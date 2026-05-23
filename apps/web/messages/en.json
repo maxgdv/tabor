@@ -42,6 +42,34 @@
     "spec": "Technical specification v1.1"
   },
   "reader": {
-    "geoCredits": "Geographic data: <link>OpenBible.info Bible Geocoding Data</link> (CC-BY 4.0)."
+    "geoCredits": "Geographic data: <link>OpenBible.info Bible Geocoding Data</link> (CC-BY 4.0).",
+    "prevChapter": "Previous chapter",
+    "nextChapter": "Next chapter",
+    "ariaPrev": "Go to previous chapter",
+    "ariaNext": "Go to next chapter"
+  },
+  "books": {
+    "title": "Bible",
+    "lede": "Seventy-three books in Catholic liturgical order. Pick one to open its chapter index.",
+    "chooseChapter": "Choose a chapter",
+    "chapter": "Chapter {n}",
+    "chaptersOne": "{count} chapter",
+    "chaptersOther": "{count} chapters",
+    "testament": {
+      "OT": "Old Testament",
+      "NT": "New Testament"
+    },
+    "category": {
+      "pentateuch": "Pentateuch",
+      "historical": "Historical",
+      "wisdom": "Wisdom",
+      "prophets": "Prophets",
+      "gospels": "Gospels",
+      "historical_nt": "Acts of the Apostles",
+      "pauline": "Pauline epistles",
+      "catholic_epistles": "Catholic epistles",
+      "apocalyptic": "Apocalypse"
+    },
+    "breadcrumbBible": "Bible"
   }
 }
