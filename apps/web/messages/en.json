@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "title": "Tabor — The Bible, place by place",
+    "description": "Read the Bible while an interactive map shows, in real time, where each passage takes place."
+  },
+  "header": {
+    "skipToContent": "Skip to main content",
+    "switchLanguage": "Change language"
+  },
+  "home": {
+    "tagline": "The Bible, place by place",
+    "lede": "Read the sacred text while a map travels with you, showing where each passage unfolds in its real setting.",
+    "ctaRead": "Start reading",
+    "ctaExplore": "Explore the map",
+    "soon": "Coming soon",
+    "phase": {
+      "title": "Phase 0 — Preparation",
+      "body": "We are closing editorial licenses with bishops' conferences and designing the visual identity. The reader and the map will arrive in Phase 1."
+    },
+    "principles": {
+      "title": "Our principles",
+      "rigor": {
+        "title": "Doctrinal rigor",
+        "body": "Only approved versions and verified notes."
+      },
+      "calm": {
+        "title": "Aesthetic calm",
+        "body": "No ads, no gamification, no dark patterns."
+      },
+      "privacy": {
+        "title": "Privacy by design",
+        "body": "Your data is yours. Optional account, anonymous telemetry."
+      },
+      "access": {
+        "title": "Accessibility",
+        "body": "WCAG 2.2 AA from day one."
+      }
+    }
+  },
+  "footer": {
+    "copy": "© {year} Tabor Project. Confidential — internal use.",
+    "spec": "Technical specification v1.1"
+  },
+  "reader": {
+    "geoCredits": "Geographic data: <link>OpenBible.info Bible Geocoding Data</link> (CC-BY 4.0)."
+  }
+}

@@ -1,0 +1,63 @@
+@import 'tailwindcss';
+
+/* --- Tokens de diseño (Tailwind v4 CSS-based config) ---
+ * Paleta serena: arenas, piedras y cielos del Mediterráneo oriental.
+ * Cambiar aquí los valores actualiza tanto utilidades (bg-sand-50…) como variables CSS.
+ */
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Source Serif 4', 'Source Serif Pro', Georgia, serif;
+
+  --color-sand-50: #fbf7f0;
+  --color-sand-100: #f3ecdc;
+  --color-sand-200: #e6d6b5;
+  --color-sand-300: #d6bb89;
+  --color-sand-400: #c19f64;
+  --color-sand-500: #a98249;
+  --color-sand-600: #8a6839;
+  --color-sand-700: #6c4f2b;
+  --color-sand-800: #4e3920;
+  --color-sand-900: #322516;
+
+  --color-stone-50: #f7f5f3;
+  --color-stone-100: #e9e5df;
+  --color-stone-200: #cfc7bd;
+  --color-stone-300: #aea395;
+  --color-stone-400: #8b7e6e;
+  --color-stone-500: #6e6253;
+  --color-stone-600: #574c40;
+  --color-stone-700: #403831;
+  --color-stone-800: #2b2622;
+  --color-stone-900: #171513;
+
+  --color-olive-500: #7a8c4b;
+  --color-olive-600: #5f6f3a;
+  --color-olive-700: #46532b;
+
+  --color-lapis-500: #3a5a85;
+  --color-lapis-600: #2c4669;
+
+  --container-reader: 36rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-sand-50 text-stone-800 antialiased;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      @apply bg-stone-900 text-sand-100;
+    }
+  }
+
+  /* Foco visible — accesibilidad WCAG 2.2 AA. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-lapis-500;
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "title": "Tabor — La Biblia, lugar a lugar",
+    "description": "Lee la Biblia mientras un mapa interactivo sitúa, en tiempo real, los lugares donde sucede cada pasaje."
+  },
+  "header": {
+    "skipToContent": "Saltar al contenido principal",
+    "switchLanguage": "Cambiar idioma"
+  },
+  "home": {
+    "tagline": "La Biblia, lugar a lugar",
+    "lede": "Lee el texto sagrado mientras un mapa te acompaña, mostrando dónde sucede cada pasaje en su escenario real.",
+    "ctaRead": "Comenzar a leer",
+    "ctaExplore": "Explorar el mapa",
+    "soon": "Próximamente",
+    "phase": {
+      "title": "Fase 0 — preparación",
+      "body": "Estamos cerrando licencias editoriales con conferencias episcopales y diseñando la identidad visual. El lector y el mapa llegarán en la Fase 1."
+    },
+    "principles": {
+      "title": "Nuestros principios",
+      "rigor": {
+        "title": "Rigor doctrinal",
+        "body": "Solo ofrecemos versiones aprobadas y notas verificadas."
+      },
+      "calm": {
+        "title": "Serenidad estética",
+        "body": "Sin publicidad, sin gamificación, sin dark patterns."
+      },
+      "privacy": {
+        "title": "Privacidad por diseño",
+        "body": "Tus datos son tuyos. Cuenta opcional, telemetría anónima."
+      },
+      "access": {
+        "title": "Accesibilidad",
+        "body": "WCAG 2.2 AA desde el primer día."
+      }
+    }
+  },
+  "footer": {
+    "copy": "© {year} Proyecto Tabor. Documento confidencial — uso interno.",
+    "spec": "Especificación técnica v1.1"
+  },
+  "reader": {
+    "geoCredits": "Datos geográficos: <link>OpenBible.info Bible Geocoding Data</link> (CC-BY 4.0)."
+  }
+}

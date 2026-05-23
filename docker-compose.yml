@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: tabor_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-tabor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tabor_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-tabor}
+    ports:
+      - '127.0.0.1:${POSTGRES_PORT:-54320}:5432'
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./packages/db/sql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-tabor} -d ${POSTGRES_DB:-tabor}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.10
+    container_name: tabor_meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-tabor_dev_meili_master_key_change_me}
+      MEILI_ENV: development
+      MEILI_NO_ANALYTICS: 'true'
+    ports:
+      - '127.0.0.1:7700:7700'
+    volumes:
+      - ./data/meilisearch:/meili_data
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--spider', 'http://localhost:7700/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5

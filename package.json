@@ -1,0 +1,26 @@
+{
+  "name": "tabor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tabor — La Biblia, lugar a lugar. Monorepo raíz.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace apps/web",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:up": "docker compose up -d postgres meilisearch",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres meilisearch"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "license": "UNLICENSED",
+  "author": "Manuel G. <manuelgdveas@hotmail.com>"
+}
