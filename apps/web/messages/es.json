@@ -13,9 +13,9 @@
     "ctaRead": "Comenzar a leer",
     "ctaExplore": "Explorar el mapa",
     "soon": "Próximamente",
-    "phase": {
-      "title": "Fase 0 — preparación",
-      "body": "Estamos cerrando licencias editoriales con conferencias episcopales y diseñando la identidad visual. El lector y el mapa llegarán en la Fase 1."
+    "now": {
+      "title": "Qué encontrarás hoy",
+      "body": "El texto completo de los 73 libros del canon católico en dos versiones de dominio público (Biblia Platense / Straubinger en español, Catholic Public Domain Version en inglés). Un mapa interactivo con 1.335 lugares bíblicos sincronizado con la lectura. Próximamente: búsqueda, marcadores y planes de lectura."
     },
     "principles": {
       "title": "Nuestros principios",

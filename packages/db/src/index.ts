@@ -5,9 +5,18 @@ import * as schema from './schema/index';
 const connectionString =
   process.env.DATABASE_URL ?? 'postgres://tabor:tabor_dev_password@localhost:54320/tabor';
 
-// Cliente único reutilizable. En Next.js Route Handlers se importa este módulo
-// y se reaprovecha la misma conexión entre invocaciones del mismo worker.
-const client = postgres(connectionString, { max: 10 });
+// Detecta si vamos contra un pooler tipo pgbouncer (Supabase usa puerto 6543
+// en modo transaction). En ese modo: max=1 por Lambda para no agotar el
+// connection limit, y prepare=false porque pgbouncer transaction no soporta
+// prepared statements.
+const isPooled = connectionString.includes(':6543');
+
+const client = postgres(connectionString, {
+  max: isPooled ? 1 : 10,
+  idle_timeout: 20,
+  connect_timeout: 10,
+  prepare: !isPooled,
+});
 
 export const db = drizzle(client, { schema });
 export { schema };

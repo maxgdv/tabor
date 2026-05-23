@@ -41,9 +41,9 @@ export default async function HomePage({
 
       <section className="mt-20 rounded-lg border border-sand-200 bg-white/60 p-8 dark:border-stone-700 dark:bg-stone-800/60">
         <h2 className="font-serif text-xl text-stone-800 dark:text-sand-100">
-          {t('phase.title')}
+          {t('now.title')}
         </h2>
-        <p className="mt-3 text-stone-600 dark:text-sand-200">{t('phase.body')}</p>
+        <p className="mt-3 text-stone-600 dark:text-sand-200">{t('now.body')}</p>
       </section>
 
       <section className="mt-16">
