@@ -51,7 +51,11 @@
     "ariaPrev": "Go to previous chapter",
     "ariaNext": "Go to next chapter",
     "noPlacesTitle": "No geographic references",
-    "noPlacesBody": "This chapter doesn't reference specific places in the text."
+    "noPlacesBody": "This chapter doesn't reference specific places in the text.",
+    "overviewBadge": "Overview map — this chapter doesn't reference specific places",
+    "mapStyleVector": "Map",
+    "mapStyleSatellite": "Satellite",
+    "mapStyleAria": "Change map style"
   },
   "books": {
     "title": "Bible",

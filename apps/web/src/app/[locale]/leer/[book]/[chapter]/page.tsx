@@ -5,7 +5,6 @@ import { Link } from '@/i18n/routing';
 import { getChapter, getPlacesForChapter } from '@/lib/bible';
 import { ChapterReader } from '@/components/reader/ChapterReader';
 import { ActiveVerseMarker } from '@/components/reader/ActiveVerseMarker';
-import { EmptyChapterIllumination } from '@/components/reader/EmptyChapterIllumination';
 import { BibleMapClient } from '@/components/map/BibleMapClient';
 
 const VERSION_BY_LOCALE: Record<string, string> = {
@@ -118,8 +117,9 @@ export default async function ReaderPage({ params }: { params: Params }) {
       {/* min-h-0 + grid-rows explícitas: necesario para que el ChapterReader
           (con h-full overflow-y-auto) pueda hacer scroll vertical en vez de
           empujar el mapa fuera del viewport en móvil o ignorar overflow en
-          desktop. */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[1fr_50vh] lg:grid-cols-2 lg:grid-rows-1">
+          desktop. Mapa al 35vh en móvil (no 50) para dar al texto un panel
+          de lectura razonable en pantallas pequeñas. */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[1fr_35vh] lg:grid-cols-2 lg:grid-rows-1">
         <section
           aria-label="Texto del capítulo"
           className="min-h-0 overflow-hidden border-b border-sand-200 lg:border-b-0 lg:border-r dark:border-stone-700"
@@ -128,15 +128,10 @@ export default async function ReaderPage({ params }: { params: Params }) {
           <ActiveVerseMarker />
         </section>
         <section aria-label="Mapa del capítulo" className="relative min-h-0">
-          {places.length > 0 ? (
-            <BibleMapClient chapter={chapterData} places={places} />
-          ) : (
-            <EmptyChapterIllumination
-              bookName={chapterData.bookName}
-              chapterNumber={chapterData.number}
-              message={tReader('noPlacesBody')}
-            />
-          )}
+          {/* El mapa siempre se renderiza, incluso en capítulos sin lugares.
+              En ese caso muestra una vista panorámica del mundo bíblico con
+              un badge explicativo (gestionado en BibleMap). */}
+          <BibleMapClient chapter={chapterData} places={places} />
         </section>
       </div>
     </div>

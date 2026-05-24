@@ -1,8 +1,14 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import maplibregl, { Marker, Popup, type Map as MapLibreMap } from 'maplibre-gl';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
+import maplibregl, {
+  Marker,
+  Popup,
+  type Map as MapLibreMap,
+  type StyleSpecification,
+} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { useTranslations } from 'next-intl';
 import { useReaderStore } from '@/lib/reader-store';
 import type { Chapter, Place } from '@/lib/bible';
 
@@ -11,11 +17,58 @@ type Props = {
   places: Place[];
 };
 
-// Estilo vectorial gratuito y open-source. En producción usaremos nuestro propio
-// tile server (OpenMapTiles + Tegola/Martin), pero para el vertical slice este
-// estilo basta y no requiere API key.
-const DEMO_STYLE = 'https://demotiles.maplibre.org/style.json';
+// Estilo vectorial gratuito y open-source. Para el MVP basta y no requiere
+// API key. En el futuro podemos servir nuestro propio tile server.
+const VECTOR_STYLE = 'https://demotiles.maplibre.org/style.json';
 
+// Estilo satélite con teselas raster de Esri World Imagery — gratis para
+// uso no comercial, atribución obligatoria visible.
+const SATELLITE_STYLE: StyleSpecification = {
+  version: 8,
+  sources: {
+    esri: {
+      type: 'raster',
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+      maxzoom: 19,
+      attribution: 'Imagery © Esri, Maxar, Earthstar Geographics',
+    },
+  },
+  layers: [{ id: 'esri-imagery', type: 'raster', source: 'esri' }],
+};
+
+// Vista panorámica del "mundo bíblico": Egipto + Levante + Mesopotamia.
+// Usada cuando el capítulo no tiene lugares específicos.
+const OVERVIEW_CENTER: [number, number] = [35.5, 32];
+const OVERVIEW_ZOOM = 5;
+
+// --- Persistencia de la preferencia de estilo en localStorage ----------
+type MapStyleId = 'vector' | 'satellite';
+const STYLE_KEY = 'tabor-map-style';
+const STYLE_CHANGE_EVENT = 'tabor-map-style-change';
+
+function subscribeStyle(cb: () => void): () => void {
+  window.addEventListener('storage', cb);
+  window.addEventListener(STYLE_CHANGE_EVENT, cb);
+  return () => {
+    window.removeEventListener('storage', cb);
+    window.removeEventListener(STYLE_CHANGE_EVENT, cb);
+  };
+}
+function getStoredStyle(): MapStyleId {
+  if (typeof localStorage === 'undefined') return 'vector';
+  return localStorage.getItem(STYLE_KEY) === 'satellite' ? 'satellite' : 'vector';
+}
+function setStoredStyle(s: MapStyleId): void {
+  localStorage.setItem(STYLE_KEY, s);
+  // 'storage' event no se dispara en la misma pestaña — usamos custom event
+  // para que el resto de componentes (si los hubiera) también reaccionen.
+  window.dispatchEvent(new Event(STYLE_CHANGE_EVENT));
+}
+
+// --- Componente --------------------------------------------------------
 export function BibleMap({ chapter, places }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -23,33 +76,46 @@ export function BibleMap({ chapter, places }: Props) {
 
   const activeVerse = useReaderStore((s) => s.activeVerseNumber);
   const requestScrollTo = useReaderStore((s) => s.requestScrollTo);
+  const t = useTranslations('reader');
 
-  // Inicialización del mapa: ocurre una sola vez.
+  // Estilo persistente vía localStorage, leído con useSyncExternalStore
+  // para evitar mismatch de hidratación (SSR siempre devuelve 'vector').
+  const mapStyle = useSyncExternalStore(
+    subscribeStyle,
+    getStoredStyle,
+    () => 'vector' as MapStyleId,
+  );
+
+  const isOverview = places.length === 0;
+
+  // Inicialización del mapa: una sola vez. Re-ejecuta si cambia el conjunto
+  // de lugares (cambio de capítulo) o el modo overview.
   useEffect(() => {
     if (!containerRef.current) return;
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: DEMO_STYLE,
-      // Centro inicial en el Levante mediterráneo, el escenario más frecuente.
-      center: [35.5, 32.5],
-      zoom: 4.5,
+      style: mapStyle === 'satellite' ? SATELLITE_STYLE : VECTOR_STYLE,
+      center: isOverview ? OVERVIEW_CENTER : [35.5, 32.5],
+      zoom: isOverview ? OVERVIEW_ZOOM : 4.5,
       attributionControl: { compact: true },
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     mapRef.current = map;
 
-    // Cuando el estilo cargue, ajustamos la vista para abarcar todos los lugares.
     map.on('load', () => {
+      // En modo overview no añadimos marcadores ni hacemos fitBounds:
+      // queremos una vista panorámica fija del mundo bíblico.
+      if (isOverview) return;
+
       const bounds = new maplibregl.LngLatBounds();
       for (const place of places) {
         bounds.extend([place.lng, place.lat]);
       }
-      if (places.length > 0 && !bounds.isEmpty()) {
+      if (!bounds.isEmpty()) {
         map.fitBounds(bounds, { padding: 80, duration: 0, maxZoom: 6 });
       }
 
-      // Marcadores.
       for (const place of places) {
         const popup = new Popup({ offset: 18, closeButton: false }).setHTML(
           `<div class="font-serif">
@@ -63,17 +129,13 @@ export function BibleMap({ chapter, places }: Props) {
           .setPopup(popup)
           .addTo(map);
 
-        // Etiqueta persistente con el nombre bíblico bajo el marcador, para
-        // que el usuario lea los lugares sin tener que clicar uno a uno.
-        // Por ahora en inglés (los nombres vienen de OpenBible.info);
-        // queda pendiente añadir traducción al español post-deploy.
+        // Etiqueta persistente con el nombre bíblico bajo el marcador.
         const label = document.createElement('div');
         label.className =
           'pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-white/90 px-1.5 py-0.5 text-[11px] font-semibold leading-tight text-stone-800 shadow-sm';
         label.textContent = place.canonicalName;
         marker.getElement().appendChild(label);
 
-        // Click en marcador → scroll al primer versículo asociado.
         marker.getElement().addEventListener('click', () => {
           const firstVerse = chapter.verses.find((v) => v.placeSlugs.includes(place.slug));
           if (firstVerse) requestScrollTo(firstVerse.number);
@@ -89,12 +151,23 @@ export function BibleMap({ chapter, places }: Props) {
       map.remove();
       mapRef.current = null;
     };
-  }, [chapter, places, requestScrollTo]);
+    // No incluimos mapStyle aquí — el cambio de estilo lo gestiona otro efecto
+    // sin destruir el mapa entero. Sí incluimos isOverview porque cambia
+    // center/zoom iniciales.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chapter, places, requestScrollTo, isOverview]);
 
-  // Cuando el versículo activo cambia, vuela a la(s) localización(es).
+  // Cambio de estilo en caliente (no recrea el mapa, conserva marcadores).
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || activeVerse == null) return;
+    if (!map) return;
+    map.setStyle(mapStyle === 'satellite' ? SATELLITE_STYLE : VECTOR_STYLE);
+  }, [mapStyle]);
+
+  // Vuela al versículo activo (solo en modo específico).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || activeVerse == null || isOverview) return;
 
     const verse = chapter.verses.find((v) => v.number === activeVerse);
     if (!verse || verse.placeSlugs.length === 0) return;
@@ -113,28 +186,69 @@ export function BibleMap({ chapter, places }: Props) {
       });
     } else {
       const bounds = new maplibregl.LngLatBounds();
-      for (const t of targets) bounds.extend([t.lng, t.lat]);
+      for (const tgt of targets) bounds.extend([tgt.lng, tgt.lat]);
       map.fitBounds(bounds, { padding: 80, duration: 1200, maxZoom: 6 });
     }
 
-    // Resalta los marcadores asociados.
     markersRef.current.forEach((marker, slug) => {
       const el = marker.getElement();
-      const isActive = verse.placeSlugs.includes(slug);
-      el.style.filter = isActive ? 'drop-shadow(0 0 8px #c19f64)' : 'none';
-      el.style.transform = isActive
+      const active = verse.placeSlugs.includes(slug);
+      el.style.filter = active ? 'drop-shadow(0 0 8px #c19f64)' : 'none';
+      el.style.transform = active
         ? `${el.style.transform.replace(/scale\([^)]*\)/, '')} scale(1.25)`
         : el.style.transform.replace(/scale\([^)]*\)/, '');
     });
-  }, [activeVerse, chapter, places]);
+  }, [activeVerse, chapter, places, isOverview]);
 
   return (
-    <div
-      ref={containerRef}
-      className="h-full w-full"
-      aria-label="Mapa interactivo del capítulo"
-      role="application"
-    />
+    <div className="relative h-full w-full">
+      <div
+        ref={containerRef}
+        className="h-full w-full"
+        aria-label="Mapa interactivo del capítulo"
+        role="application"
+      />
+
+      {/* Selector Vector / Satélite — arriba-izquierda (top-right ya tiene
+          NavigationControl de MapLibre). */}
+      <div
+        role="group"
+        aria-label={t('mapStyleAria')}
+        className="absolute left-2 top-2 z-10 flex overflow-hidden rounded-md bg-white shadow-md ring-1 ring-stone-200 dark:bg-stone-800 dark:ring-stone-700"
+      >
+        <button
+          type="button"
+          onClick={() => setStoredStyle('vector')}
+          aria-pressed={mapStyle === 'vector'}
+          className={`px-2.5 py-1.5 font-sans text-xs font-medium transition-colors ${
+            mapStyle === 'vector'
+              ? 'bg-lapis-500 text-white'
+              : 'text-stone-700 hover:bg-sand-100 dark:text-sand-100 dark:hover:bg-stone-700'
+          }`}
+        >
+          {t('mapStyleVector')}
+        </button>
+        <button
+          type="button"
+          onClick={() => setStoredStyle('satellite')}
+          aria-pressed={mapStyle === 'satellite'}
+          className={`px-2.5 py-1.5 font-sans text-xs font-medium transition-colors ${
+            mapStyle === 'satellite'
+              ? 'bg-lapis-500 text-white'
+              : 'text-stone-700 hover:bg-sand-100 dark:text-sand-100 dark:hover:bg-stone-700'
+          }`}
+        >
+          {t('mapStyleSatellite')}
+        </button>
+      </div>
+
+      {/* Badge informativo cuando el capítulo no tiene lugares específicos. */}
+      {isOverview && (
+        <div className="pointer-events-none absolute bottom-8 left-1/2 z-10 max-w-[90%] -translate-x-1/2 rounded-md bg-stone-900/75 px-3 py-1.5 text-center font-sans text-xs text-white shadow-md backdrop-blur-sm">
+          {t('overviewBadge')}
+        </div>
+      )}
+    </div>
   );
 }
 
