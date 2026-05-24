@@ -1,19 +1,13 @@
 import { getLocale, getTranslations } from 'next-intl/server';
-import { listBooks } from '@tabor/db';
 import { Link, routing } from '@/i18n/routing';
+import { getBooks, versionForLocale } from '@/lib/bible';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { BookSidebar } from './BookSidebar';
-
-const VERSION_BY_LOCALE: Record<string, string> = {
-  es: 'STRA',
-  en: 'CPDV',
-};
 
 export async function SiteHeader() {
   const locale = await getLocale();
   const t = await getTranslations('header');
-  const versionCode = VERSION_BY_LOCALE[locale] ?? 'STRA';
-  const books = await listBooks({ versionCode });
+  const books = await getBooks(versionForLocale(locale));
 
   return (
     <header className="border-b border-sand-200 bg-sand-50/80 backdrop-blur dark:border-stone-700 dark:bg-stone-900/80">

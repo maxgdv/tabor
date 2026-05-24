@@ -11,8 +11,12 @@ const connectionString =
 // prepared statements.
 const isPooled = connectionString.includes(':6543');
 
+// Con max=5 contra el pooler de Supabase, una sola lambda puede ejecutar
+// varias queries en paralelo (p.ej. getChapterText + getChapterGeo con
+// Promise.all) sin serializarlas. Sigue muy por debajo del límite de
+// conexiones de Supabase (200 en plan Free).
 const client = postgres(connectionString, {
-  max: isPooled ? 1 : 10,
+  max: isPooled ? 5 : 10,
   idle_timeout: 20,
   connect_timeout: 10,
   prepare: !isPooled,

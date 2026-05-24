@@ -8,9 +8,33 @@
 // OpenBible.info Bible Geocoding Data (CC-BY 4.0) — la atribución se
 // muestra en la página del lector.
 
-import { getChapterGeo, getChapterText, type DbPlace } from '@tabor/db';
+import { cache } from 'react';
+import {
+  getChapterGeo,
+  getChapterText,
+  listBooks as _listBooks,
+  type DbBookSummary,
+  type DbPlace,
+} from '@tabor/db';
 
 export type Place = DbPlace;
+export type BookSummary = DbBookSummary;
+
+/**
+ * Lista de libros memoizada por petición. El SiteHeader (vía layout) y las
+ * páginas de índice y selector de capítulo necesitan los 73 libros; sin
+ * `cache()` cada petición HTTP dispararía la query 2-3 veces. Con argumento
+ * primitivo (versionCode) para que React.cache pueda deduplicar.
+ */
+export const getBooks = cache(async (versionCode: string): Promise<BookSummary[]> => {
+  return _listBooks({ versionCode });
+});
+
+/** Versión bíblica preferida para un locale de la interfaz. */
+export function versionForLocale(locale: string): string {
+  const map: Record<string, string> = { es: 'STRA', en: 'CPDV' };
+  return map[locale] ?? 'STRA';
+}
 
 export type Verse = {
   number: number;
@@ -29,13 +53,6 @@ export type Chapter = {
   places: Place[]; // lugares únicos del capítulo, en orden de aparición
 };
 
-// Versión bíblica por defecto para cada idioma de la interfaz.
-// Ambas son de dominio público y de canon católico completo (73 libros).
-const VERSION_BY_LOCALE: Record<string, string> = {
-  es: 'STRA', // Biblia Platense (Straubinger)
-  en: 'CPDV', // Catholic Public Domain Version
-};
-
 /**
  * Devuelve un capítulo con su texto y los lugares mencionados.
  * `null` si el libro/capítulo no existe en la versión correspondiente.
@@ -45,7 +62,7 @@ export async function getChapter(
   number: number,
   locale: string,
 ): Promise<Chapter | null> {
-  const versionCode = VERSION_BY_LOCALE[locale] ?? VERSION_BY_LOCALE.es!;
+  const versionCode = versionForLocale(locale);
   const upperBook = bookCanonicalId.toUpperCase();
 
   // Texto y geografía se piden en paralelo: dos round-trips a la BD sin esperar.

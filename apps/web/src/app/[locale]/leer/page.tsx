@@ -1,15 +1,12 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
-import { listBooks, type DbBookSummary } from '@tabor/db';
+import { type BookSummary, getBooks, versionForLocale } from '@/lib/bible';
 
 // Esta ruta consulta Postgres en cada render. El layout padre ya está marcado
 // como dinámico (porque el SiteHeader también consulta libros) — esa
 // declaración cascadea hasta aquí, así que no hace falta repetirla.
-
-const VERSION_BY_LOCALE: Record<string, string> = {
-  es: 'STRA',
-  en: 'CPDV',
-};
+// `getBooks` está memoizada con React.cache para que SiteHeader y esta
+// página compartan el resultado en la misma petición HTTP.
 
 // Orden de categorías dentro de cada testamento. Coincide con el orderIndex
 // canónico (todos los libros de una categoría son consecutivos por orderIndex).
@@ -27,11 +24,10 @@ export default async function BooksIndexPage({
   setRequestLocale(locale);
 
   const t = await getTranslations('books');
-  const versionCode = VERSION_BY_LOCALE[locale] ?? 'STRA';
-  const books = await listBooks({ versionCode });
+  const books = await getBooks(versionForLocale(locale));
 
   // Agrupa por testamento → categoría → libros, respetando orderIndex.
-  const byTestamentCategory: Record<string, Record<string, DbBookSummary[]>> = {
+  const byTestamentCategory: Record<string, Record<string, BookSummary[]>> = {
     OT: {},
     NT: {},
   };
