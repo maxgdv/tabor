@@ -117,9 +117,10 @@ export default async function ReaderPage({ params }: { params: Params }) {
       {/* min-h-0 + grid-rows explícitas: necesario para que el ChapterReader
           (con h-full overflow-y-auto) pueda hacer scroll vertical en vez de
           empujar el mapa fuera del viewport en móvil o ignorar overflow en
-          desktop. Mapa al 35vh en móvil (no 50) para dar al texto un panel
-          de lectura razonable en pantallas pequeñas. */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[1fr_35vh] lg:grid-cols-2 lg:grid-rows-1">
+          desktop. En móvil: texto 2fr y mapa 1fr (texto 2× el alto del
+          mapa), adapta mejor a pantallas pequeñas que un mapa con altura
+          fija en vh. En desktop: una sola fila a 50/50 lado a lado. */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[2fr_1fr] lg:grid-cols-2 lg:grid-rows-1">
         <section
           aria-label="Texto del capítulo"
           className="min-h-0 overflow-hidden border-b border-sand-200 lg:border-b-0 lg:border-r dark:border-stone-700"
