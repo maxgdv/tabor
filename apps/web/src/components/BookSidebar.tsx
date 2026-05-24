@@ -1,11 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import type { DbBookSummary } from '@tabor/db';
+
+// Detección de hidratación sin setState-in-effect: en server snapshot devuelve
+// `false`, en cliente `true`. Patrón recomendado por React 18+ para evitar
+// mismatches de hidratación al usar APIs solo-browser como `document.body`
+// para portales.
+const subscribe = () => () => {};
+const useMounted = () =>
+  useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
 
 // Orden de categorías dentro de cada testamento — debe coincidir con /leer.
 const CATEGORY_ORDER: Record<'OT' | 'NT', string[]> = {
@@ -24,17 +36,12 @@ type Props = {
  */
 export function BookSidebar({ books }: Props) {
   const [open, setOpen] = useState(false);
-  // Portal solo tras montar: evita mismatch de hidratación y nos da acceso
-  // a document.body. El botón hamburguesa se renderiza en SSR; el drawer
-  // se inserta vía portal después.
-  const [mounted, setMounted] = useState(false);
+  // El botón hamburguesa se renderiza en SSR; el drawer se inserta vía
+  // portal solo tras hidratación, así garantizamos acceso a document.body.
+  const mounted = useMounted();
   const t = useTranslations('books');
   const tHeader = useTranslations('header');
   const pathname = usePathname();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // ESC cierra el drawer.
   useEffect(() => {
