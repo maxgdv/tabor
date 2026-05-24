@@ -1,47 +1,86 @@
 # Tabor
 
-> La Biblia, lugar a lugar.
+> *La Biblia, lugar a lugar.*
 
-Aplicación web que permite leer la Biblia mientras un mapa interactivo sitúa, en tiempo real, los lugares donde sucede cada pasaje.
+Aplicación web que permite leer la Biblia mientras un mapa interactivo
+sitúa, en tiempo real, los lugares donde sucede cada pasaje. Si alguna
+vez has leído un pasaje y has querido saber **dónde** ocurría, Tabor
+es la herramienta que faltaba.
 
-Especificación técnica completa: [`Tabor_Especificacion_Tecnica_v1.1.pdf`](./Tabor_Especificacion_Tecnica_v1.1.pdf).
+**🌐 Vivo en producción:** [proyectotabor.org](https://proyectotabor.org)
 
-## Estructura del monorepo
+---
 
-```
-TABOR/
-├── apps/
-│   └── web/         # Next.js 15 + React 19 (frontend + BFF)
-├── packages/
-│   └── db/          # Esquema Drizzle ORM, migraciones, seed
-├── docker-compose.yml
-├── .env.example
-└── package.json     # workspaces npm
-```
+## Qué encontrarás
+
+- **Los 73 libros del canon católico** en dos versiones de dominio público:
+  - **Biblia Platense** (Straubinger), español
+  - **Catholic Public Domain Version** (CPDV), inglés
+- **1.335 lugares bíblicos** geolocalizados, con **8.666 vínculos**
+  versículo↔lugar (datos de
+  [OpenBible.info](https://www.openbible.info/geo/), CC-BY 4.0).
+- **Sincronización bidireccional pasaje↔mapa**: a medida que avanzas
+  en la lectura el mapa vuela al lugar correspondiente; al pulsar un
+  marcador, el texto hace scroll al primer versículo donde aparece.
+- **Navegación cómoda**: índice de libros, selector de capítulo,
+  prev/next que cruza entre libros, panel lateral.
+- **Vista satélite** opcional (Esri World Imagery).
+- **Multilenguaje** (es / en) en la interfaz.
+- **Diseño sobrio**, accesibilidad WCAG 2.2 AA como objetivo,
+  sin publicidad ni gamificación.
+
+## Principios editoriales (no negociables)
+
+1. **Rigor doctrinal**: solo versiones aprobadas por las conferencias
+   episcopales correspondientes (CELAM, CEE, USCCB, Ignatius Press) o
+   versiones de dominio público de tradición católica.
+2. **Serenidad estética**: sin publicidad, sin gamificación, sin dark
+   patterns, sin redes sociales integradas.
+3. **Privacidad por diseño**: cuenta opcional, telemetría anónima y
+   desactivable, no vendemos datos.
+4. **Accesibilidad**: WCAG 2.2 AA como compromiso desde el día uno.
+5. **Sostenibilidad sin publicidad**: donativos voluntarios, nada más.
+
+Estos principios son la línea editorial del proyecto; cualquier
+contribución debe respetarlos. Ver
+[CONTRIBUTING.md](./CONTRIBUTING.md) para detalles.
 
 ## Stack
 
-- **Frontend**: Next.js 16 (App Router, Turbopack) + React 19.2 + TypeScript + Tailwind CSS 4
-- **i18n**: next-intl 4 (es, en)
-- **Estado UI**: Zustand 5
-- **Mapa**: MapLibre GL JS *(Fase 1)*
-- **API**: Next.js Route Handlers (REST público) + tRPC (interno) — *Fase 1*
-- **Base de datos**: PostgreSQL 16 + PostGIS, Drizzle ORM
-- **Búsqueda**: Meilisearch
-- **Node**: 22 LTS
+- **Frontend:** Next.js 16 (App Router, Turbopack) + React 19 + TypeScript + Tailwind 4
+- **Mapa:** MapLibre GL JS con teselas
+  [demotiles.maplibre.org](https://demotiles.maplibre.org) (vectorial)
+  y Esri World Imagery (satélite)
+- **i18n:** next-intl 4
+- **Estado UI:** Zustand 5
+- **Backend:** Next.js Route Handlers (REST público) + tRPC (interno) — *en evolución*
+- **BD:** PostgreSQL 16 + PostGIS, Drizzle ORM
+- **Búsqueda:** Meilisearch *(planificada para Fase 1 final)*
+- **Hosting:** Vercel (Hobby) + Supabase (Free) — *coste actual: 0 €/mes*
 
-> La especificación v1.1 recomienda Next.js 15; el bootstrap usa Next 16 (estable, sucesor directo)
-> manteniendo App Router, React Server Components y todos los principios de la spec.
-> La capa de routing equivalente al `middleware.ts` se llama ahora `proxy.ts`
-> (renombrado en Next 16).
+Ver la [especificación técnica completa](./docs/SPEC.md) para
+el roadmap, decisiones arquitectónicas y modelo de datos.
 
-## Requisitos previos
+## Estructura del repositorio
+
+```
+tabor/
+├── apps/web/             Aplicación Next.js (frontend + BFF)
+├── packages/db/          Esquema Drizzle, migraciones, importadores
+├── docs/SPEC.md          Especificación técnica v1.1
+├── docker-compose.yml    Postgres+PostGIS y Meilisearch para desarrollo
+└── data/bible-sources/   (gitignored) Fuentes bíblicas descargadas
+```
+
+## Arranque en local
+
+### Requisitos
 
 - Node.js ≥ 22
 - npm ≥ 10
 - Docker + Docker Compose
 
-## Puesta en marcha
+### Pasos
 
 ```bash
 # 1. Instalar dependencias del monorepo
@@ -50,36 +89,68 @@ npm install
 # 2. Copiar variables de entorno
 cp .env.example .env
 
-# 3. Arrancar Postgres + PostGIS + Meilisearch
+# 3. Levantar Postgres + PostGIS + Meilisearch en local
 npm run db:up
 
-# 4. Aplicar migraciones e insertar seed inicial
+# 4. Migrar esquema y sembrar el catálogo de libros
 npm run --workspace packages/db migrate
 npm run --workspace packages/db seed
 
-# 5. Arrancar la app web
+# 5. Descargar las fuentes bíblicas (~30 MB)
+mkdir -p data/bible-sources
+curl -o data/bible-sources/SpaPlatense.json \
+  https://raw.githubusercontent.com/scrollmapper/bible_databases/master/formats/json/SpaPlatense.json
+curl -o data/bible-sources/CPDV.json \
+  https://raw.githubusercontent.com/scrollmapper/bible_databases/master/formats/json/CPDV.json
+curl -o data/bible-sources/ancient.jsonl \
+  https://raw.githubusercontent.com/openbibleinfo/Bible-Geocoding-Data/main/data/ancient.jsonl
+
+# 6. Importar texto bíblico y geografía
+npm run --workspace packages/db import:bible
+npm run --workspace packages/db import:geo
+
+# 7. Arrancar la app
 npm run dev
 # → http://localhost:3000
 ```
 
-## Scripts útiles
+### Scripts útiles
 
-| Script              | Qué hace                                          |
-|---------------------|---------------------------------------------------|
-| `npm run dev`       | Servidor de desarrollo Next.js                    |
-| `npm run build`     | Compila todos los workspaces                      |
-| `npm run lint`      | Lint en todos los workspaces                      |
-| `npm run typecheck` | Comprobación de tipos en todos los workspaces     |
-| `npm run db:up`     | Levanta Postgres + Meilisearch (Docker)           |
-| `npm run db:down`   | Para los contenedores                             |
-| `npm run db:logs`   | Sigue los logs de Postgres + Meilisearch          |
+| Script              | Qué hace                                              |
+|---------------------|-------------------------------------------------------|
+| `npm run dev`       | Servidor de desarrollo Next.js                        |
+| `npm run build`     | Compila todos los workspaces                          |
+| `npm run lint`      | Lint en todos los workspaces                          |
+| `npm run typecheck` | Comprobación de tipos en todos los workspaces         |
+| `npm run db:up`     | Levanta Postgres + Meilisearch (Docker)               |
+| `npm run db:down`   | Para los contenedores                                 |
 
-## Estado
+## Fuentes y atribuciones
 
-**Fase 0 — Preparación.** Scaffold inicial; el lector y mapa llegan en Fase 1.
+- **Texto bíblico:**
+  - *Biblia Platense* de Mons. Juan Straubinger (dominio público)
+  - *Catholic Public Domain Version* de Ronald L. Conte Jr. (dominio público)
+- **Datos geográficos:** OpenBible.info Bible Geocoding Data,
+  [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+  Atribución visible en el pie del lector.
+- **Mapas:** Esri World Imagery (satélite, uso no comercial),
+  demotiles.maplibre.org (vectorial).
 
-Ver §20 de la especificación para el roadmap completo.
+## Contribuir
+
+Lee primero la sección de principios editoriales y luego
+[CONTRIBUTING.md](./CONTRIBUTING.md). Las PRs son bienvenidas, pero
+las decisiones editoriales (qué versiones bíblicas, qué notas, qué
+elementos doctrinales) las mantiene el promotor único del proyecto.
+
+## Licencia
+
+[Apache License 2.0](./LICENSE). Eres libre de usar, modificar y
+redistribuir Tabor; te pedimos que mantengas las atribuciones y los
+principios editoriales si publicas un derivado con marca o intención
+católica.
 
 ---
 
-© 2026 Proyecto Tabor — documento confidencial, uso interno.
+© 2026 Proyecto Tabor. Promovido por Manuel G.
+[github.com/maxgdv/tabor](https://github.com/maxgdv/tabor)

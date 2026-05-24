@@ -41,8 +41,8 @@
     }
   },
   "footer": {
-    "copy": "© {year} Tabor Project. Confidential — internal use.",
-    "spec": "Technical specification v1.1"
+    "copy": "© {year} Tabor Project — open source under Apache 2.0.",
+    "spec": "Source code on GitHub"
   },
   "reader": {
     "geoCredits": "Geographic data: <link>OpenBible.info Bible Geocoding Data</link> (CC-BY 4.0).",

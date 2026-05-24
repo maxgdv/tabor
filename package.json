@@ -21,6 +21,14 @@
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
   },
-  "license": "UNLICENSED",
-  "author": "Manuel G. <manuelgdveas@hotmail.com>"
+  "license": "Apache-2.0",
+  "author": "Manuel G. (https://github.com/maxgdv)",
+  "homepage": "https://proyectotabor.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maxgdv/tabor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maxgdv/tabor/issues"
+  }
 }
