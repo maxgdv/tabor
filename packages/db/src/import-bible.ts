@@ -229,7 +229,8 @@ async function main() {
     console.warn(`Aviso: BOOK_META tiene ${BOOK_META.length} libros (se esperaban 73).`);
   }
 
-  const client = postgres(url, { max: 1 });
+  const isPooled = url.includes(':6543');
+  const client = postgres(url, { max: 1, prepare: !isPooled });
   const db = drizzle(client, { schema });
 
   try {

@@ -10,10 +10,8 @@ dist/
 build/
 *.tsbuildinfo
 
-# Env
-.env
-.env.local
-.env.*.local
+# Env (ignora todos los .env excepto el ejemplo)
+.env*
 !.env.example
 
 # Logs

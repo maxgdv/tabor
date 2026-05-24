@@ -6,7 +6,9 @@ const url =
   process.env.DATABASE_URL ?? 'postgres://tabor:tabor_dev_password@localhost:54320/tabor';
 
 async function main() {
-  const client = postgres(url, { max: 1 });
+  // prepare:false necesario contra pgbouncer transaction-mode (Supabase pooler).
+  const isPooled = url.includes(':6543');
+  const client = postgres(url, { max: 1, prepare: !isPooled });
   const db = drizzle(client);
 
   console.log('[db] applying migrations...');

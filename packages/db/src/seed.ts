@@ -9,7 +9,8 @@ const url =
 // Seed mínimo de Fase 0: catálogo de libros canónicos y una versión de prueba.
 // En Fase 1 se importan los versículos completos desde una versión licenciada.
 async function main() {
-  const client = postgres(url, { max: 1 });
+  const isPooled = url.includes(':6543');
+  const client = postgres(url, { max: 1, prepare: !isPooled });
   const db = drizzle(client, { schema });
 
   console.log('[seed] inserting canonical book catalog...');

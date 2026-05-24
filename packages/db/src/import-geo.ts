@@ -80,7 +80,8 @@ type AncientRecord = {
 
 // --- importador ------------------------------------------------------------
 async function main() {
-  const client = postgres(url, { max: 1 });
+  const isPooled = url.includes(':6543');
+  const client = postgres(url, { max: 1, prepare: !isPooled });
   const db = drizzle(client, { schema });
 
   const path = fileURLToPath(
