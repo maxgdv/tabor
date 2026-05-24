@@ -63,6 +63,16 @@ export function BibleMap({ chapter, places }: Props) {
           .setPopup(popup)
           .addTo(map);
 
+        // Etiqueta persistente con el nombre bíblico bajo el marcador, para
+        // que el usuario lea los lugares sin tener que clicar uno a uno.
+        // Por ahora en inglés (los nombres vienen de OpenBible.info);
+        // queda pendiente añadir traducción al español post-deploy.
+        const label = document.createElement('div');
+        label.className =
+          'pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-white/90 px-1.5 py-0.5 text-[11px] font-semibold leading-tight text-stone-800 shadow-sm';
+        label.textContent = place.canonicalName;
+        marker.getElement().appendChild(label);
+
         // Click en marcador → scroll al primer versículo asociado.
         marker.getElement().addEventListener('click', () => {
           const firstVerse = chapter.verses.find((v) => v.placeSlugs.includes(place.slug));
