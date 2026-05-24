@@ -58,8 +58,11 @@ contribución debe respetarlos. Ver
 - **Búsqueda:** Meilisearch *(planificada para Fase 1 final)*
 - **Hosting:** Vercel (Hobby) + Supabase (Free) — *coste actual: 0 €/mes*
 
-Ver la [especificación técnica completa](./docs/SPEC.md) para
-el roadmap, decisiones arquitectónicas y modelo de datos.
+- [**ROADMAP.md**](./ROADMAP.md) — hacia dónde va el proyecto y qué
+  tipo de contribución encaja en cada fase.
+- [**docs/SPEC.md**](./docs/SPEC.md) — especificación técnica
+  completa: arquitectura, modelo de datos, criterios editoriales,
+  alcance original del MVP.
 
 ## Estructura del repositorio
 
