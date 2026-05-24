@@ -11,6 +11,12 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+// El SiteHeader hace `listBooks()` contra Postgres en cada render — para
+// alimentar el BookSidebar. Forzar dinámico evita que el build intente
+// prerender estático (que falla en CI donde no hay BD). Cuando convenga,
+// se puede optimizar envolviendo `listBooks` en `unstable_cache`.
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({
   params,
 }: {

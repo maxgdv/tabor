@@ -2,11 +2,9 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { listBooks, type DbBookSummary } from '@tabor/db';
 
-// Esta ruta no tiene segmentos dinámicos pero consulta Postgres en cada render.
-// Sin `force-dynamic`, Next intentaría prerenderizarla en build y fallaría en
-// CI (donde no hay BD accesible). El catálogo de libros cambia raramente —
-// cuando convenga, se puede optimizar con `revalidate` o `unstable_cache`.
-export const dynamic = 'force-dynamic';
+// Esta ruta consulta Postgres en cada render. El layout padre ya está marcado
+// como dinámico (porque el SiteHeader también consulta libros) — esa
+// declaración cascadea hasta aquí, así que no hace falta repetirla.
 
 const VERSION_BY_LOCALE: Record<string, string> = {
   es: 'STRA',

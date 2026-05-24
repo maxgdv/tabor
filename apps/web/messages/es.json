@@ -5,7 +5,10 @@
   },
   "header": {
     "skipToContent": "Saltar al contenido principal",
-    "switchLanguage": "Cambiar idioma"
+    "switchLanguage": "Cambiar idioma",
+    "openSidebar": "Abrir índice de libros",
+    "closeSidebar": "Cerrar",
+    "sidebarTitle": "Libros de la Biblia"
   },
   "home": {
     "tagline": "La Biblia, lugar a lugar",
@@ -46,7 +49,9 @@
     "prevChapter": "Capítulo anterior",
     "nextChapter": "Capítulo siguiente",
     "ariaPrev": "Ir al capítulo anterior",
-    "ariaNext": "Ir al capítulo siguiente"
+    "ariaNext": "Ir al capítulo siguiente",
+    "noPlacesTitle": "Sin referencias geográficas",
+    "noPlacesBody": "Este capítulo no menciona lugares específicos en el texto."
   },
   "books": {
     "title": "Biblia",

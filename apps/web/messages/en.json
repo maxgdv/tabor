@@ -5,7 +5,10 @@
   },
   "header": {
     "skipToContent": "Skip to main content",
-    "switchLanguage": "Change language"
+    "switchLanguage": "Change language",
+    "openSidebar": "Open book index",
+    "closeSidebar": "Close",
+    "sidebarTitle": "Books of the Bible"
   },
   "home": {
     "tagline": "The Bible, place by place",
@@ -46,7 +49,9 @@
     "prevChapter": "Previous chapter",
     "nextChapter": "Next chapter",
     "ariaPrev": "Go to previous chapter",
-    "ariaNext": "Go to next chapter"
+    "ariaNext": "Go to next chapter",
+    "noPlacesTitle": "No geographic references",
+    "noPlacesBody": "This chapter doesn't reference specific places in the text."
   },
   "books": {
     "title": "Bible",

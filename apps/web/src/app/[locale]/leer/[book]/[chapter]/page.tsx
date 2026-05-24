@@ -114,16 +114,31 @@ export default async function ReaderPage({ params }: { params: Params }) {
         </div>
       </div>
 
-      <div className="grid flex-1 grid-cols-1 overflow-hidden lg:grid-cols-2">
+      {/* min-h-0 + grid-rows explícitas: necesario para que el ChapterReader
+          (con h-full overflow-y-auto) pueda hacer scroll vertical en vez de
+          empujar el mapa fuera del viewport en móvil o ignorar overflow en
+          desktop. */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[1fr_50vh] lg:grid-cols-2 lg:grid-rows-1">
         <section
           aria-label="Texto del capítulo"
-          className="border-b border-sand-200 lg:border-b-0 lg:border-r dark:border-stone-700"
+          className="min-h-0 overflow-hidden border-b border-sand-200 lg:border-b-0 lg:border-r dark:border-stone-700"
         >
           <ChapterReader chapter={chapterData} />
           <ActiveVerseMarker />
         </section>
-        <section aria-label="Mapa del capítulo" className="relative min-h-[50vh] lg:min-h-0">
-          <BibleMapClient chapter={chapterData} places={places} />
+        <section aria-label="Mapa del capítulo" className="relative min-h-0">
+          {places.length > 0 ? (
+            <BibleMapClient chapter={chapterData} places={places} />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-sand-100 px-8 dark:bg-stone-800">
+              <div className="max-w-xs text-center text-stone-500 dark:text-sand-200">
+                <p className="font-serif text-lg text-stone-700 dark:text-sand-100">
+                  {tReader('noPlacesTitle')}
+                </p>
+                <p className="mt-2 text-sm">{tReader('noPlacesBody')}</p>
+              </div>
+            </div>
+          )}
         </section>
       </div>
     </div>
