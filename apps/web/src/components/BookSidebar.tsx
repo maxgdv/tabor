@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/routing';
@@ -23,9 +24,17 @@ type Props = {
  */
 export function BookSidebar({ books }: Props) {
   const [open, setOpen] = useState(false);
+  // Portal solo tras montar: evita mismatch de hidratación y nos da acceso
+  // a document.body. El botón hamburguesa se renderiza en SSR; el drawer
+  // se inserta vía portal después.
+  const [mounted, setMounted] = useState(false);
   const t = useTranslations('books');
   const tHeader = useTranslations('header');
   const pathname = usePathname();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // ESC cierra el drawer.
   useEffect(() => {
@@ -58,29 +67,12 @@ export function BookSidebar({ books }: Props) {
     (tg[b.category] ??= []).push(b);
   }
 
-  return (
+  // El drawer + backdrop se portan a document.body para escapar de cualquier
+  // stacking context creado por ancestros del header (ej. backdrop-blur).
+  // Sin esto, el `fixed` del drawer queda contenido en el rectángulo del
+  // header y se ve "clippeado".
+  const drawer = (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label={tHeader('openSidebar')}
-        aria-expanded={open}
-        aria-controls="book-sidebar"
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-stone-700 transition-colors hover:bg-sand-200 dark:text-sand-100 dark:hover:bg-stone-700"
-      >
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-          aria-hidden="true"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-
-      {/* Backdrop translúcido — click para cerrar */}
       <div
         onClick={() => setOpen(false)}
         aria-hidden="true"
@@ -88,8 +80,6 @@ export function BookSidebar({ books }: Props) {
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       />
-
-      {/* Drawer */}
       <aside
         id="book-sidebar"
         role="dialog"
@@ -158,6 +148,31 @@ export function BookSidebar({ books }: Props) {
           ))}
         </nav>
       </aside>
+    </>
+  );
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={tHeader('openSidebar')}
+        aria-expanded={open}
+        aria-controls="book-sidebar"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-stone-700 transition-colors hover:bg-sand-200 dark:text-sand-100 dark:hover:bg-stone-700"
+      >
+        <svg
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+          aria-hidden="true"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      {mounted && createPortal(drawer, document.body)}
     </>
   );
 }

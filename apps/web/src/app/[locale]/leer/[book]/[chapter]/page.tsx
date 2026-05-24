@@ -5,6 +5,7 @@ import { Link } from '@/i18n/routing';
 import { getChapter, getPlacesForChapter } from '@/lib/bible';
 import { ChapterReader } from '@/components/reader/ChapterReader';
 import { ActiveVerseMarker } from '@/components/reader/ActiveVerseMarker';
+import { EmptyChapterIllumination } from '@/components/reader/EmptyChapterIllumination';
 import { BibleMapClient } from '@/components/map/BibleMapClient';
 
 const VERSION_BY_LOCALE: Record<string, string> = {
@@ -130,14 +131,11 @@ export default async function ReaderPage({ params }: { params: Params }) {
           {places.length > 0 ? (
             <BibleMapClient chapter={chapterData} places={places} />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-sand-100 px-8 dark:bg-stone-800">
-              <div className="max-w-xs text-center text-stone-500 dark:text-sand-200">
-                <p className="font-serif text-lg text-stone-700 dark:text-sand-100">
-                  {tReader('noPlacesTitle')}
-                </p>
-                <p className="mt-2 text-sm">{tReader('noPlacesBody')}</p>
-              </div>
-            </div>
+            <EmptyChapterIllumination
+              bookName={chapterData.bookName}
+              chapterNumber={chapterData.number}
+              message={tReader('noPlacesBody')}
+            />
           )}
         </section>
       </div>
