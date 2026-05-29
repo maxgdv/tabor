@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "maplibre-gl": "^5.24.0",
     "next": "^16.2.6",
     "next-intl": "^4.12.0",
