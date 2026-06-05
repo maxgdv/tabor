@@ -58,8 +58,9 @@ function subscribeStyle(cb: () => void): () => void {
   };
 }
 function getStoredStyle(): MapStyleId {
-  if (typeof localStorage === 'undefined') return 'vector';
-  return localStorage.getItem(STYLE_KEY) === 'satellite' ? 'satellite' : 'vector';
+  if (typeof localStorage === 'undefined') return 'satellite';
+  // Por defecto satélite; solo se usa vector si el usuario lo eligió explícitamente.
+  return localStorage.getItem(STYLE_KEY) === 'vector' ? 'vector' : 'satellite';
 }
 function setStoredStyle(s: MapStyleId): void {
   localStorage.setItem(STYLE_KEY, s);
@@ -79,11 +80,11 @@ export function BibleMap({ chapter, places }: Props) {
   const t = useTranslations('reader');
 
   // Estilo persistente vía localStorage, leído con useSyncExternalStore
-  // para evitar mismatch de hidratación (SSR siempre devuelve 'vector').
+  // para evitar mismatch de hidratación (SSR siempre devuelve 'satellite').
   const mapStyle = useSyncExternalStore(
     subscribeStyle,
     getStoredStyle,
-    () => 'vector' as MapStyleId,
+    () => 'satellite' as MapStyleId,
   );
 
   const isOverview = places.length === 0;
