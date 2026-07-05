@@ -1,6 +1,25 @@
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { type BookSummary, getBooks, versionForLocale } from '@/lib/bible';
+import { localeAlternates, openGraphFor } from '@/lib/seo';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'books' });
+  const title = t('title');
+  const description = t('lede');
+  return {
+    title,
+    description,
+    alternates: localeAlternates(locale, 'leer'),
+    openGraph: openGraphFor(locale, `${title} · Tabor`, description, 'leer'),
+  };
+}
 
 // Esta ruta consulta Postgres en cada render. El layout padre ya está marcado
 // como dinámico (porque el SiteHeader también consulta libros) — esa

@@ -23,6 +23,9 @@ con ajustes según el aprendizaje real.
 - **Responsive** con ratio adaptado a móvil.
 - Desplegado en [proyectotabor.org](https://proyectotabor.org)
   sobre infraestructura gratuita (Vercel + Supabase).
+- **SEO**: título y descripción únicos por capítulo y libro, sitemap
+  con las ~2.800 URLs, robots.txt, canonical + hreflang es/en,
+  Open Graph con imagen de marca y breadcrumbs schema.org.
 
 ---
 
@@ -43,7 +46,6 @@ Lo que cerraría el alcance del MVP web de la spec:
 - **Tile server propio** (OpenMapTiles + Tegola/Martin) en vez de
   demotiles públicas.
 - **Auditoría WCAG 2.2 AA** completa.
-- **SEO**: sitemap, Open Graph, schema.org.
 
 ---
 

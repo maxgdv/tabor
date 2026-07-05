@@ -1,8 +1,10 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { getAdjacentChapter } from '@tabor/db';
 import { Link } from '@/i18n/routing';
 import { getChapter, getPlacesForChapter } from '@/lib/bible';
+import { SITE_URL, localeAlternates, openGraphFor, verseSnippet } from '@/lib/seo';
 import { ChapterReader } from '@/components/reader/ChapterReader';
 import { ActiveVerseMarker } from '@/components/reader/ActiveVerseMarker';
 import { BibleMapClient } from '@/components/map/BibleMapClient';
@@ -13,6 +15,36 @@ const VERSION_BY_LOCALE: Record<string, string> = {
 };
 
 type Params = Promise<{ locale: string; book: string; chapter: string }>;
+
+// Título y descripción únicos por capítulo: el título lleva libro y número
+// ("Génesis 12 · Tabor" vía plantilla del layout) y la descripción arranca
+// con las primeras palabras del propio texto — el contenido más singular de
+// cada una de las 1.334 páginas. `getChapter` está memoizada con React.cache,
+// así que el cuerpo de la página reutiliza esta misma query.
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { locale, book, chapter } = await params;
+  const chapterNumber = Number.parseInt(chapter, 10);
+  if (!Number.isFinite(chapterNumber)) return {};
+
+  const chapterData = await getChapter(book, chapterNumber, locale);
+  if (!chapterData) return {};
+
+  const t = await getTranslations({ locale, namespace: 'metadata' });
+  const title = `${chapterData.bookName} ${chapterData.number}`;
+  const description = t('chapterDescription', {
+    snippet: verseSnippet(chapterData.verses),
+    book: chapterData.bookName,
+    chapter: chapterData.number,
+  });
+  const path = `leer/${book.toLowerCase()}/${chapterNumber}`;
+
+  return {
+    title,
+    description,
+    alternates: localeAlternates(locale, path),
+    openGraph: openGraphFor(locale, `${title} · Tabor`, description, path),
+  };
+}
 
 export default async function ReaderPage({ params }: { params: Params }) {
   const { locale, book, chapter } = await params;
@@ -46,8 +78,42 @@ export default async function ReaderPage({ params }: { params: Params }) {
 
   const places = getPlacesForChapter(chapterData);
 
+  // Datos estructurados schema.org: Google los usa para mostrar la ruta
+  // "Biblia › Génesis › 12" en los resultados en vez de la URL cruda.
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: tBooks('breadcrumbBible'),
+        item: `${SITE_URL}/${locale}/leer`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: chapterData.bookName,
+        item: `${SITE_URL}/${locale}/leer/${book.toLowerCase()}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: `${chapterData.bookName} ${chapterData.number}`,
+      },
+    ],
+  };
+
   return (
     <div className="flex h-[calc(100dvh-8rem)] flex-col">
+      <script
+        type="application/ld+json"
+        // JSON.stringify + escape de '<' evita inyección si algún nombre
+        // de libro contuviera markup.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, '\\u003c'),
+        }}
+      />
       <div className="border-b border-sand-200 bg-sand-50/60 px-4 py-2.5 backdrop-blur sm:px-6 dark:border-stone-700 dark:bg-stone-900/60">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2">
           <nav aria-label="Breadcrumb" className="font-sans text-xs uppercase tracking-[0.18em] text-stone-500">

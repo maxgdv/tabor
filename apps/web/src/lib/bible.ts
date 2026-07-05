@@ -10,6 +10,7 @@
 
 import { cache } from 'react';
 import {
+  getBookSummary as _getBookSummary,
   getChapterGeo,
   getChapterText,
   listBooks as _listBooks,
@@ -29,6 +30,16 @@ export type BookSummary = DbBookSummary;
 export const getBooks = cache(async (versionCode: string): Promise<BookSummary[]> => {
   return _listBooks({ versionCode });
 });
+
+/**
+ * Resumen de un libro memoizado por petición: `generateMetadata` y el cuerpo
+ * de la página del libro piden lo mismo en la misma petición HTTP.
+ */
+export const getBookSummaryCached = cache(
+  async (bookCanonicalId: string, versionCode: string): Promise<DbBookSummary | null> => {
+    return _getBookSummary({ bookCanonicalId, versionCode });
+  },
+);
 
 /** Versión bíblica preferida para un locale de la interfaz. */
 export function versionForLocale(locale: string): string {
@@ -56,12 +67,14 @@ export type Chapter = {
 /**
  * Devuelve un capítulo con su texto y los lugares mencionados.
  * `null` si el libro/capítulo no existe en la versión correspondiente.
+ * Memoizada por petición: `generateMetadata` y el cuerpo de la página
+ * comparten el resultado sin repetir queries.
  */
-export async function getChapter(
+export const getChapter = cache(async (
   bookCanonicalId: string,
   number: number,
   locale: string,
-): Promise<Chapter | null> {
+): Promise<Chapter | null> => {
   const versionCode = versionForLocale(locale);
   const upperBook = bookCanonicalId.toUpperCase();
 
@@ -90,7 +103,7 @@ export async function getChapter(
     })),
     places: geo.places,
   };
-}
+});
 
 /** Atajo conveniente para la página del lector. */
 export function getPlacesForChapter(chapter: Chapter): Place[] {

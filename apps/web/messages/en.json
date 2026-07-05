@@ -1,7 +1,9 @@
 {
   "metadata": {
     "title": "Tabor — The Bible, place by place",
-    "description": "Read the Bible while an interactive map shows, in real time, where each passage takes place."
+    "description": "Read the Bible while an interactive map shows, in real time, where each passage takes place.",
+    "chapterDescription": "“{snippet}” — {book} {chapter}, with an interactive map of the places in the passage.",
+    "bookDescription": "{book}: {count, plural, one {# chapter} other {# chapters}}. Read each chapter alongside an interactive map of biblical places."
   },
   "header": {
     "skipToContent": "Skip to main content",

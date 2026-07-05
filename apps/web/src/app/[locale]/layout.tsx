@@ -4,6 +4,7 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import { notFound } from 'next/navigation';
 import { Analytics } from '@vercel/analytics/next';
 import { routing } from '@/i18n/routing';
+import { SITE_URL, localeAlternates, openGraphFor } from '@/lib/seo';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import '../globals.css';
@@ -26,8 +27,19 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'metadata' });
   return {
-    title: t('title'),
+    metadataBase: new URL(SITE_URL),
+    // Las páginas hijas declaran solo su parte ("Génesis 12") y la
+    // plantilla añade la marca. La home usa el título completo por defecto.
+    title: {
+      default: t('title'),
+      template: '%s · Tabor',
+    },
     description: t('description'),
+    // Canonical + hreflang de la home; cada página hija los sobreescribe
+    // con su propio path.
+    alternates: localeAlternates(locale),
+    openGraph: openGraphFor(locale, t('title'), t('description')),
+    twitter: { card: 'summary_large_image' },
   };
 }
 

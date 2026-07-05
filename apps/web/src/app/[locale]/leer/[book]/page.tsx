@@ -1,7 +1,9 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
-import { getBookSummary } from '@tabor/db';
+import { getBookSummaryCached } from '@/lib/bible';
+import { localeAlternates, openGraphFor } from '@/lib/seo';
 
 const VERSION_BY_LOCALE: Record<string, string> = {
   es: 'STRA',
@@ -10,6 +12,27 @@ const VERSION_BY_LOCALE: Record<string, string> = {
 
 type Params = Promise<{ locale: string; book: string }>;
 
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { locale, book } = await params;
+  const versionCode = VERSION_BY_LOCALE[locale] ?? 'STRA';
+  const summary = await getBookSummaryCached(book.toUpperCase(), versionCode);
+  if (!summary || summary.chapterCount === 0) return {};
+
+  const t = await getTranslations({ locale, namespace: 'metadata' });
+  const description = t('bookDescription', {
+    book: summary.name,
+    count: summary.chapterCount,
+  });
+  const path = `leer/${summary.urlSegment}`;
+
+  return {
+    title: summary.name,
+    description,
+    alternates: localeAlternates(locale, path),
+    openGraph: openGraphFor(locale, `${summary.name} · Tabor`, description, path),
+  };
+}
+
 export default async function BookChapterIndexPage({ params }: { params: Params }) {
   const { locale, book } = await params;
   setRequestLocale(locale);
@@ -17,10 +40,7 @@ export default async function BookChapterIndexPage({ params }: { params: Params 
   const t = await getTranslations('books');
   const versionCode = VERSION_BY_LOCALE[locale] ?? 'STRA';
 
-  const summary = await getBookSummary({
-    bookCanonicalId: book.toUpperCase(),
-    versionCode,
-  });
+  const summary = await getBookSummaryCached(book.toUpperCase(), versionCode);
   if (!summary || summary.chapterCount === 0) notFound();
 
   const chapters = Array.from({ length: summary.chapterCount }, (_, i) => i + 1);
