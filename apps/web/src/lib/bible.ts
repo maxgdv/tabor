@@ -85,7 +85,7 @@ export const getChapter = cache(async (
       chapterNumber: number,
       versionCode,
     }),
-    getChapterGeo({ bookCanonicalId: upperBook, chapterNumber: number }),
+    getChapterGeo({ bookCanonicalId: upperBook, chapterNumber: number, language: locale }),
   ]);
   if (!text) return null;
 

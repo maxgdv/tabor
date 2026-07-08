@@ -26,6 +26,9 @@ con ajustes según el aprendizaje real.
 - **SEO**: título y descripción únicos por capítulo y libro, sitemap
   con las ~2.800 URLs, robots.txt, canonical + hreflang es/en,
   Open Graph con imagen de marca y breadcrumbs schema.org.
+- **Nombres de lugares en español**: dataset curado de ~270 lugares
+  (los 250 más mencionados ≈80 % de menciones + célebres del NT),
+  con fallback limpio para el resto.
 
 ---
 
@@ -33,9 +36,9 @@ con ajustes según el aprendizaje real.
 
 Lo que cerraría el alcance del MVP web de la spec:
 
-- **Traducción al español de los nombres de lugares** del dataset
-  OpenBible (hoy en inglés en el mapa: "Bethlehem" en vez de "Belén").
-  Empezar por los ~100 más frecuentes que cubren el 95 % de menciones.
+- **Ampliar la traducción de nombres de lugares** más allá del top
+  ~270 ya cubierto (la cola larga: ~1.000 lugares poco mencionados).
+  Dataset editable en `packages/db/src/data/place-names-es.ts`.
 - **Búsqueda con Meilisearch**: por referencia (`Mt 5`, `Gen 12:6`),
   por texto libre y por lugar. Infraestructura ya levantada, falta
   indexar y conectar UI.

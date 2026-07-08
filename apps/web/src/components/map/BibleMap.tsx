@@ -120,7 +120,7 @@ export function BibleMap({ chapter, places }: Props) {
       for (const place of places) {
         const popup = new Popup({ offset: 18, closeButton: false }).setHTML(
           `<div class="font-serif">
-             <div class="text-sm font-semibold">${escapeHtml(place.canonicalName)}</div>
+             <div class="text-sm font-semibold">${escapeHtml(place.name)}</div>
              ${place.modernName ? `<div class="text-xs text-stone-500">${escapeHtml(place.modernName)}</div>` : ''}
              ${place.description ? `<div class="mt-1 text-xs">${escapeHtml(place.description)}</div>` : ''}
            </div>`,
@@ -134,7 +134,7 @@ export function BibleMap({ chapter, places }: Props) {
         const label = document.createElement('div');
         label.className =
           'pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-white/90 px-1.5 py-0.5 text-[11px] font-semibold leading-tight text-stone-800 shadow-sm';
-        label.textContent = place.canonicalName;
+        label.textContent = place.name;
         marker.getElement().appendChild(label);
 
         marker.getElement().addEventListener('click', () => {

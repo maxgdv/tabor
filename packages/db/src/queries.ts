@@ -5,7 +5,7 @@
 import { and, asc, desc, eq, sql } from 'drizzle-orm';
 import { db } from './index';
 import { book, bookTranslation, chapter, verse, verseText, version } from './schema/bible';
-import { place, verseLocation } from './schema/geo';
+import { place, placeAlternateName, verseLocation } from './schema/geo';
 
 export type DbVerse = {
   number: number;
@@ -74,12 +74,21 @@ export async function getChapterText(opts: {
 
 export type DbPlace = {
   slug: string;
+  /** Nombre para mostrar: la traducción al idioma pedido si existe; si no,
+   *  el canónico sin el sufijo numérico de desambiguación ("Bethel 1" → "Bethel"). */
+  name: string;
   canonicalName: string;
   modernName: string | null;
   description: string | null;
   lng: number;
   lat: number;
 };
+
+/** "Bethel 1" → "Bethel". El sufijo numérico desambigua homónimos en el
+ *  dataset de OpenBible; es metadato, no parte del nombre visible. */
+function stripDisambiguation(canonicalName: string): string {
+  return canonicalName.replace(/\s+\d+$/, '');
+}
 
 export type DbChapterGeo = {
   /** Lugares únicos del capítulo, en orden de primera aparición. */
@@ -91,11 +100,15 @@ export type DbChapterGeo = {
 /**
  * Devuelve los lugares mencionados en un capítulo y los vínculos
  * versículo→lugar, leyendo `verse_location` (poblado desde OpenBible.info).
+ * Si se pasa `language`, resuelve el nombre visible contra
+ * `place_alternate_name` (dataset curado); sin traducción disponible cae al
+ * nombre canónico limpio.
  * Devuelve `{ places: [], placeSlugsByVerse: {} }` si no hay vínculos.
  */
 export async function getChapterGeo(opts: {
   bookCanonicalId: string;
   chapterNumber: number;
+  language?: string; // 'es', 'en', ...
 }): Promise<DbChapterGeo> {
   const [bk] = await db.select().from(book).where(eq(book.canonicalId, opts.bookCanonicalId));
   if (!bk) return { places: [], placeSlugsByVerse: {} };
@@ -106,12 +119,14 @@ export async function getChapterGeo(opts: {
     .where(and(eq(chapter.bookId, bk.id), eq(chapter.number, opts.chapterNumber)));
   if (!ch) return { places: [], placeSlugsByVerse: {} };
 
-  // Una sola consulta: versículo + lugar (con lon/lat extraídos del geography).
+  // Una sola consulta: versículo + lugar (con lon/lat extraídos del geography)
+  // + nombre traducido si lo hay para el idioma pedido.
   const rows = await db
     .select({
       verseNumber: verse.number,
       slug: place.slug,
       canonicalName: place.canonicalName,
+      localizedName: placeAlternateName.name,
       modernName: place.modernName,
       description: place.description,
       lng: sql<number>`ST_X(${place.geom}::geometry)`,
@@ -120,6 +135,13 @@ export async function getChapterGeo(opts: {
     .from(verse)
     .innerJoin(verseLocation, eq(verseLocation.verseId, verse.id))
     .innerJoin(place, eq(place.id, verseLocation.placeId))
+    .leftJoin(
+      placeAlternateName,
+      and(
+        eq(placeAlternateName.placeId, place.id),
+        eq(placeAlternateName.language, opts.language ?? '__none__'),
+      ),
+    )
     .where(eq(verse.chapterId, ch.id))
     .orderBy(asc(verse.number), asc(place.slug));
 
@@ -129,6 +151,7 @@ export async function getChapterGeo(opts: {
     if (!placeBySlug.has(r.slug)) {
       placeBySlug.set(r.slug, {
         slug: r.slug,
+        name: r.localizedName ?? stripDisambiguation(r.canonicalName),
         canonicalName: r.canonicalName,
         modernName: r.modernName,
         description: r.description,
@@ -136,7 +159,10 @@ export async function getChapterGeo(opts: {
         lat: Number(r.lat),
       });
     }
-    (placeSlugsByVerse[r.verseNumber] ??= []).push(r.slug);
+    const slugsOfVerse = (placeSlugsByVerse[r.verseNumber] ??= []);
+    // El LEFT JOIN podría duplicar filas si un lugar tuviera varios nombres
+    // en el mismo idioma; deduplicamos por si acaso.
+    if (!slugsOfVerse.includes(r.slug)) slugsOfVerse.push(r.slug);
   }
   return { places: Array.from(placeBySlug.values()), placeSlugsByVerse };
 }

@@ -15,6 +15,7 @@
     "seed": "tsx src/seed.ts",
     "import:bible": "tsx src/import-bible.ts",
     "import:geo": "tsx src/import-geo.ts",
+    "import:place-names": "tsx src/import-place-names.ts",
     "studio": "drizzle-kit studio",
     "typecheck": "tsc --noEmit"
   },
