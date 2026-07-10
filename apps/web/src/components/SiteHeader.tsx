@@ -3,6 +3,7 @@ import { Link, routing } from '@/i18n/routing';
 import { getBooks, versionForLocale } from '@/lib/bible';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { BookSidebar } from './BookSidebar';
+import { SearchBox } from './SearchBox';
 
 export async function SiteHeader() {
   const locale = await getLocale();
@@ -11,8 +12,8 @@ export async function SiteHeader() {
 
   return (
     <header className="border-b border-sand-200 bg-sand-50/80 backdrop-blur dark:border-stone-700 dark:bg-stone-900/80">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
-        <div className="flex items-center gap-3">
+      <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4">
+        <div className="flex shrink-0 items-center gap-3">
           <BookSidebar books={books} />
           <Link
             href="/"
@@ -21,7 +22,12 @@ export async function SiteHeader() {
             Tabor
           </Link>
         </div>
-        <LocaleSwitcher locales={routing.locales} label={t('switchLanguage')} />
+        <div className="flex min-w-0 flex-1 justify-center">
+          <SearchBox />
+        </div>
+        <div className="shrink-0">
+          <LocaleSwitcher locales={routing.locales} label={t('switchLanguage')} />
+        </div>
       </div>
     </header>
   );

@@ -12,6 +12,14 @@
     "closeSidebar": "Close",
     "sidebarTitle": "Books of the Bible"
   },
+  "search": {
+    "label": "Search the Bible",
+    "placeholder": "Search: Mt 5, Jericho, “light of the world”…",
+    "groupReference": "Go to",
+    "groupPlaces": "Places",
+    "groupVerses": "Verses",
+    "noResults": "No results for “{query}”"
+  },
   "home": {
     "tagline": "The Bible, place by place",
     "lede": "Read the sacred text while a map travels with you, showing where each passage unfolds in its real setting.",

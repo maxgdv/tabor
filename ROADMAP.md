@@ -29,6 +29,10 @@ con ajustes según el aprendizaje real.
 - **Nombres de lugares en español**: dataset curado de ~270 lugares
   (los 250 más mencionados ≈80 % de menciones + célebres del NT),
   con fallback limpio para el resto.
+- **Búsqueda global** en el header: por referencia («Mt 5»,
+  «1 Co 13, 4» — parser es/en con abreviaturas), por lugar (ignora
+  acentos) y por texto libre sobre los 71.603 versículos (Meilisearch).
+  Los resultados enlazan al versículo exacto (`#v12`).
 
 ---
 
@@ -39,9 +43,12 @@ Lo que cerraría el alcance del MVP web de la spec:
 - **Ampliar la traducción de nombres de lugares** más allá del top
   ~270 ya cubierto (la cola larga: ~1.000 lugares poco mencionados).
   Dataset editable en `packages/db/src/data/place-names-es.ts`.
-- **Búsqueda con Meilisearch**: por referencia (`Mt 5`, `Gen 12:6`),
-  por texto libre y por lugar. Infraestructura ya levantada, falta
-  indexar y conectar UI.
+- **Meilisearch en producción**: la búsqueda de texto libre ya
+  funciona en local; falta una instancia hosteada (Meilisearch Cloud
+  free tier o VPS), indexar con `npm run --workspace packages/db
+  import:search` y definir `MEILI_HOST` + `MEILI_SEARCH_KEY` en
+  Vercel. Sin ella, la búsqueda degrada con elegancia a referencias
+  y lugares (que van contra Postgres).
 - **Marcadores, resaltados y notas personales**. El esquema en BD
   ya existe; falta auth + UI.
 - **Autenticación** (Better-Auth o Lucia, self-hosted).

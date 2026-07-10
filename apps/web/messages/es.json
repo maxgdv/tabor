@@ -12,6 +12,14 @@
     "closeSidebar": "Cerrar",
     "sidebarTitle": "Libros de la Biblia"
   },
+  "search": {
+    "label": "Buscar en la Biblia",
+    "placeholder": "Buscar: Mt 5, Jericó, «luz del mundo»…",
+    "groupReference": "Ir a",
+    "groupPlaces": "Lugares",
+    "groupVerses": "Versículos",
+    "noResults": "Sin resultados para «{query}»"
+  },
   "home": {
     "tagline": "La Biblia, lugar a lugar",
     "lede": "Lee el texto sagrado mientras un mapa te acompaña, mostrando dónde sucede cada pasaje en su escenario real.",

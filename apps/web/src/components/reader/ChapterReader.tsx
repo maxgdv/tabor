@@ -49,6 +49,20 @@ export function ChapterReader({ chapter }: Props) {
     return () => observer.disconnect();
   }, [setActiveVerse]);
 
+  // Deep-link a un versículo: /leer/mat/5#v3 (desde la búsqueda o un enlace
+  // compartido). El contenedor de scroll es interno, así que hacemos el
+  // scroll nosotros en vez de confiar en el anchor nativo del navegador.
+  useEffect(() => {
+    const match = window.location.hash.match(/^#v(\d+)$/);
+    if (!match) return;
+    const number = Number(match[1]);
+    const el = verseRefs.current.get(number);
+    if (el) {
+      el.scrollIntoView({ block: 'center' });
+      setActiveVerse(number);
+    }
+  }, [chapter, setActiveVerse]);
+
   // Cuando el mapa pide scroll a un versículo concreto, lo llevamos suavemente.
   useEffect(() => {
     if (scrollTarget == null) return;
@@ -81,6 +95,7 @@ export function ChapterReader({ chapter }: Props) {
                 if (el) verseRefs.current.set(verse.number, el);
                 else verseRefs.current.delete(verse.number);
               }}
+              id={`v${verse.number}`}
               data-verse={verse.number}
               className="group inline transition-colors"
             >
