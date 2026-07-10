@@ -29,3 +29,7 @@ export type Database = typeof db;
 // Consultas de dominio. Se exportan al final para que `db` ya esté inicializado
 // cuando queries.ts (que lo importa) se evalúe — evita el TDZ del ciclo de imports.
 export * from './queries';
+
+// Metadatos estáticos del canon (nombres y abreviaturas es/en por libro).
+// Los usa el parser de referencias de la búsqueda ("Mt 5" → MAT 5).
+export { BOOK_META, type BookMeta } from './book-meta';

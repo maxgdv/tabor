@@ -167,6 +167,139 @@ export async function getChapterGeo(opts: {
   return { places: Array.from(placeBySlug.values()), placeSlugsByVerse };
 }
 
+// --- Búsqueda de lugares ---------------------------------------------------
+
+export type DbPlaceSearchResult = {
+  slug: string;
+  /** Nombre visible: traducción si existe, canónico sin sufijo si no. */
+  name: string;
+  canonicalName: string;
+  modernName: string | null;
+  /** Capítulo con más menciones del lugar — destino natural al hacer click. */
+  bookCanonicalId: string;
+  bookUrlSegment: string;
+  bookName: string;
+  chapterNumber: number;
+  mentionCount: number;
+};
+
+/** Escapa los metacaracteres de LIKE para usar entrada del usuario en ILIKE. */
+function escapeLike(input: string): string {
+  return input.replace(/[\\%_]/g, (c) => `\\${c}`);
+}
+
+// Folding de acentos para que "jerico" encuentre "Jericó". Se hace igual en
+// SQL (translate, sin depender de la extensión unaccent) y en JS (NFD).
+const ACCENTED = 'áàâäãéèêëíìîïóòôöõúùûüñç';
+const PLAIN = 'aaaaaeeeeiiiiooooouuuunc';
+
+function foldSql(col: unknown) {
+  return sql`translate(lower(${col}), ${ACCENTED}, ${PLAIN})`;
+}
+
+function foldJs(input: string): string {
+  return input
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '');
+}
+
+/**
+ * Busca lugares por nombre (canónico o traducido al idioma pedido) con
+ * coincidencia por subcadena, y devuelve para cada uno el capítulo que más
+ * lo menciona. Los que empiezan por el término buscado van primero.
+ * El dataset es pequeño (~1.335 lugares), así que ILIKE es suficiente:
+ * no necesita motor de búsqueda externo.
+ */
+export async function searchPlaces(opts: {
+  query: string;
+  language?: string; // 'es', 'en', ...
+  versionCode: string; // para el nombre localizado del libro destino
+  limit?: number;
+}): Promise<DbPlaceSearchResult[]> {
+  const q = foldJs(opts.query.trim());
+  if (q.length < 2) return [];
+  const limit = opts.limit ?? 5;
+  const contains = `%${escapeLike(q)}%`;
+  const prefix = `${escapeLike(q)}%`;
+
+  const [ver] = await db.select().from(version).where(eq(version.code, opts.versionCode));
+  if (!ver) return [];
+
+  // Lugares cuyo nombre canónico o traducido contiene el término.
+  const matches = await db
+    .select({
+      id: place.id,
+      slug: place.slug,
+      canonicalName: place.canonicalName,
+      localizedName: placeAlternateName.name,
+      modernName: place.modernName,
+    })
+    .from(place)
+    .leftJoin(
+      placeAlternateName,
+      and(
+        eq(placeAlternateName.placeId, place.id),
+        eq(placeAlternateName.language, opts.language ?? '__none__'),
+      ),
+    )
+    .where(
+      sql`(${foldSql(place.canonicalName)} LIKE ${contains} OR ${foldSql(placeAlternateName.name)} LIKE ${contains})`,
+    )
+    .orderBy(
+      sql`(${foldSql(sql`coalesce(${placeAlternateName.name}, ${place.canonicalName})`)} LIKE ${prefix}) DESC`,
+      sql`length(coalesce(${placeAlternateName.name}, ${place.canonicalName})) ASC`,
+      asc(place.slug),
+    )
+    .limit(limit);
+  if (matches.length === 0) return [];
+
+  // Para cada lugar, el capítulo con más menciones (una fila por lugar).
+  const ids = matches.map((m) => m.id);
+  const topChapters = await db.execute<{
+    place_id: number;
+    canonical_id: string;
+    number: number;
+    book_name: string | null;
+    cnt: number;
+  }>(sql`
+    SELECT DISTINCT ON (t.place_id)
+      t.place_id, t.canonical_id, t.number, bt.name AS book_name, t.cnt
+    FROM (
+      SELECT vl.place_id, b.id AS book_id, b.canonical_id, b.order_index,
+             c.number, count(*)::int AS cnt
+      FROM ${verseLocation} vl
+      JOIN ${verse} v ON v.id = vl.verse_id
+      JOIN ${chapter} c ON c.id = v.chapter_id
+      JOIN ${book} b ON b.id = c.book_id
+      WHERE vl.place_id IN (${sql.join(ids, sql`, `)})
+      GROUP BY vl.place_id, b.id, b.canonical_id, b.order_index, c.number
+    ) t
+    LEFT JOIN ${bookTranslation} bt
+      ON bt.book_id = t.book_id AND bt.version_id = ${ver.id}
+    ORDER BY t.place_id, t.cnt DESC, t.order_index ASC, t.number ASC
+  `);
+  const topByPlaceId = new Map(topChapters.map((r) => [r.place_id, r]));
+
+  const results: DbPlaceSearchResult[] = [];
+  for (const m of matches) {
+    const top = topByPlaceId.get(m.id);
+    if (!top) continue; // lugar sin menciones vinculadas: no hay destino útil
+    results.push({
+      slug: m.slug,
+      name: m.localizedName ?? stripDisambiguation(m.canonicalName),
+      canonicalName: m.canonicalName,
+      modernName: m.modernName,
+      bookCanonicalId: top.canonical_id,
+      bookUrlSegment: top.canonical_id.toLowerCase(),
+      bookName: top.book_name ?? top.canonical_id,
+      chapterNumber: top.number,
+      mentionCount: top.cnt,
+    });
+  }
+  return results;
+}
+
 // --- Navegación (índices de libros y capítulos, prev/next) ---------------
 
 export type DbBookSummary = {
