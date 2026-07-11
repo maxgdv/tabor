@@ -6,7 +6,9 @@
 // puntos de abreviatura. Devuelve la referencia estructurada; validar que el
 // capítulo exista es responsabilidad del llamador (requiere BD).
 
-import { BOOK_META } from '@tabor/db';
+// Import por subpath para no arrastrar el barrel de @tabor/db, que abre la
+// conexión Postgres al cargarse — así el parser es testeable sin BD.
+import { BOOK_META } from '@tabor/db/book-meta';
 
 export type ParsedReference = {
   canonicalId: string; // 'MAT'
