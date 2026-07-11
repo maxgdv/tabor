@@ -6,6 +6,7 @@ import { and, asc, desc, eq, sql } from 'drizzle-orm';
 import { db } from './index';
 import { book, bookTranslation, chapter, verse, verseText, version } from './schema/bible';
 import { place, placeAlternateName, verseLocation } from './schema/geo';
+import { escapeLike, foldJs, foldSql } from './text';
 
 export type DbVerse = {
   number: number;
@@ -183,26 +184,6 @@ export type DbPlaceSearchResult = {
   mentionCount: number;
 };
 
-/** Escapa los metacaracteres de LIKE para usar entrada del usuario en ILIKE. */
-function escapeLike(input: string): string {
-  return input.replace(/[\\%_]/g, (c) => `\\${c}`);
-}
-
-// Folding de acentos para que "jerico" encuentre "Jericó". Se hace igual en
-// SQL (translate, sin depender de la extensión unaccent) y en JS (NFD).
-const ACCENTED = 'áàâäãéèêëíìîïóòôöõúùûüñç';
-const PLAIN = 'aaaaaeeeeiiiiooooouuuunc';
-
-function foldSql(col: unknown) {
-  return sql`translate(lower(${col}), ${ACCENTED}, ${PLAIN})`;
-}
-
-function foldJs(input: string): string {
-  return input
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '');
-}
 
 /**
  * Busca lugares por nombre (canónico o traducido al idioma pedido) con
