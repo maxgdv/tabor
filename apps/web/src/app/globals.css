@@ -61,3 +61,10 @@
     @apply outline-2 outline-offset-2 outline-lapis-500;
   }
 }
+
+/* Etiquetas de marcador del mapa: en capítulos densos BibleMap las oculta
+   según el zoom, pero pasar el ratón por el marcador siempre muestra la suya
+   (el display inline que pone BibleMap se anula aquí con !important). */
+.maplibregl-marker:hover .tabor-marker-label {
+  display: block !important;
+}

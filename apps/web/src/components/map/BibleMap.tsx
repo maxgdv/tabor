@@ -44,6 +44,12 @@ const SATELLITE_STYLE: StyleSpecification = {
 const OVERVIEW_CENTER: [number, number] = [35.5, 32];
 const OVERVIEW_ZOOM = 5;
 
+// A partir de cuántos lugares las etiquetas persistentes se solapan en una
+// sopa ilegible (Josué 15 tiene 163). En capítulos densos solo se muestran
+// desde este zoom; el hover y el versículo activo las fuerzan una a una.
+const DENSE_PLACE_THRESHOLD = 40;
+const LABEL_MIN_ZOOM = 7.5;
+
 // --- Persistencia de la preferencia de estilo en localStorage ----------
 type MapStyleId = 'vector' | 'satellite';
 const STYLE_KEY = 'tabor-map-style';
@@ -74,6 +80,9 @@ export function BibleMap({ chapter, places }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Map<string, Marker>>(new Map());
+  // Recalcula qué etiquetas se ven; lo comparten el listener de zoom del
+  // mapa y el efecto de versículo activo (que marca data-active).
+  const labelVisibilityRef = useRef<() => void>(() => {});
 
   const activeVerse = useReaderStore((s) => s.activeVerseNumber);
   const requestScrollTo = useReaderStore((s) => s.requestScrollTo);
@@ -133,7 +142,7 @@ export function BibleMap({ chapter, places }: Props) {
         // Etiqueta persistente con el nombre bíblico bajo el marcador.
         const label = document.createElement('div');
         label.className =
-          'pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-white/90 px-1.5 py-0.5 text-[11px] font-semibold leading-tight text-stone-800 shadow-sm';
+          'tabor-marker-label pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-white/90 px-1.5 py-0.5 text-[11px] font-semibold leading-tight text-stone-800 shadow-sm';
         label.textContent = place.name;
         marker.getElement().appendChild(label);
 
@@ -143,6 +152,21 @@ export function BibleMap({ chapter, places }: Props) {
         });
         markersRef.current.set(place.slug, marker);
       }
+
+      // Visibilidad de etiquetas según densidad y zoom (ver constantes).
+      const updateLabelVisibility = () => {
+        const showAll =
+          places.length <= DENSE_PLACE_THRESHOLD || map.getZoom() >= LABEL_MIN_ZOOM;
+        markersRef.current.forEach((marker) => {
+          const el = marker.getElement();
+          const label = el.querySelector<HTMLElement>('.tabor-marker-label');
+          if (!label) return;
+          label.style.display = showAll || el.dataset.active === 'true' ? '' : 'none';
+        });
+      };
+      labelVisibilityRef.current = updateLabelVisibility;
+      updateLabelVisibility();
+      map.on('zoom', updateLabelVisibility);
     });
 
     const markers = markersRef.current;
@@ -194,11 +218,15 @@ export function BibleMap({ chapter, places }: Props) {
     markersRef.current.forEach((marker, slug) => {
       const el = marker.getElement();
       const active = verse.placeSlugs.includes(slug);
+      el.dataset.active = String(active);
       el.style.filter = active ? 'drop-shadow(0 0 8px #c19f64)' : 'none';
       el.style.transform = active
         ? `${el.style.transform.replace(/scale\([^)]*\)/, '')} scale(1.25)`
         : el.style.transform.replace(/scale\([^)]*\)/, '');
     });
+    // Los lugares del versículo activo muestran su etiqueta aunque el
+    // capítulo sea denso y el zoom esté lejos.
+    labelVisibilityRef.current();
   }, [activeVerse, chapter, places, isOverview]);
 
   return (
