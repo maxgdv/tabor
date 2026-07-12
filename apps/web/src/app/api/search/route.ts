@@ -4,14 +4,15 @@
 //   1. Referencia bíblica escrita a mano ("Mt 5", "gen 12:6") — parser local
 //      + validación contra la BD (que el libro/capítulo existan de verdad).
 //   2. Lugares por nombre (Postgres ILIKE sobre ~1.335 lugares).
-//   3. Texto libre sobre los versículos (Meilisearch, filtrado por idioma
-//      para no mezclar versiones).
+//   3. Texto libre sobre los versículos: Meilisearch si está configurado
+//      (mejor tolerancia a erratas); si no —el caso de producción hoy—,
+//      FTS nativo de Postgres con stemming por idioma.
 //
-// Si Meilisearch no está disponible, la respuesta degrada a referencia +
-// lugares en vez de fallar entera.
+// Si ambos motores de texto libre fallan, la respuesta degrada a
+// referencia + lugares en vez de fallar entera.
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { getBookSummary, searchPlaces } from '@tabor/db';
+import { getBookSummary, searchPlaces, searchVersesFts } from '@tabor/db';
 import { parseReference } from '@/lib/reference';
 import { versionForLocale } from '@/lib/bible';
 import {
@@ -30,6 +31,10 @@ const MEILI_KEY =
   process.env.MEILI_SEARCH_KEY ??
   process.env.MEILI_MASTER_KEY ??
   'tabor_dev_meili_master_key_change_me';
+// En producción sin MEILI_HOST no hay nada que intentar: directo al FTS de
+// Postgres. En desarrollo probamos siempre el contenedor local.
+const MEILI_ENABLED =
+  Boolean(process.env.MEILI_HOST) || process.env.NODE_ENV !== 'production';
 
 /** Valida la referencia parseada contra la BD y la localiza. */
 async function resolveReference(
@@ -54,7 +59,7 @@ async function resolveReference(
   };
 }
 
-async function searchVerses(query: string, language: string): Promise<SearchVerse[]> {
+async function searchVersesMeili(query: string, language: string): Promise<SearchVerse[]> {
   const res = await fetch(`${MEILI_HOST}/indexes/verses/search`, {
     method: 'POST',
     headers: {
@@ -96,6 +101,36 @@ async function searchVerses(query: string, language: string): Promise<SearchVers
   }));
 }
 
+/** Texto libre: Meilisearch si se puede, FTS de Postgres si no. */
+async function searchVerses(
+  query: string,
+  language: string,
+  versionCode: string,
+): Promise<SearchVerse[]> {
+  if (MEILI_ENABLED) {
+    try {
+      return await searchVersesMeili(query, language);
+    } catch {
+      // Contenedor caído o instancia mal configurada: probamos Postgres.
+    }
+  }
+  const rows = await searchVersesFts({
+    query,
+    language,
+    versionCode,
+    highlightPre: HIGHLIGHT_PRE,
+    highlightPost: HIGHLIGHT_POST,
+    limit: 8,
+  });
+  return rows.map((r) => ({
+    bookSegment: r.bookUrlSegment,
+    bookName: r.bookName,
+    chapter: r.chapterNumber,
+    verse: r.verseNumber,
+    snippet: r.snippet,
+  }));
+}
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const q = (request.nextUrl.searchParams.get('q') ?? '').trim().slice(0, 200);
   const locale = request.nextUrl.searchParams.get('locale') === 'en' ? 'en' : 'es';
@@ -108,7 +143,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const [reference, places, verses] = await Promise.all([
     resolveReference(q, versionCode).catch(() => null),
     searchPlaces({ query: q, language: locale, versionCode, limit: 4 }).catch(() => []),
-    searchVerses(q, locale).catch(() => []),
+    searchVerses(q, locale, versionCode).catch(() => []),
   ]);
 
   return NextResponse.json<SearchResponse>(

@@ -281,6 +281,82 @@ export async function searchPlaces(opts: {
   return results;
 }
 
+// --- Búsqueda de texto libre (Postgres FTS) --------------------------------
+
+export type DbVerseSearchResult = {
+  bookCanonicalId: string;
+  bookUrlSegment: string;
+  bookName: string;
+  chapterNumber: number;
+  verseNumber: number;
+  /** Texto con los términos encontrados entre los marcadores pedidos. */
+  snippet: string;
+};
+
+// Config de FTS por idioma de la interfaz. Debe coincidir LITERALMENTE con
+// la expresión de los índices de 0001_verse_fts_indexes.sql.
+const FTS_CONFIG: Record<string, 'spanish' | 'english'> = {
+  es: 'spanish',
+  en: 'english',
+};
+
+/**
+ * Búsqueda de texto libre sobre los versículos con el FTS nativo de
+ * Postgres. Es el fallback de producción cuando no hay Meilisearch: con
+ * stemming por idioma pero sin tolerancia a erratas. Los marcadores de
+ * resaltado los pone ts_headline directamente.
+ */
+export async function searchVersesFts(opts: {
+  query: string;
+  language?: string; // 'es' | 'en'
+  versionCode: string;
+  highlightPre: string;
+  highlightPost: string;
+  limit?: number;
+}): Promise<DbVerseSearchResult[]> {
+  const q = opts.query.trim();
+  if (q.length < 2) return [];
+  const limit = opts.limit ?? 8;
+  // Literal controlado por el mapa de arriba — nunca entrada del usuario —
+  // porque el planner solo usa el índice si la config va inline.
+  const cfg = sql.raw(`'${FTS_CONFIG[opts.language ?? 'es'] ?? 'spanish'}'`);
+  const headlineOpts = `StartSel="${opts.highlightPre}", StopSel="${opts.highlightPost}", MaxWords=28, MinWords=12`;
+
+  const rows = await db.execute<{
+    canonical_id: string;
+    book_name: string | null;
+    chapter: number;
+    verse: number;
+    snippet: string;
+  }>(sql`
+    SELECT b.canonical_id, bt.name AS book_name, c.number AS chapter,
+      v.number AS verse,
+      ts_headline(${cfg}, vt.text, websearch_to_tsquery(${cfg}, ${q}), ${headlineOpts}) AS snippet
+    FROM ${verseText} vt
+    JOIN ${version} ver ON ver.id = vt.version_id
+    JOIN ${verse} v ON v.id = vt.verse_id
+    JOIN ${chapter} c ON c.id = v.chapter_id
+    JOIN ${book} b ON b.id = c.book_id
+    LEFT JOIN ${bookTranslation} bt
+      ON bt.book_id = b.id AND bt.version_id = vt.version_id
+    WHERE ver.code = ${opts.versionCode}
+      AND to_tsvector(${cfg}, vt.text) @@ websearch_to_tsquery(${cfg}, ${q})
+    ORDER BY
+      ts_rank(to_tsvector(${cfg}, vt.text), websearch_to_tsquery(${cfg}, ${q})) DESC,
+      b.order_index ASC, c.number ASC, v.number ASC
+    LIMIT ${limit}
+  `);
+
+  return rows.map((r) => ({
+    bookCanonicalId: r.canonical_id,
+    bookUrlSegment: r.canonical_id.toLowerCase(),
+    bookName: r.book_name ?? r.canonical_id,
+    chapterNumber: r.chapter,
+    verseNumber: r.verse,
+    snippet: r.snippet,
+  }));
+}
+
 // --- Navegación (índices de libros y capítulos, prev/next) ---------------
 
 export type DbBookSummary = {
