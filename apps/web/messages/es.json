@@ -26,10 +26,11 @@
     "lede": "Lee el texto sagrado mientras un mapa te acompaña, mostrando dónde sucede cada pasaje en su escenario real.",
     "ctaRead": "Comenzar a leer",
     "ctaExplore": "Explorar el mapa",
+    "ctaPlans": "Planes de lectura",
     "soon": "Próximamente",
     "now": {
       "title": "Qué encontrarás hoy",
-      "body": "El texto completo de los 73 libros del canon católico en dos versiones de dominio público (Biblia Platense / Straubinger en español, Catholic Public Domain Version en inglés). Un mapa interactivo con 1.335 lugares bíblicos sincronizado con la lectura, y búsqueda por referencia, lugar o texto libre. Próximamente: marcadores y planes de lectura."
+      "body": "El texto completo de los 73 libros del canon católico en dos versiones de dominio público (Biblia Platense / Straubinger en español, Catholic Public Domain Version en inglés). Un mapa interactivo con 1.335 lugares bíblicos sincronizado con la lectura, búsqueda por referencia, lugar o texto libre, y planes de lectura para leer con constancia. Próximamente: marcadores y notas personales."
     },
     "principles": {
       "title": "Nuestros principios",
@@ -50,6 +51,17 @@
         "body": "WCAG 2.2 AA desde el primer día."
       }
     }
+  },
+  "plans": {
+    "title": "Planes de lectura",
+    "lede": "Itinerarios para leer la Biblia con constancia: unos capítulos cada día, a tu ritmo. El progreso se guarda en este dispositivo.",
+    "breadcrumb": "Volver a planes",
+    "duration": "{count, plural, one {# día} other {# días}}",
+    "progress": "{done} de {total} días",
+    "completed": "Plan completado",
+    "day": "Día {day}",
+    "markDay": "Marcar el día {day} como leído",
+    "unmarkDay": "Desmarcar el día {day}"
   },
   "footer": {
     "copy": "© {year} Proyecto Tabor — código abierto bajo licencia Apache 2.0.",

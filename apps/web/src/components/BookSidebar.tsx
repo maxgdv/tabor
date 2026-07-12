@@ -41,6 +41,7 @@ export function BookSidebar({ books }: Props) {
   const mounted = useMounted();
   const t = useTranslations('books');
   const tHeader = useTranslations('header');
+  const tPlans = useTranslations('plans');
   const pathname = usePathname();
 
   const asideRef = useRef<HTMLElement>(null);
@@ -157,6 +158,13 @@ export function BookSidebar({ books }: Props) {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-4 py-4">
+          <Link
+            href="/planes"
+            onClick={() => setOpen(false)}
+            className="mb-5 flex items-center gap-2 rounded-md border border-sand-200 px-3 py-2 font-serif text-sm text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-700 dark:text-sand-200 dark:hover:border-lapis-500"
+          >
+            {tPlans('title')}
+          </Link>
           {(['OT', 'NT'] as const).map((testament) => (
             <section key={testament} className="mb-6">
               <h3 className="mb-3 font-sans text-xs uppercase tracking-[0.18em] text-stone-500">

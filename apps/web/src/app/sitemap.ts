@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { listBooks } from '@tabor/db';
 import { routing } from '@/i18n/routing';
+import { PLANS } from '@/lib/plans';
 import { SITE_URL } from '@/lib/seo';
 
 // El sitemap consulta Postgres (nº de capítulos por libro): generación en
@@ -32,6 +33,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [
     ...perLocale('', 'monthly', 1),
     ...perLocale('leer', 'monthly', 0.9),
+    ...perLocale('planes', 'monthly', 0.8),
+    ...PLANS.flatMap((plan) => perLocale(`planes/${plan.slug}`, 'monthly', 0.7)),
   ];
 
   for (const book of books) {
