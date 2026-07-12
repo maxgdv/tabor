@@ -55,7 +55,8 @@ contribución debe respetarlos. Ver
 - **Estado UI:** Zustand 5
 - **Backend:** Next.js Route Handlers (REST público) + tRPC (interno) — *en evolución*
 - **BD:** PostgreSQL 16 + PostGIS, Drizzle ORM
-- **Búsqueda:** Meilisearch *(planificada para Fase 1 final)*
+- **Búsqueda:** por referencia («Mt 5»), por lugar (Postgres, ignora
+  acentos) y texto libre sobre los 71.603 versículos (Meilisearch)
 - **Hosting:** Vercel (Hobby) + Supabase (Free) — *coste actual: 0 €/mes*
 
 - [**ROADMAP.md**](./ROADMAP.md) — hacia dónde va el proyecto y qué
@@ -108,14 +109,21 @@ curl -o data/bible-sources/CPDV.json \
 curl -o data/bible-sources/ancient.jsonl \
   https://raw.githubusercontent.com/openbibleinfo/Bible-Geocoding-Data/main/data/ancient.jsonl
 
-# 6. Importar texto bíblico y geografía
+# 6. Importar texto bíblico, geografía y nombres de lugares en español
 npm run --workspace packages/db import:bible
 npm run --workspace packages/db import:geo
+npm run --workspace packages/db import:place-names
 
-# 7. Arrancar la app
+# 7. Indexar los versículos en Meilisearch (búsqueda de texto libre)
+npm run --workspace packages/db import:search
+
+# 8. Arrancar la app
 npm run dev
 # → http://localhost:3000
 ```
+
+Sin el paso 7 la app funciona igual: la búsqueda degrada a
+referencias y lugares (que van contra Postgres).
 
 ### Scripts útiles
 
@@ -125,6 +133,7 @@ npm run dev
 | `npm run build`     | Compila todos los workspaces                          |
 | `npm run lint`      | Lint en todos los workspaces                          |
 | `npm run typecheck` | Comprobación de tipos en todos los workspaces         |
+| `npm run test`      | Tests (Vitest) en todos los workspaces                |
 | `npm run db:up`     | Levanta Postgres + Meilisearch (Docker)               |
 | `npm run db:down`   | Para los contenedores                                 |
 
