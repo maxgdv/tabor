@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
@@ -43,14 +43,56 @@ export function BookSidebar({ books }: Props) {
   const tHeader = useTranslations('header');
   const pathname = usePathname();
 
-  // ESC cierra el drawer.
+  const asideRef = useRef<HTMLElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  // Distingue "cerrado tras estar abierto" del primer render, para no robar
+  // el foco al montar la página.
+  const wasOpenRef = useRef(false);
+
+  // ESC cierra; Tab queda atrapado dentro del diálogo (aria-modal exige que
+  // el foco no escape a la página de fondo — WCAG 2.4.3).
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') {
+        setOpen(false);
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const aside = asideRef.current;
+      if (!aside) return;
+      const focusables = aside.querySelectorAll<HTMLElement>('a[href], button:not([disabled])');
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (!first || !last) return;
+      const active = document.activeElement;
+      if (!aside.contains(active)) {
+        // El foco se quedó fuera (p. ej. el usuario clicó el backdrop):
+        // el siguiente Tab lo trae dentro en vez de recorrer la página.
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  // Al abrir, foco al primer control del drawer (el botón de cerrar);
+  // al cerrar, de vuelta al botón hamburguesa que lo abrió.
+  useEffect(() => {
+    if (open) {
+      wasOpenRef.current = true;
+      asideRef.current?.querySelector<HTMLElement>('button, a[href]')?.focus();
+    } else if (wasOpenRef.current) {
+      wasOpenRef.current = false;
+      triggerRef.current?.focus();
+    }
   }, [open]);
 
   // Mientras el drawer está abierto, bloquea el scroll del body para
@@ -88,6 +130,7 @@ export function BookSidebar({ books }: Props) {
         }`}
       />
       <aside
+        ref={asideRef}
         id="book-sidebar"
         role="dialog"
         aria-modal="true"
@@ -161,6 +204,7 @@ export function BookSidebar({ books }: Props) {
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
         aria-label={tHeader('openSidebar')}
