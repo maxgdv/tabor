@@ -18,7 +18,8 @@
     "groupReference": "Ir a",
     "groupPlaces": "Lugares",
     "groupVerses": "Versículos",
-    "noResults": "Sin resultados para «{query}»"
+    "noResults": "Sin resultados para «{query}»",
+    "resultsAnnouncement": "{count, plural, =0 {Sin resultados} one {# resultado} other {# resultados}}"
   },
   "home": {
     "tagline": "La Biblia, lugar a lugar",

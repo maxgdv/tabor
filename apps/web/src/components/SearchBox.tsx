@@ -126,6 +126,13 @@ export function SearchBox() {
 
   return (
     <div ref={rootRef} className="relative min-w-0 flex-1 max-w-xs sm:max-w-sm">
+      {/* Anuncio para lectores de pantalla: el dropdown visual no basta,
+          hay que verbalizar cuántos resultados aparecieron. */}
+      <div aria-live="polite" className="sr-only">
+        {open && data !== null && query.trim().length >= 2
+          ? t('resultsAnnouncement', { count: items.length })
+          : ''}
+      </div>
       <div className="relative">
         <svg
           className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
