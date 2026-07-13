@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { getAdjacentChapter } from '@tabor/db';
+import { getAdjacentChapter, getBookmarkedVerseNumbers } from '@tabor/db';
+import { auth } from '@/lib/auth';
 import { Link } from '@/i18n/routing';
 import { getChapter, getPlacesForChapter } from '@/lib/bible';
 import { SITE_URL, localeAlternates, openGraphFor, verseSnippet } from '@/lib/seo';
@@ -56,8 +58,8 @@ export default async function ReaderPage({ params }: { params: Params }) {
   const versionCode = VERSION_BY_LOCALE[locale] ?? 'STRA';
   const upperBook = book.toUpperCase();
 
-  // Capítulo, vecinos y traducciones — todo en paralelo.
-  const [chapterData, prev, next, tBooks, tReader] = await Promise.all([
+  // Capítulo, vecinos, sesión y traducciones — todo en paralelo.
+  const [chapterData, prev, next, session, tBooks, tReader] = await Promise.all([
     getChapter(book, chapterNumber, locale),
     getAdjacentChapter({
       bookCanonicalId: upperBook,
@@ -71,10 +73,20 @@ export default async function ReaderPage({ params }: { params: Params }) {
       direction: 'next',
       versionCode,
     }),
+    auth.api.getSession({ headers: await headers() }),
     getTranslations('books'),
     getTranslations('reader'),
   ]);
   if (!chapterData) notFound();
+
+  // `null` = invitado (el lector no muestra ninguna UI de marcadores).
+  const initialBookmarks = session
+    ? await getBookmarkedVerseNumbers({
+        userId: session.user.id,
+        bookCanonicalId: upperBook,
+        chapterNumber,
+      })
+    : null;
 
   const places = getPlacesForChapter(chapterData);
 
@@ -191,7 +203,13 @@ export default async function ReaderPage({ params }: { params: Params }) {
           aria-label="Texto del capítulo"
           className="min-h-0 overflow-hidden border-b border-sand-200 lg:border-b-0 lg:border-r dark:border-stone-700"
         >
-          <ChapterReader chapter={chapterData} />
+          {/* key: al navegar entre capítulos el componente se remonta y el
+              estado local de marcadores arranca limpio desde el server. */}
+          <ChapterReader
+            key={`${chapterData.bookCanonicalId}-${chapterData.number}`}
+            chapter={chapterData}
+            initialBookmarks={initialBookmarks}
+          />
           <ActiveVerseMarker />
         </section>
         <section aria-label="Mapa del capítulo" className="relative min-h-0">

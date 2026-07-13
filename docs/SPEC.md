@@ -518,6 +518,22 @@ Permissions-Policy. (M) • RNF-SEG-03: Almacenamiento de contraseñas con Argon
 revocables. (M) • RNF-SEG-05: Pruebas de seguridad automatizadas en CI (npm audit, Snyk, OWASP ZAP). (M)
 
 • RNF-SEG-06: Auditoría externa antes del lanzamiento público. (S) • RNF-SEG-07: Cumplimiento del Top 10 de OWASP. (M)
+
+> **Nota de implementación (2026-07, auth v1 con Better-Auth).** Desviaciones
+> conscientes respecto a esta sección, documentadas para revisión futura:
+> (1) RNF-SEG-03: las contraseñas se almacenan con **scrypt** (default de
+> Better-Auth, criptografía nativa de Node) en lugar de Argon2id/bcrypt —
+> alineado con las recomendaciones OWASP y sin módulos nativos frágiles en
+> serverless; migrable vía `emailAndPassword.password.{hash,verify}`.
+> (2) Sin verificación de email ni recuperación de contraseña hasta que haya
+> proveedor de email transaccional (ganchos preparados en la config).
+> (3) RF-CUE-04: el borrado de cuenta es **inmediato** (hard delete con
+> cascada) en lugar de la retención de 30 días de §16.2 — más garantista.
+> (4) §16.6 se cumple: solo cookies de sesión de Better-Auth (httpOnly,
+> secure), sin banner. (5) Rate limiting: el integrado de Better-Auth
+> (3 req/10 s en sign-in, solo producción), con almacenamiento en memoria
+> por-lambda en Vercel — best-effort, mejorable con storage en BD.
+
 8.5 Accesibilidad
 • RNF-ACC-01: Cumplimiento de WCAG 2.2 nivel AA. (M) • RNF-ACC-02: Contraste ≥ 4,5:1 para texto normal y ≥ 3:1 para texto grande. (M) • RNF-ACC-03: Toda funcionalidad debe ser accesible mediante teclado. (M) • RNF-ACC-04: El mapa debe ofrecer un fallback textual con la lista de lugares para lectores de
 pantalla. (M) • RNF-ACC-05: Se respetará la preferencia de reducción de movimiento (prefers-reduced-motion).

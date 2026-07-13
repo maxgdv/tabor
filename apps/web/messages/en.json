@@ -10,7 +10,9 @@
     "switchLanguage": "Change language",
     "openSidebar": "Open book index",
     "closeSidebar": "Close",
-    "sidebarTitle": "Books of the Bible"
+    "sidebarTitle": "Books of the Bible",
+    "signIn": "Sign in",
+    "accountMenu": "Account menu"
   },
   "search": {
     "label": "Search the Bible",
@@ -52,6 +54,40 @@
       }
     }
   },
+  "auth": {
+    "title": "Your Tabor account",
+    "lede": "With an account, your bookmarks follow you on any device. Reading doesn't require one: it's optional.",
+    "signInTab": "Sign in",
+    "signUpTab": "Create account",
+    "nameLabel": "Name (optional)",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "passwordHint": "At least 8 characters",
+    "submitSignIn": "Sign in",
+    "submitSignUp": "Create account",
+    "submitting": "One moment…",
+    "errors": {
+      "userExists": "An account with that email already exists.",
+      "invalidCredentials": "Incorrect email or password.",
+      "passwordTooShort": "The password must be at least 8 characters long.",
+      "invalidEmail": "That email doesn't look valid.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "accountTitle": "My account",
+    "memberSince": "On Tabor since {date}",
+    "signOut": "Sign out",
+    "dangerTitle": "Danger zone",
+    "deleteButton": "Delete my account",
+    "deleteWarning": "Your account and all your bookmarks will be deleted immediately and permanently. This cannot be undone.",
+    "deletePasswordLabel": "Confirm with your password",
+    "deleteCancel": "Cancel",
+    "deleteConfirm": "Delete permanently",
+    "bookmarksTitle": "My bookmarks",
+    "bookmarksLede": "Your bookmarked verses, in reading order.",
+    "bookmarksEmpty": "You haven't bookmarked any verses yet. In the reader, tap a verse number to bookmark it.",
+    "bookmarksCta": "Open the reader",
+    "bookmarksRemove": "Remove bookmark"
+  },
   "plans": {
     "title": "Reading plans",
     "lede": "Guided journeys through the Bible: a few chapters each day, at your own pace. Progress is saved on this device.",
@@ -78,7 +114,9 @@
     "overviewBadge": "Overview map — this chapter doesn't reference specific places",
     "mapStyleVector": "Map",
     "mapStyleSatellite": "Satellite",
-    "mapStyleAria": "Change map style"
+    "mapStyleAria": "Change map style",
+    "bookmarkAdd": "Bookmark verse {n}",
+    "bookmarkRemove": "Remove bookmark from verse {n}"
   },
   "books": {
     "title": "Bible",

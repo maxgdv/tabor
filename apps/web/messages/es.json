@@ -10,7 +10,9 @@
     "switchLanguage": "Cambiar idioma",
     "openSidebar": "Abrir índice de libros",
     "closeSidebar": "Cerrar",
-    "sidebarTitle": "Libros de la Biblia"
+    "sidebarTitle": "Libros de la Biblia",
+    "signIn": "Entrar",
+    "accountMenu": "Menú de cuenta"
   },
   "search": {
     "label": "Buscar en la Biblia",
@@ -52,6 +54,40 @@
       }
     }
   },
+  "auth": {
+    "title": "Tu cuenta en Tabor",
+    "lede": "Con cuenta, tus marcadores te acompañan en cualquier dispositivo. Leer no la necesita: es opcional.",
+    "signInTab": "Entrar",
+    "signUpTab": "Crear cuenta",
+    "nameLabel": "Nombre (opcional)",
+    "emailLabel": "Email",
+    "passwordLabel": "Contraseña",
+    "passwordHint": "Mínimo 8 caracteres",
+    "submitSignIn": "Entrar",
+    "submitSignUp": "Crear cuenta",
+    "submitting": "Un momento…",
+    "errors": {
+      "userExists": "Ya existe una cuenta con ese email.",
+      "invalidCredentials": "Email o contraseña incorrectos.",
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
+      "invalidEmail": "Ese email no parece válido.",
+      "generic": "No se pudo completar. Inténtalo de nuevo."
+    },
+    "accountTitle": "Mi cuenta",
+    "memberSince": "En Tabor desde {date}",
+    "signOut": "Cerrar sesión",
+    "dangerTitle": "Zona de peligro",
+    "deleteButton": "Borrar mi cuenta",
+    "deleteWarning": "Se eliminarán tu cuenta y todos tus marcadores de forma inmediata y definitiva. Esta acción no se puede deshacer.",
+    "deletePasswordLabel": "Confirma con tu contraseña",
+    "deleteCancel": "Cancelar",
+    "deleteConfirm": "Borrar definitivamente",
+    "bookmarksTitle": "Mis marcadores",
+    "bookmarksLede": "Tus versículos marcados, en orden de lectura.",
+    "bookmarksEmpty": "Todavía no has marcado ningún versículo. En el lector, pulsa el número de un versículo para marcarlo.",
+    "bookmarksCta": "Abrir el lector",
+    "bookmarksRemove": "Quitar marcador"
+  },
   "plans": {
     "title": "Planes de lectura",
     "lede": "Itinerarios para leer la Biblia con constancia: unos capítulos cada día, a tu ritmo. El progreso se guarda en este dispositivo.",
@@ -78,7 +114,9 @@
     "overviewBadge": "Mapa general — este capítulo no menciona lugares específicos",
     "mapStyleVector": "Mapa",
     "mapStyleSatellite": "Satélite",
-    "mapStyleAria": "Cambiar estilo de mapa"
+    "mapStyleAria": "Cambiar estilo de mapa",
+    "bookmarkAdd": "Marcar el versículo {n}",
+    "bookmarkRemove": "Quitar el marcador del versículo {n}"
   },
   "books": {
     "title": "Biblia",

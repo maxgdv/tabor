@@ -6,6 +6,7 @@ import { and, asc, desc, eq, sql } from 'drizzle-orm';
 import { db } from './index';
 import { book, bookTranslation, chapter, verse, verseText, version } from './schema/bible';
 import { place, placeAlternateName, verseLocation } from './schema/geo';
+import { bookmark } from './schema/user';
 import { escapeLike, foldJs, foldSql } from './text';
 
 export type DbVerse = {
@@ -515,4 +516,133 @@ export async function getAdjacentChapter(opts: {
     chapterNumber: row.chapterNumber,
     bookName: row.bookName ?? row.bookCanonicalId,
   };
+}
+
+// --- Marcadores del usuario -------------------------------------------------
+
+export type DbBookmarkListItem = {
+  bookCanonicalId: string;
+  bookUrlSegment: string;
+  bookName: string;
+  chapterNumber: number;
+  verseNumber: number;
+  text: string;
+  createdAt: Date;
+};
+
+/** Resuelve el id interno de un versículo por libro/capítulo/número. */
+async function resolveVerseId(opts: {
+  bookCanonicalId: string;
+  chapterNumber: number;
+  verseNumber: number;
+}): Promise<number | null> {
+  const [row] = await db
+    .select({ id: verse.id })
+    .from(verse)
+    .innerJoin(chapter, eq(chapter.id, verse.chapterId))
+    .innerJoin(book, eq(book.id, chapter.bookId))
+    .where(
+      and(
+        eq(book.canonicalId, opts.bookCanonicalId),
+        eq(chapter.number, opts.chapterNumber),
+        eq(verse.number, opts.verseNumber),
+      ),
+    );
+  return row?.id ?? null;
+}
+
+/** Números de versículo marcados por el usuario en un capítulo. */
+export async function getBookmarkedVerseNumbers(opts: {
+  userId: string;
+  bookCanonicalId: string;
+  chapterNumber: number;
+}): Promise<number[]> {
+  const rows = await db
+    .select({ number: verse.number })
+    .from(bookmark)
+    .innerJoin(verse, eq(verse.id, bookmark.verseId))
+    .innerJoin(chapter, eq(chapter.id, verse.chapterId))
+    .innerJoin(book, eq(book.id, chapter.bookId))
+    .where(
+      and(
+        eq(bookmark.userId, opts.userId),
+        eq(book.canonicalId, opts.bookCanonicalId),
+        eq(chapter.number, opts.chapterNumber),
+      ),
+    )
+    .orderBy(asc(verse.number));
+  return rows.map((r) => r.number);
+}
+
+/**
+ * Marca o desmarca un versículo. Devuelve el estado resultante, o `null` si
+ * el versículo no existe. El índice único (user_id, verse_id) absorbe los
+ * dobles clicks concurrentes: el peor caso es un INSERT que no hace nada.
+ */
+export async function toggleBookmark(opts: {
+  userId: string;
+  bookCanonicalId: string;
+  chapterNumber: number;
+  verseNumber: number;
+}): Promise<{ bookmarked: boolean } | null> {
+  const verseId = await resolveVerseId(opts);
+  if (verseId == null) return null;
+
+  const deleted = await db
+    .delete(bookmark)
+    .where(and(eq(bookmark.userId, opts.userId), eq(bookmark.verseId, verseId)))
+    .returning({ id: bookmark.id });
+  if (deleted.length > 0) return { bookmarked: false };
+
+  await db
+    .insert(bookmark)
+    .values({ userId: opts.userId, verseId })
+    .onConflictDoNothing();
+  return { bookmarked: true };
+}
+
+/**
+ * Todos los marcadores del usuario, con el nombre del libro y el texto del
+ * versículo en la versión pedida, en orden canónico de lectura.
+ */
+export async function listBookmarks(opts: {
+  userId: string;
+  versionCode: string;
+}): Promise<DbBookmarkListItem[]> {
+  const [ver] = await db.select().from(version).where(eq(version.code, opts.versionCode));
+  if (!ver) return [];
+
+  const rows = await db
+    .select({
+      canonicalId: book.canonicalId,
+      bookName: bookTranslation.name,
+      chapterNumber: chapter.number,
+      verseNumber: verse.number,
+      text: verseText.text,
+      createdAt: bookmark.createdAt,
+    })
+    .from(bookmark)
+    .innerJoin(verse, eq(verse.id, bookmark.verseId))
+    .innerJoin(chapter, eq(chapter.id, verse.chapterId))
+    .innerJoin(book, eq(book.id, chapter.bookId))
+    .innerJoin(
+      verseText,
+      and(eq(verseText.verseId, verse.id), eq(verseText.versionId, ver.id)),
+    )
+    .leftJoin(
+      bookTranslation,
+      and(eq(bookTranslation.bookId, book.id), eq(bookTranslation.versionId, ver.id)),
+    )
+    .where(eq(bookmark.userId, opts.userId))
+    .orderBy(asc(book.orderIndex), asc(chapter.number), asc(verse.number));
+
+  return rows.map((r) => ({
+    bookCanonicalId: r.canonicalId,
+    bookUrlSegment: r.canonicalId.toLowerCase(),
+    bookName: r.bookName ?? r.canonicalId,
+    chapterNumber: r.chapterNumber,
+    verseNumber: r.verseNumber,
+    text: r.text,
+    createdAt: r.createdAt,
+  }));
 }

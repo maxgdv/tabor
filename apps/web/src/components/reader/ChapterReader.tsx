@@ -1,15 +1,17 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useReaderStore } from '@/lib/reader-store';
 import type { Chapter } from '@/lib/bible';
 
 type Props = {
   chapter: Chapter;
+  /** Versículos marcados por el usuario; `null` = invitado (sin UI de marcadores). */
+  initialBookmarks: number[] | null;
 };
 
-export function ChapterReader({ chapter }: Props) {
+export function ChapterReader({ chapter, initialBookmarks }: Props) {
   const t = useTranslations('reader');
   const setActiveVerse = useReaderStore((s) => s.setActiveVerse);
   const scrollTarget = useReaderStore((s) => s.scrollTarget);
@@ -17,6 +19,40 @@ export function ChapterReader({ chapter }: Props) {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const verseRefs = useRef<Map<number, HTMLElement>>(new Map());
+
+  // Marcadores con actualización optimista. El componente se remonta al
+  // cambiar de capítulo (key en la página), así que el estado nace del server.
+  const isAuthed = initialBookmarks !== null;
+  const [bookmarks, setBookmarks] = useState<ReadonlySet<number>>(
+    () => new Set(initialBookmarks ?? []),
+  );
+
+  const toggleBookmark = async (verseNumber: number) => {
+    const wasBookmarked = bookmarks.has(verseNumber);
+    const apply = (add: boolean) =>
+      setBookmarks((prev) => {
+        const next = new Set(prev);
+        if (add) next.add(verseNumber);
+        else next.delete(verseNumber);
+        return next;
+      });
+    apply(!wasBookmarked);
+    try {
+      const res = await fetch('/api/bookmarks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          book: chapter.bookCanonicalId.toLowerCase(),
+          chapter: chapter.number,
+          verse: verseNumber,
+        }),
+      });
+      if (!res.ok) throw new Error(`bookmarks → ${res.status}`);
+    } catch {
+      // Revertir: la red o la sesión fallaron y el estado visual mentiría.
+      apply(wasBookmarked);
+    }
+  };
 
   // Observa qué versículo está más cerca de la línea de lectura y lo marca activo.
   useEffect(() => {
@@ -97,11 +133,28 @@ export function ChapterReader({ chapter }: Props) {
               }}
               id={`v${verse.number}`}
               data-verse={verse.number}
+              data-bookmarked={isAuthed && bookmarks.has(verse.number) ? 'true' : undefined}
               className="group inline transition-colors"
             >
-              <sup className="mr-1 select-none font-sans text-xs text-stone-400 group-data-[active=true]:text-lapis-500">
-                {verse.number}
-              </sup>
+              {isAuthed ? (
+                // Con sesión, el número del versículo es el botón de marcador:
+                // misma tipografía que el <sup> de invitado, alineado arriba.
+                <button
+                  type="button"
+                  onClick={() => toggleBookmark(verse.number)}
+                  aria-pressed={bookmarks.has(verse.number)}
+                  aria-label={t(bookmarks.has(verse.number) ? 'bookmarkRemove' : 'bookmarkAdd', {
+                    n: verse.number,
+                  })}
+                  className="mr-1 inline-block select-none align-super font-sans text-xs leading-none text-stone-400 transition-colors hover:text-lapis-500 group-data-[active=true]:text-lapis-500 group-data-[bookmarked=true]:font-semibold group-data-[bookmarked=true]:text-sand-500"
+                >
+                  {verse.number}
+                </button>
+              ) : (
+                <sup className="mr-1 select-none font-sans text-xs text-stone-400 group-data-[active=true]:text-lapis-500">
+                  {verse.number}
+                </sup>
+              )}
               {verse.text}{' '}
             </span>
           ))}
