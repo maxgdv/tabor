@@ -49,4 +49,7 @@ data/bible-sources/
 # Claude Code: permisos locales por usuario (no compartido)
 .claude/settings.local.json
 
+# Archivos personales sueltos en la raíz (capturas, notas de trabajo)
+Lucas_24.png
+
 # Drizzle generated SQL kept in repo; nothing to ignore here
