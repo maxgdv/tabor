@@ -113,6 +113,24 @@ export const bookmark = pgTable(
   (t) => [uniqueIndex('bookmark_user_verse_idx').on(t.userId, t.verseId)],
 );
 
+export const planProgress = pgTable(
+  'plan_progress',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => appUser.id, { onDelete: 'cascade' }),
+    // Los planes viven en código (apps/web/src/lib/plans.ts), sin tabla
+    // propia: la API valida el slug contra PLANS antes de escribir.
+    planSlug: text('plan_slug').notNull(),
+    dayIndex: integer('day_index').notNull(), // 0-based
+    completedAt: timestamp('completed_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  // Un día solo se marca una vez; el merge (ON CONFLICT DO NOTHING) y el
+  // setPlanDay idempotente se apoyan aquí. También cubre las lecturas.
+  (t) => [uniqueIndex('plan_progress_user_plan_day_idx').on(t.userId, t.planSlug, t.dayIndex)],
+);
+
 export const highlight = pgTable('highlight', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid('user_id')

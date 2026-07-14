@@ -1,8 +1,10 @@
 'use client';
 
-// Progreso de los planes de lectura, por dispositivo (localStorage).
-// Cuando exista autenticación, este módulo será la capa de migración:
-// el formato { slug: [díasCompletados] } se sube tal cual a la cuenta.
+// Progreso de los planes de lectura del INVITADO, por dispositivo
+// (localStorage). Con sesión iniciada el servidor es la verdad
+// (plan_progress en BD): PlanProgressSync sube este contenido una única vez
+// (unión) y lo limpia. Al cerrar sesión, el usuario vuelve a ser invitado
+// con progreso local vacío — su progreso vive en la cuenta.
 
 import { useMemo, useSyncExternalStore } from 'react';
 
@@ -39,6 +41,17 @@ function parse(raw: string): ProgressMap {
 export function useCompletedDays(slug: string): Set<number> {
   const raw = useSyncExternalStore(subscribe, getSnapshot, () => '{}');
   return useMemo(() => new Set(parse(raw)[slug] ?? []), [raw, slug]);
+}
+
+/** Todo el progreso local, para la migración única a la cuenta. */
+export function readLocalProgress(): ProgressMap {
+  return parse(getSnapshot());
+}
+
+/** Vacía el progreso local tras subirlo a la cuenta. */
+export function clearLocalProgress(): void {
+  localStorage.removeItem(KEY);
+  window.dispatchEvent(new Event(EVENT));
 }
 
 /** Marca o desmarca un día (índice 0-based) como leído. */

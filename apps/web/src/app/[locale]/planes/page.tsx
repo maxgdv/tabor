@@ -1,9 +1,13 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getPlanProgress } from '@tabor/db';
 import { Link } from '@/i18n/routing';
+import { auth } from '@/lib/auth';
 import { PLANS } from '@/lib/plans';
 import { localeAlternates, openGraphFor } from '@/lib/seo';
 import { PlanProgress } from '@/components/plans/PlanProgress';
+import { PlanProgressSync } from '@/components/plans/PlanProgressSync';
 
 export async function generateMetadata({
   params,
@@ -32,6 +36,10 @@ export default async function PlansIndexPage({
   const t = await getTranslations('plans');
   const lang = locale === 'en' ? 'en' : 'es';
 
+  // Con sesión, el progreso viene de la cuenta; invitado → localStorage.
+  const session = await auth.api.getSession({ headers: await headers() });
+  const progress = session ? await getPlanProgress({ userId: session.user.id }) : null;
+
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">
       <header className="mb-12 max-w-2xl">
@@ -56,12 +64,17 @@ export default async function PlansIndexPage({
                 {plan.description[lang]}
               </p>
               <div className="mt-3">
-                <PlanProgress slug={plan.slug} totalDays={plan.days.length} />
+                <PlanProgress
+                  slug={plan.slug}
+                  totalDays={plan.days.length}
+                  serverDays={progress ? (progress[plan.slug] ?? []) : null}
+                />
               </div>
             </Link>
           </li>
         ))}
       </ul>
+      {session && <PlanProgressSync />}
     </div>
   );
 }

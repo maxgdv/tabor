@@ -6,7 +6,7 @@ import { and, asc, desc, eq, sql } from 'drizzle-orm';
 import { db } from './index';
 import { book, bookTranslation, chapter, verse, verseText, version } from './schema/bible';
 import { place, placeAlternateName, verseLocation } from './schema/geo';
-import { bookmark } from './schema/user';
+import { bookmark, planProgress } from './schema/user';
 import { escapeLike, foldJs, foldSql } from './text';
 
 export type DbVerse = {
@@ -645,4 +645,68 @@ export async function listBookmarks(opts: {
     text: r.text,
     createdAt: r.createdAt,
   }));
+}
+
+// --- Progreso de planes de lectura ------------------------------------------
+
+/** Todo el progreso del usuario: { slug: [índices de día 0-based ordenados] }. */
+export async function getPlanProgress(opts: {
+  userId: string;
+}): Promise<Record<string, number[]>> {
+  const rows = await db
+    .select({ planSlug: planProgress.planSlug, dayIndex: planProgress.dayIndex })
+    .from(planProgress)
+    .where(eq(planProgress.userId, opts.userId))
+    .orderBy(asc(planProgress.planSlug), asc(planProgress.dayIndex));
+
+  const result: Record<string, number[]> = {};
+  for (const row of rows) {
+    (result[row.planSlug] ??= []).push(row.dayIndex);
+  }
+  return result;
+}
+
+/**
+ * Marca o desmarca un día de un plan. Idempotente (estado explícito, no
+ * toggle): reenviar la misma petición no cambia nada — seguro ante dobles
+ * clicks, reintentos y StrictMode.
+ */
+export async function setPlanDay(opts: {
+  userId: string;
+  planSlug: string;
+  dayIndex: number;
+  done: boolean;
+}): Promise<void> {
+  if (opts.done) {
+    await db
+      .insert(planProgress)
+      .values({ userId: opts.userId, planSlug: opts.planSlug, dayIndex: opts.dayIndex })
+      .onConflictDoNothing();
+  } else {
+    await db
+      .delete(planProgress)
+      .where(
+        and(
+          eq(planProgress.userId, opts.userId),
+          eq(planProgress.planSlug, opts.planSlug),
+          eq(planProgress.dayIndex, opts.dayIndex),
+        ),
+      );
+  }
+}
+
+/**
+ * Sube en bloque el progreso local del dispositivo (migración única al
+ * iniciar sesión). Unión: nunca borra días ya marcados en la cuenta.
+ * La entrada llega YA saneada por la API. No-op con progreso vacío.
+ */
+export async function mergePlanProgress(opts: {
+  userId: string;
+  progress: Record<string, number[]>;
+}): Promise<void> {
+  const rows = Object.entries(opts.progress).flatMap(([planSlug, days]) =>
+    days.map((dayIndex) => ({ userId: opts.userId, planSlug, dayIndex })),
+  );
+  if (rows.length === 0) return;
+  await db.insert(planProgress).values(rows).onConflictDoNothing();
 }

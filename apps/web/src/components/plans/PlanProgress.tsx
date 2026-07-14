@@ -2,20 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 import { useCompletedDays } from '@/lib/plan-progress';
+import { countCompleted } from '@/lib/plan-progress-sync';
 
-type Props = {
-  slug: string;
-  totalDays: number;
-};
-
-/**
- * Barra de progreso de un plan (leída de localStorage). En SSR renderiza
- * 0/N y se actualiza al hidratar — sin mismatch gracias al server snapshot
- * de useCompletedDays.
- */
-export function PlanProgress({ slug, totalDays }: Props) {
+/** Barra de progreso presentacional: quien la monta decide de dónde sale `done`. */
+export function PlanProgressBar({ done, totalDays }: { done: number; totalDays: number }) {
   const t = useTranslations('plans');
-  const done = useCompletedDays(slug).size;
   const pct = totalDays > 0 ? Math.round((done / totalDays) * 100) : 0;
 
   if (done === 0) {
@@ -30,9 +21,7 @@ export function PlanProgress({ slug, totalDays }: Props) {
     <div className="w-full">
       <div className="flex items-baseline justify-between gap-2">
         <span className="font-sans text-xs text-stone-500">
-          {done === totalDays
-            ? t('completed')
-            : t('progress', { done, total: totalDays })}
+          {done === totalDays ? t('completed') : t('progress', { done, total: totalDays })}
         </span>
         <span className="font-sans text-xs tabular-nums text-stone-400">{pct}%</span>
       </div>
@@ -53,4 +42,22 @@ export function PlanProgress({ slug, totalDays }: Props) {
       </div>
     </div>
   );
+}
+
+type Props = {
+  slug: string;
+  totalDays: number;
+  /** Progreso de la cuenta; `null` = invitado (localStorage reactivo). */
+  serverDays: number[] | null;
+};
+
+/**
+ * Progreso de un plan en el índice /planes (sin toggles): con sesión muestra
+ * los datos del servidor; como invitado, el localStorage del dispositivo.
+ * El hook se llama siempre (rules of hooks) aunque en modo cuenta se ignore.
+ */
+export function PlanProgress({ slug, totalDays, serverDays }: Props) {
+  const local = useCompletedDays(slug);
+  const done = serverDays !== null ? countCompleted(serverDays, totalDays) : local.size;
+  return <PlanProgressBar done={done} totalDays={totalDays} />;
 }

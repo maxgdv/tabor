@@ -2,22 +2,21 @@
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
-import { toggleDay, useCompletedDays } from '@/lib/plan-progress';
 
-// El servidor precalcula etiquetas y hrefs (dependen del locale); este
-// componente solo aporta el estado por-dispositivo de localStorage.
+// Presentacional: el estado (localStorage o servidor) lo posee PlanDetail.
+// El servidor precalcula etiquetas y hrefs (dependen del locale).
 export type DayItem = {
   readings: Array<{ label: string; href: string }>;
 };
 
 type Props = {
-  slug: string;
   days: DayItem[];
+  completed: ReadonlySet<number>;
+  onToggle: (dayIndex: number) => void;
 };
 
-export function PlanDayList({ slug, days }: Props) {
+export function PlanDayList({ days, completed, onToggle }: Props) {
   const t = useTranslations('plans');
-  const completed = useCompletedDays(slug);
   // El primer día pendiente lleva un realce sutil: es "por dónde voy".
   const nextIndex = days.findIndex((_, i) => !completed.has(i));
 
@@ -40,7 +39,7 @@ export function PlanDayList({ slug, days }: Props) {
               role="checkbox"
               aria-checked={isDone}
               aria-label={t(isDone ? 'unmarkDay' : 'markDay', { day: index + 1 })}
-              onClick={() => toggleDay(slug, index)}
+              onClick={() => onToggle(index)}
               className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
                 isDone
                   ? 'border-olive-500 bg-olive-500 text-white'
