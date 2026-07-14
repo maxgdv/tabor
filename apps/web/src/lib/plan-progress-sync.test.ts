@@ -32,7 +32,7 @@ describe('parseSetDayBody', () => {
     });
   });
 
-  it.each([
+  it.each<[unknown, string]>([
     [{ plan: 'hechos-14', day: 14, done: true }, 'day == días del plan'],
     [{ plan: 'hechos-14', day: -1, done: true }, 'day negativo'],
     [{ plan: 'hechos-14', day: 1.5, done: true }, 'day no entero'],
