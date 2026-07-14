@@ -15,11 +15,18 @@ import { db, schema } from '@tabor/db';
 // En producción BETTER_AUTH_SECRET es obligatorio (dashboard de Vercel).
 const secret = process.env.BETTER_AUTH_SECRET ?? 'tabor-dev-secret-solo-local-y-ci';
 
+// El check CSRF de Better-Auth compara el Origin contra esta URL: debe ser
+// el dominio público real. Mismo criterio de fallback que SITE_URL en
+// lib/seo.ts (Vercel no define NEXT_PUBLIC_SITE_URL hoy).
+const baseURL =
+  process.env.BETTER_AUTH_URL ??
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.NODE_ENV === 'production' ? 'https://proyectotabor.org' : 'http://localhost:3000');
+
 export const auth = betterAuth({
   appName: 'Tabor',
   secret,
-  baseURL:
-    process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
+  baseURL,
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: {
