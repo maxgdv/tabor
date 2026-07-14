@@ -86,7 +86,14 @@
     "bookmarksLede": "Tus versículos marcados, en orden de lectura.",
     "bookmarksEmpty": "Todavía no has marcado ningún versículo. En el lector, pulsa el número de un versículo para marcarlo.",
     "bookmarksCta": "Abrir el lector",
-    "bookmarksRemove": "Quitar marcador"
+    "bookmarksRemove": "Quitar marcador",
+    "notesTitle": "Mis notas",
+    "notesLede": "Tus notas personales, en orden de lectura. Son privadas: solo tú puedes verlas.",
+    "notesEmpty": "Todavía no has escrito ninguna nota. En el lector, toca el texto de un versículo y elige «Añadir nota».",
+    "exportTitle": "Tus datos",
+    "exportLede": "Descarga todos tus datos personales (marcadores, resaltados, notas y progreso de planes) cuando quieras. Son tuyos.",
+    "exportJson": "Exportar JSON",
+    "exportMarkdown": "Exportar Markdown"
   },
   "plans": {
     "title": "Planes de lectura",
@@ -116,7 +123,26 @@
     "mapStyleSatellite": "Satélite",
     "mapStyleAria": "Cambiar estilo de mapa",
     "bookmarkAdd": "Marcar el versículo {n}",
-    "bookmarkRemove": "Quitar el marcador del versículo {n}"
+    "bookmarkRemove": "Quitar el marcador del versículo {n}",
+    "verseActions": "Versículo {n}",
+    "highlightGroup": "Resaltar con color",
+    "highlightRemove": "Quitar el resaltado",
+    "color": {
+      "sand": "Resaltar en arena",
+      "olive": "Resaltar en oliva",
+      "lapis": "Resaltar en lapislázuli",
+      "rose": "Resaltar en arcilla",
+      "sky": "Resaltar en cielo"
+    },
+    "noteAdd": "Añadir nota",
+    "noteEdit": "Editar nota",
+    "noteOpen": "Ver la nota del versículo {n}",
+    "noteDialog": "Nota",
+    "notePlaceholder": "Escribe tu nota…",
+    "noteSave": "Guardar",
+    "noteDelete": "Borrar nota",
+    "noteCancel": "Cancelar",
+    "close": "Cerrar"
   },
   "books": {
     "title": "Biblia",

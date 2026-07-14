@@ -131,35 +131,46 @@ export const planProgress = pgTable(
   (t) => [uniqueIndex('plan_progress_user_plan_day_idx').on(t.userId, t.planSlug, t.dayIndex)],
 );
 
-export const highlight = pgTable('highlight', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => appUser.id, { onDelete: 'cascade' }),
-  startVerseId: integer('start_verse_id')
-    .notNull()
-    .references(() => verse.id),
-  endVerseId: integer('end_verse_id')
-    .notNull()
-    .references(() => verse.id),
-  color: text('color').notNull(),
-  label: text('label'),
-});
+// v1 de resaltados y notas: un solo versículo (start = end) y uno por
+// (usuario, versículo) — el unique sostiene el upsert. Al introducir rangos
+// habrá que revisar el modelo (el solape no se resuelve con un unique).
+export const highlight = pgTable(
+  'highlight',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => appUser.id, { onDelete: 'cascade' }),
+    startVerseId: integer('start_verse_id')
+      .notNull()
+      .references(() => verse.id),
+    endVerseId: integer('end_verse_id')
+      .notNull()
+      .references(() => verse.id),
+    color: text('color').notNull(),
+    label: text('label'),
+  },
+  (t) => [uniqueIndex('highlight_user_start_verse_idx').on(t.userId, t.startVerseId)],
+);
 
-export const note = pgTable('note', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => appUser.id, { onDelete: 'cascade' }),
-  startVerseId: integer('start_verse_id')
-    .notNull()
-    .references(() => verse.id),
-  endVerseId: integer('end_verse_id')
-    .notNull()
-    .references(() => verse.id),
-  bodyMd: text('body_md').notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+export const note = pgTable(
+  'note',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => appUser.id, { onDelete: 'cascade' }),
+    startVerseId: integer('start_verse_id')
+      .notNull()
+      .references(() => verse.id),
+    endVerseId: integer('end_verse_id')
+      .notNull()
+      .references(() => verse.id),
+    bodyMd: text('body_md').notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('note_user_start_verse_idx').on(t.userId, t.startVerseId)],
+);
 
 export const donation = pgTable('donation', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),

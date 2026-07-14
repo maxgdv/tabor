@@ -29,6 +29,13 @@
       "when": 1784051750197,
       "tag": "0003_plan_progress",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784058395953,
+      "tag": "0004_highlight_note_unique",
+      "breakpoints": true
     }
   ]
 }

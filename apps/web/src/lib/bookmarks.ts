@@ -1,21 +1,25 @@
-// Helpers puros de marcadores (sin BD): agrupación para "Mis marcadores".
-// El import de tipo se borra al compilar — no arrastra la conexión.
+// Helpers puros de contenido personal (sin BD): agrupación por libro para
+// "Mis marcadores", "Mis notas" y el export. El import de tipo se borra al
+// compilar — no arrastra la conexión.
 
 import type { DbBookmarkListItem } from '@tabor/db';
 
-export type BookmarkGroup = {
+type BookRef = {
   bookCanonicalId: string;
   bookUrlSegment: string;
   bookName: string;
-  items: DbBookmarkListItem[];
+};
+
+export type BookGroup<T extends BookRef> = BookRef & {
+  items: T[];
 };
 
 /**
- * Agrupa los marcadores por libro conservando el orden de entrada
- * (listBookmarks ya devuelve orden canónico libro → capítulo → versículo).
+ * Agrupa items por libro conservando el orden de entrada (las queries list*
+ * ya devuelven orden canónico libro → capítulo → versículo).
  */
-export function groupBookmarksByBook(items: DbBookmarkListItem[]): BookmarkGroup[] {
-  const groups: BookmarkGroup[] = [];
+export function groupByBook<T extends BookRef>(items: T[]): Array<BookGroup<T>> {
+  const groups: Array<BookGroup<T>> = [];
   for (const item of items) {
     const last = groups[groups.length - 1];
     if (last && last.bookCanonicalId === item.bookCanonicalId) {
@@ -31,3 +35,8 @@ export function groupBookmarksByBook(items: DbBookmarkListItem[]): BookmarkGroup
   }
   return groups;
 }
+
+export type BookmarkGroup = BookGroup<DbBookmarkListItem>;
+
+/** Alias retro-compatible para los marcadores. */
+export const groupBookmarksByBook = groupByBook<DbBookmarkListItem>;

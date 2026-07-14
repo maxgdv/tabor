@@ -87,6 +87,14 @@ export function UserMenu({ name, email }: Props) {
           >
             {t('bookmarksTitle')}
           </Link>
+          <Link
+            href="/cuenta/notas"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="block px-3 py-2 font-sans text-sm text-stone-700 hover:bg-sand-100 dark:text-sand-100 dark:hover:bg-stone-800"
+          >
+            {t('notesTitle')}
+          </Link>
           <button
             type="button"
             role="menuitem"

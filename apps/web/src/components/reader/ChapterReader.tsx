@@ -4,14 +4,28 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useReaderStore } from '@/lib/reader-store';
 import type { Chapter } from '@/lib/bible';
+import {
+  HIGHLIGHT_CLASSES,
+  isHighlightColor,
+  type HighlightColor,
+} from '@/lib/annotations';
+import { VerseActionsBar } from './VerseActionsBar';
+import { NoteEditor } from './NoteEditor';
+
+export type ChapterAnnotations = {
+  highlights: Array<{ verseNumber: number; color: string }>;
+  notes: Array<{ verseNumber: number; body: string }>;
+};
 
 type Props = {
   chapter: Chapter;
   /** Versículos marcados por el usuario; `null` = invitado (sin UI de marcadores). */
   initialBookmarks: number[] | null;
+  /** Resaltados y notas del capítulo; `null` = invitado. */
+  initialAnnotations: ChapterAnnotations | null;
 };
 
-export function ChapterReader({ chapter, initialBookmarks }: Props) {
+export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }: Props) {
   const t = useTranslations('reader');
   const setActiveVerse = useReaderStore((s) => s.setActiveVerse);
   const scrollTarget = useReaderStore((s) => s.scrollTarget);
@@ -26,6 +40,82 @@ export function ChapterReader({ chapter, initialBookmarks }: Props) {
   const [bookmarks, setBookmarks] = useState<ReadonlySet<number>>(
     () => new Set(initialBookmarks ?? []),
   );
+
+  // Resaltados y notas (solo con sesión). Nacen del server y el remontaje
+  // por key al cambiar de capítulo los refresca — sin setState en effects.
+  const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
+  const [noteEditorVerse, setNoteEditorVerse] = useState<number | null>(null);
+  const [highlights, setHighlights] = useState<ReadonlyMap<number, HighlightColor>>(
+    () =>
+      new Map(
+        (initialAnnotations?.highlights ?? [])
+          .filter((h) => isHighlightColor(h.color))
+          .map((h) => [h.verseNumber, h.color as HighlightColor]),
+      ),
+  );
+  const [notes, setNotes] = useState<ReadonlyMap<number, string>>(
+    () => new Map((initialAnnotations?.notes ?? []).map((n) => [n.verseNumber, n.body])),
+  );
+
+  const applyHighlight = (verseNumber: number, color: HighlightColor | null) => {
+    const previous = highlights.get(verseNumber) ?? null;
+    const set = (value: HighlightColor | null) =>
+      setHighlights((prev) => {
+        const next = new Map(prev);
+        if (value === null) next.delete(verseNumber);
+        else next.set(verseNumber, value);
+        return next;
+      });
+    set(color);
+    void fetch('/api/highlights', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        book: chapter.bookCanonicalId.toLowerCase(),
+        chapter: chapter.number,
+        verse: verseNumber,
+        color,
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`highlights → ${res.status}`);
+      })
+      .catch(() => set(previous));
+  };
+
+  const saveNote = (verseNumber: number, body: string | null) => {
+    const previous = notes.get(verseNumber) ?? null;
+    const set = (value: string | null) =>
+      setNotes((prev) => {
+        const next = new Map(prev);
+        if (value === null) next.delete(verseNumber);
+        else next.set(verseNumber, value);
+        return next;
+      });
+    set(body);
+    setNoteEditorVerse(null);
+    void fetch('/api/notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        book: chapter.bookCanonicalId.toLowerCase(),
+        chapter: chapter.number,
+        verse: verseNumber,
+        body,
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`notes → ${res.status}`);
+      })
+      .catch(() => set(previous));
+  };
+
+  // Tap en el texto del versículo = seleccionar/deseleccionar. Los clicks
+  // nacidos en botones interiores (marcador, icono de nota) no seleccionan.
+  const onVerseClick = (verseNumber: number) => (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    setSelectedVerse((current) => (current === verseNumber ? null : verseNumber));
+  };
 
   const toggleBookmark = async (verseNumber: number) => {
     const wasBookmarked = bookmarks.has(verseNumber);
@@ -109,7 +199,13 @@ export function ChapterReader({ chapter, initialBookmarks }: Props) {
     clearScrollTarget();
   }, [scrollTarget, clearScrollTarget]);
 
+  const selectedVerseText =
+    selectedVerse != null
+      ? (chapter.verses.find((v) => v.number === selectedVerse)?.text ?? '')
+      : '';
+
   return (
+    <div className="relative h-full">
     <div
       ref={containerRef}
       className="h-full overflow-y-auto px-6 py-10 sm:px-10 sm:py-14"
@@ -134,7 +230,16 @@ export function ChapterReader({ chapter, initialBookmarks }: Props) {
               id={`v${verse.number}`}
               data-verse={verse.number}
               data-bookmarked={isAuthed && bookmarks.has(verse.number) ? 'true' : undefined}
-              className="group inline transition-colors"
+              data-selected={selectedVerse === verse.number ? 'true' : undefined}
+              // A11y v1 documentada: seleccionar para anotar es por puntero
+              // (hacer focusables ~170 spans degradaría el teclado del
+              // lector); barra y editor sí son 100 % accesibles por teclado.
+              onClick={isAuthed ? onVerseClick(verse.number) : undefined}
+              className={`group inline transition-colors ${
+                isAuthed && highlights.has(verse.number)
+                  ? `${HIGHLIGHT_CLASSES[highlights.get(verse.number) as HighlightColor]} box-decoration-clone rounded-sm`
+                  : ''
+              } data-[selected=true]:underline data-[selected=true]:decoration-stone-400 data-[selected=true]:decoration-dotted data-[selected=true]:underline-offset-4`}
             >
               {isAuthed ? (
                 // Con sesión, el número del versículo es el botón de marcador:
@@ -154,6 +259,26 @@ export function ChapterReader({ chapter, initialBookmarks }: Props) {
                 <sup className="mr-1 select-none font-sans text-xs text-stone-400 group-data-[active=true]:text-lapis-500">
                   {verse.number}
                 </sup>
+              )}
+              {isAuthed && notes.has(verse.number) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedVerse(verse.number);
+                    setNoteEditorVerse(verse.number);
+                  }}
+                  aria-label={t('noteOpen', { n: verse.number })}
+                  title={t('noteOpen', { n: verse.number })}
+                  className="mr-1 inline-block align-super text-lapis-500 transition-colors hover:text-lapis-600 dark:text-lapis-300"
+                >
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.4-9.4a2 2 0 112.8 2.8L11 15l-4 1 1-4 8.6-8.4z"
+                    />
+                  </svg>
+                </button>
               )}
               {verse.text}{' '}
             </span>
@@ -177,6 +302,31 @@ export function ChapterReader({ chapter, initialBookmarks }: Props) {
           </p>
         </footer>
       </article>
+    </div>
+
+    {isAuthed && selectedVerse != null && noteEditorVerse == null && (
+      <VerseActionsBar
+        verseNumber={selectedVerse}
+        currentColor={highlights.get(selectedVerse) ?? null}
+        hasNote={notes.has(selectedVerse)}
+        onSelectColor={(color) => applyHighlight(selectedVerse, color)}
+        onOpenNote={() => setNoteEditorVerse(selectedVerse)}
+        onClose={() => setSelectedVerse(null)}
+      />
+    )}
+
+    {isAuthed && noteEditorVerse != null && (
+      <NoteEditor
+        reference={`${chapter.bookName} ${chapter.number}, ${noteEditorVerse}`}
+        verseText={
+          chapter.verses.find((v) => v.number === noteEditorVerse)?.text ?? selectedVerseText
+        }
+        initialBody={notes.get(noteEditorVerse) ?? ''}
+        onSave={(body) => saveNote(noteEditorVerse, body)}
+        onDelete={() => saveNote(noteEditorVerse, null)}
+        onClose={() => setNoteEditorVerse(null)}
+      />
+    )}
     </div>
   );
 }

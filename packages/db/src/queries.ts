@@ -6,7 +6,7 @@ import { and, asc, desc, eq, sql } from 'drizzle-orm';
 import { db } from './index';
 import { book, bookTranslation, chapter, verse, verseText, version } from './schema/bible';
 import { place, placeAlternateName, verseLocation } from './schema/geo';
-import { bookmark, planProgress } from './schema/user';
+import { bookmark, highlight, note, planProgress } from './schema/user';
 import { escapeLike, foldJs, foldSql } from './text';
 
 export type DbVerse = {
@@ -709,4 +709,233 @@ export async function mergePlanProgress(opts: {
   );
   if (rows.length === 0) return;
   await db.insert(planProgress).values(rows).onConflictDoNothing();
+}
+
+// --- Resaltados y notas del usuario ------------------------------------------
+// v1: un solo versículo (start_verse_id = end_verse_id) y una fila por
+// (usuario, versículo) — los índices únicos sostienen los upserts.
+
+export type DbChapterAnnotations = {
+  highlights: Array<{ verseNumber: number; color: string }>;
+  notes: Array<{ verseNumber: number; body: string }>;
+};
+
+/** Resaltados y notas del usuario en un capítulo (con cuerpos de nota:
+ *  son pocos y pequeños, y así el lector no necesita un GET aparte). */
+export async function getChapterAnnotations(opts: {
+  userId: string;
+  bookCanonicalId: string;
+  chapterNumber: number;
+}): Promise<DbChapterAnnotations> {
+  const chapterVerses = db
+    .select({ id: verse.id, number: verse.number })
+    .from(verse)
+    .innerJoin(chapter, eq(chapter.id, verse.chapterId))
+    .innerJoin(book, eq(book.id, chapter.bookId))
+    .where(
+      and(eq(book.canonicalId, opts.bookCanonicalId), eq(chapter.number, opts.chapterNumber)),
+    )
+    .as('chapter_verses');
+
+  const [highlights, notes] = await Promise.all([
+    db
+      .select({ verseNumber: chapterVerses.number, color: highlight.color })
+      .from(highlight)
+      .innerJoin(chapterVerses, eq(chapterVerses.id, highlight.startVerseId))
+      .where(eq(highlight.userId, opts.userId))
+      .orderBy(asc(chapterVerses.number)),
+    db
+      .select({ verseNumber: chapterVerses.number, body: note.bodyMd })
+      .from(note)
+      .innerJoin(chapterVerses, eq(chapterVerses.id, note.startVerseId))
+      .where(eq(note.userId, opts.userId))
+      .orderBy(asc(chapterVerses.number)),
+  ]);
+
+  return { highlights, notes };
+}
+
+/**
+ * Resalta un versículo con un color (upsert: re-resaltar cambia el color) o
+ * quita el resaltado (`color: null`). `null` si el versículo no existe.
+ * El color llega YA validado contra la lista blanca por la API.
+ */
+export async function setHighlight(opts: {
+  userId: string;
+  bookCanonicalId: string;
+  chapterNumber: number;
+  verseNumber: number;
+  color: string | null;
+}): Promise<{ color: string | null } | null> {
+  const verseId = await resolveVerseId(opts);
+  if (verseId == null) return null;
+
+  if (opts.color === null) {
+    await db
+      .delete(highlight)
+      .where(and(eq(highlight.userId, opts.userId), eq(highlight.startVerseId, verseId)));
+    return { color: null };
+  }
+
+  await db
+    .insert(highlight)
+    .values({
+      userId: opts.userId,
+      startVerseId: verseId,
+      endVerseId: verseId,
+      color: opts.color,
+    })
+    .onConflictDoUpdate({
+      target: [highlight.userId, highlight.startVerseId],
+      set: { color: opts.color },
+    });
+  return { color: opts.color };
+}
+
+/**
+ * Guarda la nota de un versículo (upsert: editar reemplaza el cuerpo) o la
+ * borra (`body: null`). `null` si el versículo no existe.
+ */
+export async function setNote(opts: {
+  userId: string;
+  bookCanonicalId: string;
+  chapterNumber: number;
+  verseNumber: number;
+  body: string | null;
+}): Promise<{ saved: boolean } | null> {
+  const verseId = await resolveVerseId(opts);
+  if (verseId == null) return null;
+
+  if (opts.body === null) {
+    await db
+      .delete(note)
+      .where(and(eq(note.userId, opts.userId), eq(note.startVerseId, verseId)));
+    return { saved: false };
+  }
+
+  await db
+    .insert(note)
+    .values({
+      userId: opts.userId,
+      startVerseId: verseId,
+      endVerseId: verseId,
+      bodyMd: opts.body,
+    })
+    .onConflictDoUpdate({
+      target: [note.userId, note.startVerseId],
+      set: { bodyMd: opts.body, updatedAt: sql`now()` },
+    });
+  return { saved: true };
+}
+
+export type DbHighlightListItem = {
+  bookCanonicalId: string;
+  bookUrlSegment: string;
+  bookName: string;
+  chapterNumber: number;
+  verseNumber: number;
+  text: string;
+  color: string;
+  label: string | null;
+};
+
+/** Todos los resaltados del usuario, en orden canónico, con texto localizado. */
+export async function listHighlights(opts: {
+  userId: string;
+  versionCode: string;
+}): Promise<DbHighlightListItem[]> {
+  const [ver] = await db.select().from(version).where(eq(version.code, opts.versionCode));
+  if (!ver) return [];
+
+  const rows = await db
+    .select({
+      canonicalId: book.canonicalId,
+      bookName: bookTranslation.name,
+      chapterNumber: chapter.number,
+      verseNumber: verse.number,
+      text: verseText.text,
+      color: highlight.color,
+      label: highlight.label,
+    })
+    .from(highlight)
+    .innerJoin(verse, eq(verse.id, highlight.startVerseId))
+    .innerJoin(chapter, eq(chapter.id, verse.chapterId))
+    .innerJoin(book, eq(book.id, chapter.bookId))
+    .innerJoin(
+      verseText,
+      and(eq(verseText.verseId, verse.id), eq(verseText.versionId, ver.id)),
+    )
+    .leftJoin(
+      bookTranslation,
+      and(eq(bookTranslation.bookId, book.id), eq(bookTranslation.versionId, ver.id)),
+    )
+    .where(eq(highlight.userId, opts.userId))
+    .orderBy(asc(book.orderIndex), asc(chapter.number), asc(verse.number));
+
+  return rows.map((r) => ({
+    bookCanonicalId: r.canonicalId,
+    bookUrlSegment: r.canonicalId.toLowerCase(),
+    bookName: r.bookName ?? r.canonicalId,
+    chapterNumber: r.chapterNumber,
+    verseNumber: r.verseNumber,
+    text: r.text,
+    color: r.color,
+    label: r.label,
+  }));
+}
+
+export type DbNoteListItem = {
+  bookCanonicalId: string;
+  bookUrlSegment: string;
+  bookName: string;
+  chapterNumber: number;
+  verseNumber: number;
+  text: string;
+  body: string;
+  updatedAt: Date;
+};
+
+/** Todas las notas del usuario, en orden canónico, con texto localizado. */
+export async function listNotes(opts: {
+  userId: string;
+  versionCode: string;
+}): Promise<DbNoteListItem[]> {
+  const [ver] = await db.select().from(version).where(eq(version.code, opts.versionCode));
+  if (!ver) return [];
+
+  const rows = await db
+    .select({
+      canonicalId: book.canonicalId,
+      bookName: bookTranslation.name,
+      chapterNumber: chapter.number,
+      verseNumber: verse.number,
+      text: verseText.text,
+      body: note.bodyMd,
+      updatedAt: note.updatedAt,
+    })
+    .from(note)
+    .innerJoin(verse, eq(verse.id, note.startVerseId))
+    .innerJoin(chapter, eq(chapter.id, verse.chapterId))
+    .innerJoin(book, eq(book.id, chapter.bookId))
+    .innerJoin(
+      verseText,
+      and(eq(verseText.verseId, verse.id), eq(verseText.versionId, ver.id)),
+    )
+    .leftJoin(
+      bookTranslation,
+      and(eq(bookTranslation.bookId, book.id), eq(bookTranslation.versionId, ver.id)),
+    )
+    .where(eq(note.userId, opts.userId))
+    .orderBy(asc(book.orderIndex), asc(chapter.number), asc(verse.number));
+
+  return rows.map((r) => ({
+    bookCanonicalId: r.canonicalId,
+    bookUrlSegment: r.canonicalId.toLowerCase(),
+    bookName: r.bookName ?? r.canonicalId,
+    chapterNumber: r.chapterNumber,
+    verseNumber: r.verseNumber,
+    text: r.text,
+    body: r.body,
+    updatedAt: r.updatedAt,
+  }));
 }

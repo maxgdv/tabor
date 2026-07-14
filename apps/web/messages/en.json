@@ -86,7 +86,14 @@
     "bookmarksLede": "Your bookmarked verses, in reading order.",
     "bookmarksEmpty": "You haven't bookmarked any verses yet. In the reader, tap a verse number to bookmark it.",
     "bookmarksCta": "Open the reader",
-    "bookmarksRemove": "Remove bookmark"
+    "bookmarksRemove": "Remove bookmark",
+    "notesTitle": "My notes",
+    "notesLede": "Your personal notes, in reading order. They are private: only you can see them.",
+    "notesEmpty": "You haven't written any notes yet. In the reader, tap a verse's text and choose \"Add note\".",
+    "exportTitle": "Your data",
+    "exportLede": "Download all your personal data (bookmarks, highlights, notes, and plan progress) anytime. It's yours.",
+    "exportJson": "Export JSON",
+    "exportMarkdown": "Export Markdown"
   },
   "plans": {
     "title": "Reading plans",
@@ -116,7 +123,26 @@
     "mapStyleSatellite": "Satellite",
     "mapStyleAria": "Change map style",
     "bookmarkAdd": "Bookmark verse {n}",
-    "bookmarkRemove": "Remove bookmark from verse {n}"
+    "bookmarkRemove": "Remove bookmark from verse {n}",
+    "verseActions": "Verse {n}",
+    "highlightGroup": "Highlight with color",
+    "highlightRemove": "Remove highlight",
+    "color": {
+      "sand": "Highlight in sand",
+      "olive": "Highlight in olive",
+      "lapis": "Highlight in lapis",
+      "rose": "Highlight in clay",
+      "sky": "Highlight in sky"
+    },
+    "noteAdd": "Add note",
+    "noteEdit": "Edit note",
+    "noteOpen": "View note on verse {n}",
+    "noteDialog": "Note",
+    "notePlaceholder": "Write your note…",
+    "noteSave": "Save",
+    "noteDelete": "Delete note",
+    "noteCancel": "Cancel",
+    "close": "Close"
   },
   "books": {
     "title": "Bible",

@@ -30,12 +30,21 @@
   --color-stone-800: #2b2622;
   --color-stone-900: #171513;
 
+  --color-olive-200: #dfe4cb;
   --color-olive-500: #7a8c4b;
   --color-olive-600: #5f6f3a;
   --color-olive-700: #46532b;
 
+  --color-lapis-200: #ccd8e8;
   --color-lapis-500: #3a5a85;
   --color-lapis-600: #2c4669;
+
+  /* Familias mínimas para resaltados (misma saturación apagada del tema). */
+  --color-rose-200: #ecd6d2;
+  --color-rose-500: #a05a52;
+
+  --color-sky-200: #d2e1e6;
+  --color-sky-500: #5b8a9c;
 
   --container-reader: 36rem;
 }

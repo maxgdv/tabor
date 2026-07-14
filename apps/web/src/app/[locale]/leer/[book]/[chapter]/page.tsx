@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { getAdjacentChapter, getBookmarkedVerseNumbers } from '@tabor/db';
+import { getAdjacentChapter, getBookmarkedVerseNumbers, getChapterAnnotations } from '@tabor/db';
 import { auth } from '@/lib/auth';
 import { Link } from '@/i18n/routing';
 import { getChapter, getPlacesForChapter } from '@/lib/bible';
@@ -79,14 +79,21 @@ export default async function ReaderPage({ params }: { params: Params }) {
   ]);
   if (!chapterData) notFound();
 
-  // `null` = invitado (el lector no muestra ninguna UI de marcadores).
-  const initialBookmarks = session
-    ? await getBookmarkedVerseNumbers({
-        userId: session.user.id,
-        bookCanonicalId: upperBook,
-        chapterNumber,
-      })
-    : null;
+  // `null` = invitado (el lector no muestra ninguna UI personal).
+  const [initialBookmarks, initialAnnotations] = session
+    ? await Promise.all([
+        getBookmarkedVerseNumbers({
+          userId: session.user.id,
+          bookCanonicalId: upperBook,
+          chapterNumber,
+        }),
+        getChapterAnnotations({
+          userId: session.user.id,
+          bookCanonicalId: upperBook,
+          chapterNumber,
+        }),
+      ])
+    : [null, null];
 
   const places = getPlacesForChapter(chapterData);
 
@@ -209,6 +216,7 @@ export default async function ReaderPage({ params }: { params: Params }) {
             key={`${chapterData.bookCanonicalId}-${chapterData.number}`}
             chapter={chapterData}
             initialBookmarks={initialBookmarks}
+            initialAnnotations={initialAnnotations}
           />
           <ActiveVerseMarker />
         </section>

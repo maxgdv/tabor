@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX "highlight_user_start_verse_idx" ON "highlight" USING btree ("user_id","start_verse_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "note_user_start_verse_idx" ON "note" USING btree ("user_id","start_verse_id");
