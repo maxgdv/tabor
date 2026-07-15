@@ -1,8 +1,10 @@
-// POST /api/highlights — resalta un versículo con un color de la paleta o
-// quita el resaltado (color: null). Body: { book, chapter, verse, color }.
+// POST /api/highlights — resalta un rango contiguo de versículos con un color
+// de la paleta y etiqueta opcional, o quita el resaltado (color: null).
+// Body: { book, chapter, start, end, color, label? } — `verse` (v1) sigue
+// aceptándose como alias de start = end.
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { setHighlight } from '@tabor/db';
+import { setHighlightRange } from '@tabor/db';
 import { auth } from '@/lib/auth';
 import { parseHighlightBody } from '@/lib/annotations';
 
@@ -17,12 +19,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'bad_request' }, { status: 400 });
   }
 
-  const result = await setHighlight({
+  const result = await setHighlightRange({
     userId: session.user.id,
     bookCanonicalId: body.book.toUpperCase(),
     chapterNumber: body.chapter,
-    verseNumber: body.verse,
+    startVerse: body.start,
+    endVerse: body.end,
     color: body.color,
+    label: body.label,
   });
   if (!result) {
     return NextResponse.json({ error: 'not_found' }, { status: 404 });

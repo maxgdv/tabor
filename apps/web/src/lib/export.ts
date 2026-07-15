@@ -67,10 +67,13 @@ export function buildExportMarkdown(data: ExportData): string {
     lines.push(`### ${group.bookName}`);
     lines.push('');
     for (const item of group.items) {
-      lines.push(
-        `- **${item.bookName} ${item.chapterNumber}, ${item.verseNumber}** (color: ${item.color})`,
-      );
-      lines.push(`  > ${item.text}`);
+      const ref =
+        item.endVerseNumber > item.verseNumber
+          ? `${item.verseNumber}-${item.endVerseNumber}`
+          : `${item.verseNumber}`;
+      const meta = [`color: ${item.color}`, ...(item.label ? [`etiqueta: ${item.label}`] : [])];
+      lines.push(`- **${item.bookName} ${item.chapterNumber}, ${ref}** (${meta.join(', ')})`);
+      lines.push(`  > ${item.text}${item.endVerseNumber > item.verseNumber ? ' […]' : ''}`);
     }
     lines.push('');
   }

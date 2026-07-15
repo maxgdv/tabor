@@ -2,7 +2,8 @@
 // la app web no tenga que conocer Drizzle ni el esquema: importa funciones,
 // no tablas.
 
-import { and, asc, desc, eq, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { db } from './index';
 import { book, bookTranslation, chapter, verse, verseText, version } from './schema/bible';
 import { place, placeAlternateName, verseLocation } from './schema/geo';
@@ -712,13 +713,28 @@ export async function mergePlanProgress(opts: {
 }
 
 // --- Resaltados y notas del usuario ------------------------------------------
-// v1: un solo versículo (start_verse_id = end_verse_id) y una fila por
-// (usuario, versículo) — los índices únicos sostienen los upserts.
+// v2: un resaltado es un rango contiguo de versículos DENTRO de un capítulo
+// (start_verse_id..end_verse_id, mismo chapter_id — invariante que mantiene
+// setHighlightRange). Las notas siguen siendo de un solo versículo.
 
 export type DbChapterAnnotations = {
-  highlights: Array<{ verseNumber: number; color: string }>;
+  /** Una entrada por versículo (los rangos llegan ya expandidos). */
+  highlights: Array<{ verseNumber: number; color: string; label: string | null }>;
   notes: Array<{ verseNumber: number; body: string }>;
 };
+
+/** Id del capítulo, o `null` si el libro/capítulo no existe. */
+async function resolveChapterId(opts: {
+  bookCanonicalId: string;
+  chapterNumber: number;
+}): Promise<number | null> {
+  const [row] = await db
+    .select({ id: chapter.id })
+    .from(chapter)
+    .innerJoin(book, eq(book.id, chapter.bookId))
+    .where(and(eq(book.canonicalId, opts.bookCanonicalId), eq(chapter.number, opts.chapterNumber)));
+  return row?.id ?? null;
+}
 
 /** Resaltados y notas del usuario en un capítulo (con cuerpos de nota:
  *  son pocos y pequeños, y así el lector no necesita un GET aparte). */
@@ -727,68 +743,119 @@ export async function getChapterAnnotations(opts: {
   bookCanonicalId: string;
   chapterNumber: number;
 }): Promise<DbChapterAnnotations> {
-  const chapterVerses = db
-    .select({ id: verse.id, number: verse.number })
-    .from(verse)
-    .innerJoin(chapter, eq(chapter.id, verse.chapterId))
-    .innerJoin(book, eq(book.id, chapter.bookId))
-    .where(
-      and(eq(book.canonicalId, opts.bookCanonicalId), eq(chapter.number, opts.chapterNumber)),
-    )
-    .as('chapter_verses');
+  const chapterId = await resolveChapterId(opts);
+  if (chapterId == null) return { highlights: [], notes: [] };
+
+  // sv/ev delimitan el rango; cv expande a un versículo por fila. El filtro
+  // sv.chapter_id = capítulo basta porque los rangos nunca cruzan capítulos.
+  const sv = alias(verse, 'sv');
+  const ev = alias(verse, 'ev');
+  const cv = alias(verse, 'cv');
 
   const [highlights, notes] = await Promise.all([
     db
-      .select({ verseNumber: chapterVerses.number, color: highlight.color })
+      .select({ verseNumber: cv.number, color: highlight.color, label: highlight.label })
       .from(highlight)
-      .innerJoin(chapterVerses, eq(chapterVerses.id, highlight.startVerseId))
-      .where(eq(highlight.userId, opts.userId))
-      .orderBy(asc(chapterVerses.number)),
+      .innerJoin(sv, eq(sv.id, highlight.startVerseId))
+      .innerJoin(ev, eq(ev.id, highlight.endVerseId))
+      .innerJoin(
+        cv,
+        and(eq(cv.chapterId, chapterId), gte(cv.number, sv.number), lte(cv.number, ev.number)),
+      )
+      .where(and(eq(highlight.userId, opts.userId), eq(sv.chapterId, chapterId)))
+      .orderBy(asc(cv.number)),
     db
-      .select({ verseNumber: chapterVerses.number, body: note.bodyMd })
+      .select({ verseNumber: sv.number, body: note.bodyMd })
       .from(note)
-      .innerJoin(chapterVerses, eq(chapterVerses.id, note.startVerseId))
-      .where(eq(note.userId, opts.userId))
-      .orderBy(asc(chapterVerses.number)),
+      .innerJoin(sv, eq(sv.id, note.startVerseId))
+      .where(and(eq(note.userId, opts.userId), eq(sv.chapterId, chapterId)))
+      .orderBy(asc(sv.number)),
   ]);
 
   return { highlights, notes };
 }
 
 /**
- * Resalta un versículo con un color (upsert: re-resaltar cambia el color) o
- * quita el resaltado (`color: null`). `null` si el versículo no existe.
- * El color llega YA validado contra la lista blanca por la API.
+ * Resalta un rango contiguo de versículos de un capítulo con un color y una
+ * etiqueta opcional, o lo des-resalta (`color: null`). Los resaltados previos
+ * que solapan el rango se resuelven recortándolos: los cubiertos se borran y
+ * los parciales conservan color y etiqueta en la parte que sobresale.
+ * `null` si el libro, el capítulo o algún extremo del rango no existen.
+ * Color y etiqueta llegan YA validados por la API.
  */
-export async function setHighlight(opts: {
+export async function setHighlightRange(opts: {
   userId: string;
   bookCanonicalId: string;
   chapterNumber: number;
-  verseNumber: number;
+  startVerse: number;
+  endVerse: number;
   color: string | null;
+  label: string | null;
 }): Promise<{ color: string | null } | null> {
-  const verseId = await resolveVerseId(opts);
-  if (verseId == null) return null;
+  if (opts.endVerse < opts.startVerse) return null;
+  const chapterId = await resolveChapterId(opts);
+  if (chapterId == null) return null;
 
-  if (opts.color === null) {
-    await db
-      .delete(highlight)
-      .where(and(eq(highlight.userId, opts.userId), eq(highlight.startVerseId, verseId)));
-    return { color: null };
-  }
+  const chapterVerses = await db
+    .select({ id: verse.id, number: verse.number })
+    .from(verse)
+    .where(eq(verse.chapterId, chapterId));
+  const idByNumber = new Map(chapterVerses.map((v) => [v.number, v.id]));
+  if (!idByNumber.has(opts.startVerse) || !idByNumber.has(opts.endVerse)) return null;
 
-  await db
-    .insert(highlight)
-    .values({
-      userId: opts.userId,
-      startVerseId: verseId,
-      endVerseId: verseId,
-      color: opts.color,
-    })
-    .onConflictDoUpdate({
-      target: [highlight.userId, highlight.startVerseId],
-      set: { color: opts.color },
-    });
+  const row = (startNumber: number, endNumber: number, color: string, label: string | null) => ({
+    userId: opts.userId,
+    startVerseId: idByNumber.get(startNumber)!,
+    endVerseId: idByNumber.get(endNumber)!,
+    color,
+    label,
+  });
+
+  await db.transaction(async (tx) => {
+    const sv = alias(verse, 'sv');
+    const ev = alias(verse, 'ev');
+    const overlapping = await tx
+      .select({
+        id: highlight.id,
+        start: sv.number,
+        end: ev.number,
+        color: highlight.color,
+        label: highlight.label,
+      })
+      .from(highlight)
+      .innerJoin(sv, eq(sv.id, highlight.startVerseId))
+      .innerJoin(ev, eq(ev.id, highlight.endVerseId))
+      .where(
+        and(
+          eq(highlight.userId, opts.userId),
+          eq(sv.chapterId, chapterId),
+          lte(sv.number, opts.endVerse),
+          gte(ev.number, opts.startVerse),
+        ),
+      );
+
+    if (overlapping.length > 0) {
+      await tx.delete(highlight).where(
+        inArray(
+          highlight.id,
+          overlapping.map((o) => o.id),
+        ),
+      );
+    }
+
+    const inserts = [];
+    for (const o of overlapping) {
+      // Los extremos recortados existen siempre: o.start/o.end son versículos
+      // reales del capítulo y el recorte solo se acerca hacia ellos.
+      if (o.start < opts.startVerse) inserts.push(row(o.start, opts.startVerse - 1, o.color, o.label));
+      if (o.end > opts.endVerse) inserts.push(row(opts.endVerse + 1, o.end, o.color, o.label));
+    }
+    if (opts.color !== null) {
+      inserts.push(row(opts.startVerse, opts.endVerse, opts.color, opts.label));
+    }
+    if (inserts.length > 0) await tx.insert(highlight).values(inserts);
+  });
+
   return { color: opts.color };
 }
 
@@ -833,7 +900,10 @@ export type DbHighlightListItem = {
   bookUrlSegment: string;
   bookName: string;
   chapterNumber: number;
+  /** Inicio del rango; con endVerseNumber igual, es un solo versículo. */
   verseNumber: number;
+  endVerseNumber: number;
+  /** Texto del primer versículo del rango (los rangos largos no se concatenan). */
   text: string;
   color: string;
   label: string | null;
@@ -847,18 +917,21 @@ export async function listHighlights(opts: {
   const [ver] = await db.select().from(version).where(eq(version.code, opts.versionCode));
   if (!ver) return [];
 
+  const ev = alias(verse, 'ev');
   const rows = await db
     .select({
       canonicalId: book.canonicalId,
       bookName: bookTranslation.name,
       chapterNumber: chapter.number,
       verseNumber: verse.number,
+      endVerseNumber: ev.number,
       text: verseText.text,
       color: highlight.color,
       label: highlight.label,
     })
     .from(highlight)
     .innerJoin(verse, eq(verse.id, highlight.startVerseId))
+    .innerJoin(ev, eq(ev.id, highlight.endVerseId))
     .innerJoin(chapter, eq(chapter.id, verse.chapterId))
     .innerJoin(book, eq(book.id, chapter.bookId))
     .innerJoin(
@@ -878,6 +951,7 @@ export async function listHighlights(opts: {
     bookName: r.bookName ?? r.canonicalId,
     chapterNumber: r.chapterNumber,
     verseNumber: r.verseNumber,
+    endVerseNumber: r.endVerseNumber,
     text: r.text,
     color: r.color,
     label: r.label,

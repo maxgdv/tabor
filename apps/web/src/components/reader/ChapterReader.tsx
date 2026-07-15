@@ -6,6 +6,8 @@ import { useReaderStore } from '@/lib/reader-store';
 import type { Chapter } from '@/lib/bible';
 import {
   HIGHLIGHT_CLASSES,
+  contiguousRanges,
+  formatRanges,
   isHighlightColor,
   type HighlightColor,
 } from '@/lib/annotations';
@@ -13,9 +15,18 @@ import { VerseActionsBar } from './VerseActionsBar';
 import { NoteEditor } from './NoteEditor';
 
 export type ChapterAnnotations = {
-  highlights: Array<{ verseNumber: number; color: string }>;
+  highlights: Array<{ verseNumber: number; color: string; label: string | null }>;
   notes: Array<{ verseNumber: number; body: string }>;
 };
+
+type VerseHighlight = { color: HighlightColor; label: string | null };
+
+/** Valor común de todos los elementos, o `null` si difieren o no hay ninguno. */
+function uniformValue<T>(values: Array<T | null>): T | null {
+  if (values.length === 0) return null;
+  const [first] = values;
+  return values.every((v) => v === first) ? (first ?? null) : null;
+}
 
 type Props = {
   chapter: Chapter;
@@ -43,44 +54,63 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
 
   // Resaltados y notas (solo con sesión). Nacen del server y el remontaje
   // por key al cambiar de capítulo los refresca — sin setState en effects.
-  const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
+  // La selección es un conjunto: cada tap añade/quita un versículo, y el
+  // color se aplica por rangos contiguos (un tap solo = comportamiento v1).
+  const [selected, setSelected] = useState<ReadonlySet<number>>(() => new Set());
   const [noteEditorVerse, setNoteEditorVerse] = useState<number | null>(null);
-  const [highlights, setHighlights] = useState<ReadonlyMap<number, HighlightColor>>(
+  const [highlights, setHighlights] = useState<ReadonlyMap<number, VerseHighlight>>(
     () =>
       new Map(
         (initialAnnotations?.highlights ?? [])
           .filter((h) => isHighlightColor(h.color))
-          .map((h) => [h.verseNumber, h.color as HighlightColor]),
+          .map((h) => [h.verseNumber, { color: h.color as HighlightColor, label: h.label }]),
       ),
   );
   const [notes, setNotes] = useState<ReadonlyMap<number, string>>(
     () => new Map((initialAnnotations?.notes ?? []).map((n) => [n.verseNumber, n.body])),
   );
 
-  const applyHighlight = (verseNumber: number, color: HighlightColor | null) => {
-    const previous = highlights.get(verseNumber) ?? null;
-    const set = (value: HighlightColor | null) =>
-      setHighlights((prev) => {
-        const next = new Map(prev);
-        if (value === null) next.delete(verseNumber);
-        else next.set(verseNumber, value);
-        return next;
-      });
-    set(color);
-    void fetch('/api/highlights', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        book: chapter.bookCanonicalId.toLowerCase(),
-        chapter: chapter.number,
-        verse: verseNumber,
-        color,
-      }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(`highlights → ${res.status}`);
-      })
-      .catch(() => set(previous));
+  const selectedNumbers = [...selected].sort((a, b) => a - b);
+  const selectedHighlights = selectedNumbers.map((n) => highlights.get(n) ?? null);
+  // Swatch activo solo si TODA la selección comparte color; ídem etiqueta.
+  const selectionColor = uniformValue(selectedHighlights.map((h) => h?.color ?? null));
+  const selectionLabel =
+    selectionColor !== null
+      ? uniformValue(selectedHighlights.map((h) => h?.label ?? null))
+      : null;
+
+  /** Aplica color (o null = quitar) y etiqueta a toda la selección, un POST
+   *  por rango contiguo, con actualización optimista y revert conjunto. */
+  const applyHighlight = (color: HighlightColor | null, label: string | null) => {
+    if (selectedNumbers.length === 0) return;
+    const previous = highlights;
+    setHighlights((prev) => {
+      const next = new Map(prev);
+      for (const n of selectedNumbers) {
+        if (color === null) next.delete(n);
+        else next.set(n, { color, label });
+      }
+      return next;
+    });
+    const ranges = contiguousRanges(selectedNumbers);
+    void Promise.all(
+      ranges.map((range) =>
+        fetch('/api/highlights', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            book: chapter.bookCanonicalId.toLowerCase(),
+            chapter: chapter.number,
+            start: range.start,
+            end: range.end,
+            color,
+            label,
+          }),
+        }).then((res) => {
+          if (!res.ok) throw new Error(`highlights → ${res.status}`);
+        }),
+      ),
+    ).catch(() => setHighlights(previous));
   };
 
   const saveNote = (verseNumber: number, body: string | null) => {
@@ -110,11 +140,16 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
       .catch(() => set(previous));
   };
 
-  // Tap en el texto del versículo = seleccionar/deseleccionar. Los clicks
-  // nacidos en botones interiores (marcador, icono de nota) no seleccionan.
+  // Tap en el texto del versículo = añadirlo/quitarlo de la selección. Los
+  // clicks nacidos en botones interiores (marcador, icono de nota) no cuentan.
   const onVerseClick = (verseNumber: number) => (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return;
-    setSelectedVerse((current) => (current === verseNumber ? null : verseNumber));
+    setSelected((current) => {
+      const next = new Set(current);
+      if (next.has(verseNumber)) next.delete(verseNumber);
+      else next.add(verseNumber);
+      return next;
+    });
   };
 
   const toggleBookmark = async (verseNumber: number) => {
@@ -199,10 +234,13 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
     clearScrollTarget();
   }, [scrollTarget, clearScrollTarget]);
 
-  const selectedVerseText =
-    selectedVerse != null
-      ? (chapter.verses.find((v) => v.number === selectedVerse)?.text ?? '')
-      : '';
+  // La nota sigue siendo de un solo versículo: el botón solo aparece con
+  // exactamente un versículo seleccionado.
+  const singleSelected = selectedNumbers.length === 1 ? selectedNumbers[0]! : null;
+  const selectionRef =
+    selectedNumbers.length === 1
+      ? t('verseActions', { n: selectedNumbers[0]! })
+      : t('verseActionsRange', { refs: formatRanges(contiguousRanges(selectedNumbers)) });
 
   return (
     <div className="relative h-full">
@@ -230,14 +268,14 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
               id={`v${verse.number}`}
               data-verse={verse.number}
               data-bookmarked={isAuthed && bookmarks.has(verse.number) ? 'true' : undefined}
-              data-selected={selectedVerse === verse.number ? 'true' : undefined}
+              data-selected={selected.has(verse.number) ? 'true' : undefined}
               // A11y v1 documentada: seleccionar para anotar es por puntero
               // (hacer focusables ~170 spans degradaría el teclado del
               // lector); barra y editor sí son 100 % accesibles por teclado.
               onClick={isAuthed ? onVerseClick(verse.number) : undefined}
               className={`group inline transition-colors ${
                 isAuthed && highlights.has(verse.number)
-                  ? `${HIGHLIGHT_CLASSES[highlights.get(verse.number) as HighlightColor]} box-decoration-clone rounded-sm`
+                  ? `${HIGHLIGHT_CLASSES[highlights.get(verse.number)!.color]} box-decoration-clone rounded-sm`
                   : ''
               } data-[selected=true]:underline data-[selected=true]:decoration-stone-400 data-[selected=true]:decoration-dotted data-[selected=true]:underline-offset-4`}
             >
@@ -264,7 +302,7 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedVerse(verse.number);
+                    setSelected(new Set([verse.number]));
                     setNoteEditorVerse(verse.number);
                   }}
                   aria-label={t('noteOpen', { n: verse.number })}
@@ -304,23 +342,27 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
       </article>
     </div>
 
-    {isAuthed && selectedVerse != null && noteEditorVerse == null && (
+    {isAuthed && selected.size > 0 && noteEditorVerse == null && (
       <VerseActionsBar
-        verseNumber={selectedVerse}
-        currentColor={highlights.get(selectedVerse) ?? null}
-        hasNote={notes.has(selectedVerse)}
-        onSelectColor={(color) => applyHighlight(selectedVerse, color)}
-        onOpenNote={() => setNoteEditorVerse(selectedVerse)}
-        onClose={() => setSelectedVerse(null)}
+        refLabel={selectionRef}
+        currentColor={selectionColor}
+        currentLabel={selectionLabel}
+        canNote={singleSelected != null}
+        hasNote={singleSelected != null && notes.has(singleSelected)}
+        onSelectColor={(color) =>
+          // Cambiar de color conserva la etiqueta común de la selección.
+          applyHighlight(color, color === null ? null : selectionLabel)
+        }
+        onSaveLabel={(label) => applyHighlight(selectionColor, label)}
+        onOpenNote={() => singleSelected != null && setNoteEditorVerse(singleSelected)}
+        onClose={() => setSelected(new Set())}
       />
     )}
 
     {isAuthed && noteEditorVerse != null && (
       <NoteEditor
         reference={`${chapter.bookName} ${chapter.number}, ${noteEditorVerse}`}
-        verseText={
-          chapter.verses.find((v) => v.number === noteEditorVerse)?.text ?? selectedVerseText
-        }
+        verseText={chapter.verses.find((v) => v.number === noteEditorVerse)?.text ?? ''}
         initialBody={notes.get(noteEditorVerse) ?? ''}
         onSave={(body) => saveNote(noteEditorVerse, body)}
         onDelete={() => saveNote(noteEditorVerse, null)}

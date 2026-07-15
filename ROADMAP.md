@@ -35,8 +35,10 @@ con ajustes según el aprendizaje real.
   Los resultados enlazan al versículo exacto (`#v12`).
 - **Cuentas** (email + contraseña, Better-Auth) con borrado RGPD y
   export de datos en JSON/Markdown.
-- **Marcadores, resaltados de 5 colores y notas** por versículo,
-  sincronizados con la cuenta; páginas propias en `/cuenta`.
+- **Marcadores, resaltados y notas** sincronizados con la cuenta;
+  páginas propias en `/cuenta`. Los resaltados admiten **rangos de
+  versículos** (selección multi-tap), 5 colores y **etiqueta corta**
+  opcional; los solapes se recortan de forma natural.
 - **Planes de lectura** con progreso por dispositivo (invitado) o
   sincronizado con la cuenta.
 
@@ -56,8 +58,6 @@ Lo que cerraría el alcance del MVP web de la spec:
   import:search` y definir `MEILI_HOST` + `MEILI_SEARCH_KEY` en
   Vercel. Sin ella, la búsqueda degrada con elegancia a referencias
   y lugares (que van contra Postgres).
-- **Resaltados v2**: rangos de versículos y etiquetas (la BD ya
-  modela rangos; la UI es single-verse).
 - **Email transaccional** (verificación de cuenta y reset de
   contraseña) y **Google OAuth**.
 - **Donaciones via Stripe Checkout** + página de transparencia.

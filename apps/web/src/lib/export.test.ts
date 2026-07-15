@@ -18,9 +18,22 @@ const highlight: DbHighlightListItem = {
   bookName: 'Mateo',
   chapterNumber: 5,
   verseNumber: 3,
+  endVerseNumber: 3,
   text: 'Bienaventurados los pobres de espíritu',
   color: 'olive',
   label: null,
+};
+
+const rangeHighlight: DbHighlightListItem = {
+  bookCanonicalId: 'MAT',
+  bookUrlSegment: 'mat',
+  bookName: 'Mateo',
+  chapterNumber: 5,
+  verseNumber: 3,
+  endVerseNumber: 10,
+  text: 'Bienaventurados los pobres de espíritu',
+  color: 'lapis',
+  label: 'bienaventuranzas',
 };
 
 const note: DbNoteListItem = {
@@ -38,7 +51,7 @@ const data: ExportData = {
   exportedAt: new Date('2026-07-14T12:00:00Z'),
   user: { email: 'x@y.z', name: 'X', createdAt: new Date('2026-07-01T00:00:00Z') },
   bookmarks: [bookmark(3, 15), bookmark(12, 1)],
-  highlights: [highlight],
+  highlights: [highlight, rangeHighlight],
   notes: [note],
   planProgress: { 'hechos-14': [0, 1] },
 };
@@ -84,6 +97,9 @@ describe('buildExportMarkdown', () => {
     // Dos marcadores del mismo libro → un solo encabezado de Génesis.
     expect(md.match(/### Génesis/g)).toHaveLength(1);
     expect(md).toContain('(color: olive)');
+    // Los rangos se referencian «3-10», llevan etiqueta y marcan texto parcial.
+    expect(md).toContain('**Mateo 5, 3-10** (color: lapis, etiqueta: bienaventuranzas)');
+    expect(md).toContain('Bienaventurados los pobres de espíritu […]');
     // Cuerpo multilínea verbatim.
     expect(md).toContain('línea uno\nlínea dos');
     // Días 1-based legibles.
