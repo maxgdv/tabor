@@ -26,13 +26,19 @@ con ajustes según el aprendizaje real.
 - **SEO**: título y descripción únicos por capítulo y libro, sitemap
   con las ~2.800 URLs, robots.txt, canonical + hreflang es/en,
   Open Graph con imagen de marca y breadcrumbs schema.org.
-- **Nombres de lugares en español**: dataset curado de ~270 lugares
-  (los 250 más mencionados ≈80 % de menciones + célebres del NT),
-  con fallback limpio para el resto.
+- **Nombres de lugares en español**: dataset curado con los **1.335
+  lugares** traducidos (formas de la Biblia de Jerusalén, cediendo a
+  la forma tradicional castellana cuando es más reconocible).
 - **Búsqueda global** en el header: por referencia («Mt 5»,
   «1 Co 13, 4» — parser es/en con abreviaturas), por lugar (ignora
   acentos) y por texto libre sobre los 71.603 versículos (Meilisearch).
   Los resultados enlazan al versículo exacto (`#v12`).
+- **Cuentas** (email + contraseña, Better-Auth) con borrado RGPD y
+  export de datos en JSON/Markdown.
+- **Marcadores, resaltados de 5 colores y notas** por versículo,
+  sincronizados con la cuenta; páginas propias en `/cuenta`.
+- **Planes de lectura** con progreso por dispositivo (invitado) o
+  sincronizado con la cuenta.
 
 ---
 
@@ -40,18 +46,20 @@ con ajustes según el aprendizaje real.
 
 Lo que cerraría el alcance del MVP web de la spec:
 
-- **Ampliar la traducción de nombres de lugares** más allá del top
-  ~270 ya cubierto (la cola larga: ~1.000 lugares poco mencionados).
-  Dataset editable en `packages/db/src/data/place-names-es.ts`.
+- **Revisión editorial de nombres de lugares**: la cola larga
+  (~1.060 lugares poco mencionados) se tradujo por transliteración
+  sistemática; se agradecen correcciones puntuales en
+  `packages/db/src/data/place-names-es.ts`.
 - **Meilisearch en producción**: la búsqueda de texto libre ya
   funciona en local; falta una instancia hosteada (Meilisearch Cloud
   free tier o VPS), indexar con `npm run --workspace packages/db
   import:search` y definir `MEILI_HOST` + `MEILI_SEARCH_KEY` en
   Vercel. Sin ella, la búsqueda degrada con elegancia a referencias
   y lugares (que van contra Postgres).
-- **Marcadores, resaltados y notas personales**. El esquema en BD
-  ya existe; falta auth + UI.
-- **Autenticación** (Better-Auth o Lucia, self-hosted).
+- **Resaltados v2**: rangos de versículos y etiquetas (la BD ya
+  modela rangos; la UI es single-verse).
+- **Email transaccional** (verificación de cuenta y reset de
+  contraseña) y **Google OAuth**.
 - **Donaciones via Stripe Checkout** + página de transparencia.
 - **Tile server propio** (OpenMapTiles + Tegola/Martin) en vez de
   demotiles públicas.
