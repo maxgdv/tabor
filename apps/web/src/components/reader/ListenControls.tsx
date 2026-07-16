@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useReaderStore } from '@/lib/reader-store';
 import { pickVoice, ttsLangFor } from '@/lib/speech';
@@ -25,16 +25,18 @@ export function ListenControls({ verses }: Props) {
   const setActiveVerse = useReaderStore((s) => s.setActiveVerse);
   const requestScrollTo = useReaderStore((s) => s.requestScrollTo);
 
-  // El soporte solo se conoce en cliente; en SSR se renderiza vacío estable.
-  const [supported, setSupported] = useState(false);
+  // El soporte solo se conoce en cliente; en SSR se renderiza vacío estable
+  // y React re-renderiza tras hidratar con el valor real (useSyncExternalStore
+  // es el patrón para valores servidor≠cliente sin setState en efectos).
+  const supported = useSyncExternalStore(
+    () => () => {},
+    () => 'speechSynthesis' in window,
+    () => false,
+  );
   const [status, setStatus] = useState<Status>('idle');
   // Los callbacks de enunciados viejos (tras parar o cambiar de arranque)
   // se ignoran comparando su sesión con la vigente.
   const sessionRef = useRef(0);
-
-  useEffect(() => {
-    setSupported(typeof window !== 'undefined' && 'speechSynthesis' in window);
-  }, []);
 
   // Muchos navegadores cargan las voces en diferido: getVoices() vacío hasta
   // 'voiceschanged'. Pedirlas al montar dispara esa carga.
