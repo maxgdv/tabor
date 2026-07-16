@@ -41,6 +41,10 @@ con ajustes según el aprendizaje real.
   opcional; los solapes se recortan de forma natural.
 - **Planes de lectura** con progreso por dispositivo (invitado) o
   sincronizado con la cuenta.
+- **Lectura en voz alta** con la síntesis de voz del navegador
+  (Web Speech API): versículo a versículo desde el versículo actual,
+  con el texto y el mapa siguiendo la lectura. Sin licencias ni
+  backend; disponible también para invitados.
 
 ---
 
@@ -80,8 +84,10 @@ Ideas que multiplican el valor del lector. Casi todas requieren
   dominio público (Doré, Caravaggio, Rembrandt, Tissot, El Greco…)
   desde Wikimedia Commons. Idea ya esbozada para los capítulos sin
   geografía; ampliable a todos.
-- **Audio narrado** con versiones licenciadas (cuando se cierren
-  acuerdos con CELAM/CEE/USCCB).
+- **Audio narrado con grabaciones humanas** licenciadas (cuando se
+  cierren acuerdos con CELAM/CEE/USCCB). Hoy la lectura en voz alta
+  usa el TTS del navegador; las grabaciones lo sustituirían donde
+  existan.
 - **Planes de lectura**: Año bíblico, Cuaresma, Adviento, Evangelios
   en 30 días, Salmos en 60 días.
 - **Capas históricas múltiples**: Patriarcas, Reinos, Exilio, Imperio

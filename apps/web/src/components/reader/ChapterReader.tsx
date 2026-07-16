@@ -13,6 +13,7 @@ import {
 } from '@/lib/annotations';
 import { VerseActionsBar } from './VerseActionsBar';
 import { NoteEditor } from './NoteEditor';
+import { ListenControls } from './ListenControls';
 
 export type ChapterAnnotations = {
   highlights: Array<{ verseNumber: number; color: string; label: string | null }>;
@@ -244,6 +245,11 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
 
   return (
     <div className="relative h-full">
+    {/* Fijo al panel (no al texto): los controles siguen a mano mientras la
+        lectura en voz alta desplaza el capítulo. */}
+    <div className="absolute right-4 top-3 z-10">
+      <ListenControls verses={chapter.verses} />
+    </div>
     <div
       ref={containerRef}
       className="h-full overflow-y-auto px-6 py-10 sm:px-10 sm:py-14"
