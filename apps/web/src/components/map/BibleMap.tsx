@@ -87,6 +87,11 @@ export function BibleMap({ chapter, places }: Props) {
   const activeVerse = useReaderStore((s) => s.activeVerseNumber);
   const requestScrollTo = useReaderStore((s) => s.requestScrollTo);
   const t = useTranslations('reader');
+  // Último estilo aplicado al mapa vivo. Evita el setStyle redundante del
+  // montaje: setStyle antes de que el estilo inicial termine de cargar
+  // fuerza un "rebuild from scratch" y puede perder el evento 'load' (y con
+  // él los marcadores) — carrera real observada con red lenta.
+  const appliedStyleRef = useRef<MapStyleId | null>(null);
 
   // Estilo persistente vía localStorage, leído con useSyncExternalStore
   // para evitar mismatch de hidratación (SSR siempre devuelve 'satellite').
@@ -112,6 +117,7 @@ export function BibleMap({ chapter, places }: Props) {
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     mapRef.current = map;
+    appliedStyleRef.current = mapStyle;
 
     map.on('load', () => {
       // En modo overview no añadimos marcadores ni hacemos fitBounds:
@@ -200,7 +206,8 @@ export function BibleMap({ chapter, places }: Props) {
   // Cambio de estilo en caliente (no recrea el mapa, conserva marcadores).
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map || appliedStyleRef.current === mapStyle) return;
+    appliedStyleRef.current = mapStyle;
     map.setStyle(mapStyle === 'satellite' ? SATELLITE_STYLE : VECTOR_STYLE);
   }, [mapStyle]);
 
