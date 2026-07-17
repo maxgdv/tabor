@@ -55,7 +55,6 @@ export function UserMenu({ name, email }: Props) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-haspopup="menu"
         aria-expanded={open}
         aria-label={tHeader('accountMenu')}
         className="flex h-9 w-9 items-center justify-center rounded-full bg-lapis-500 font-sans text-sm font-semibold text-white transition-colors hover:bg-lapis-600"
@@ -64,16 +63,15 @@ export function UserMenu({ name, email }: Props) {
       </button>
 
       {open && (
-        <div
-          role="menu"
-          className="absolute right-0 top-full z-50 mt-1.5 w-56 rounded-lg border border-sand-200 bg-sand-50 py-1 shadow-xl dark:border-stone-700 dark:bg-stone-900"
-        >
-          <p className="truncate border-b border-sand-200 px-3 py-2 font-sans text-xs text-stone-500 dark:border-stone-700">
+        // Disclosure simple, sin role="menu": ese patrón exige gestión de
+        // foco y flechas que unos enlaces normales no necesitan — con Tab
+        // se recorren y con Escape se cierra.
+        <div className="absolute right-0 top-full z-50 mt-1.5 w-56 rounded-lg border border-sand-200 bg-sand-50 py-1 shadow-xl dark:border-stone-700 dark:bg-stone-900">
+          <p className="truncate border-b border-sand-200 px-3 py-2 font-sans text-xs text-stone-500 dark:border-stone-700 dark:text-stone-400">
             {email}
           </p>
           <Link
             href="/cuenta"
-            role="menuitem"
             onClick={() => setOpen(false)}
             className="block px-3 py-2 font-sans text-sm text-stone-700 hover:bg-sand-100 dark:text-sand-100 dark:hover:bg-stone-800"
           >
@@ -81,7 +79,6 @@ export function UserMenu({ name, email }: Props) {
           </Link>
           <Link
             href="/cuenta/marcadores"
-            role="menuitem"
             onClick={() => setOpen(false)}
             className="block px-3 py-2 font-sans text-sm text-stone-700 hover:bg-sand-100 dark:text-sand-100 dark:hover:bg-stone-800"
           >
@@ -89,7 +86,6 @@ export function UserMenu({ name, email }: Props) {
           </Link>
           <Link
             href="/cuenta/notas"
-            role="menuitem"
             onClick={() => setOpen(false)}
             className="block px-3 py-2 font-sans text-sm text-stone-700 hover:bg-sand-100 dark:text-sand-100 dark:hover:bg-stone-800"
           >
@@ -97,7 +93,6 @@ export function UserMenu({ name, email }: Props) {
           </Link>
           <button
             type="button"
-            role="menuitem"
             onClick={signOut}
             className="block w-full px-3 py-2 text-left font-sans text-sm text-stone-700 hover:bg-sand-100 dark:text-sand-100 dark:hover:bg-stone-800"
           >

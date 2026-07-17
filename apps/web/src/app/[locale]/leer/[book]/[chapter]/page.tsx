@@ -156,7 +156,7 @@ export default async function ReaderPage({ params }: { params: Params }) {
             </ol>
           </nav>
 
-          <nav aria-label="Navegación entre capítulos" className="flex items-center gap-1.5 font-sans text-sm">
+          <nav aria-label={tReader('sectionNav')} className="flex items-center gap-1.5 font-sans text-sm">
             {prev ? (
               <Link
                 href={`/leer/${prev.bookUrlSegment}/${prev.chapterNumber}`}
@@ -207,7 +207,7 @@ export default async function ReaderPage({ params }: { params: Params }) {
           fija en vh. En desktop: una sola fila a 50/50 lado a lado. */}
       <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[2fr_1fr] lg:grid-cols-2 lg:grid-rows-1">
         <section
-          aria-label="Texto del capítulo"
+          aria-label={tReader('sectionText')}
           className="min-h-0 overflow-hidden border-b border-sand-200 lg:border-b-0 lg:border-r dark:border-stone-700"
         >
           {/* key: al navegar entre capítulos el componente se remonta y el
@@ -220,7 +220,7 @@ export default async function ReaderPage({ params }: { params: Params }) {
           />
           <ActiveVerseMarker />
         </section>
-        <section aria-label="Mapa del capítulo" className="relative min-h-0">
+        <section aria-label={tReader('sectionMap')} className="relative min-h-0">
           {/* El mapa siempre se renderiza, incluso en capítulos sin lugares.
               En ese caso muestra una vista panorámica del mundo bíblico con
               un badge explicativo (gestionado en BibleMap). */}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toggleDay, useCompletedDays } from '@/lib/plan-progress';
 import { PlanProgressBar } from './PlanProgress';
 import { PlanDayList, type DayItem } from './PlanDayList';
@@ -24,7 +25,10 @@ type Props = {
  *   progreso nuevo (p. ej. tras el merge inicial).
  */
 export function PlanDetail({ slug, totalDays, days, serverProgress }: Props) {
+  const tReader = useTranslations('reader');
   const isAuthed = serverProgress !== null;
+  // Anuncio sr-only cuando el toggle optimista revierte (WCAG 4.1.3).
+  const [saveFailed, setSaveFailed] = useState(false);
   const local = useCompletedDays(slug);
   const [remote, setRemote] = useState<ReadonlySet<number>>(
     () => new Set(serverProgress ?? []),
@@ -37,6 +41,7 @@ export function PlanDetail({ slug, totalDays, days, serverProgress }: Props) {
       toggleDay(slug, dayIndex);
       return;
     }
+    setSaveFailed(false);
     const wasDone = remote.has(dayIndex);
     const apply = (done: boolean) =>
       setRemote((prev) => {
@@ -57,6 +62,7 @@ export function PlanDetail({ slug, totalDays, days, serverProgress }: Props) {
       .catch(() => {
         // Revertir: la red o la sesión fallaron y el estado visual mentiría.
         apply(wasDone);
+        setSaveFailed(true);
       });
   };
 
@@ -66,6 +72,9 @@ export function PlanDetail({ slug, totalDays, days, serverProgress }: Props) {
         <PlanProgressBar done={completed.size} totalDays={totalDays} />
       </div>
       <PlanDayList days={days} completed={completed} onToggle={onToggle} />
+      <p role="status" className="sr-only">
+        {saveFailed ? tReader('saveError') : ''}
+      </p>
     </>
   );
 }

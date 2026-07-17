@@ -40,7 +40,7 @@ export function PlanDayList({ days, completed, onToggle }: Props) {
               aria-checked={isDone}
               aria-label={t(isDone ? 'unmarkDay' : 'markDay', { day: index + 1 })}
               onClick={() => onToggle(index)}
-              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-colors ${
                 isDone
                   ? 'border-olive-500 bg-olive-500 text-white'
                   : 'border-stone-300 bg-transparent hover:border-lapis-500 dark:border-stone-600'
@@ -59,7 +59,7 @@ export function PlanDayList({ days, completed, onToggle }: Props) {
               )}
             </button>
 
-            <span className="w-14 shrink-0 font-sans text-xs uppercase tracking-wide text-stone-400">
+            <span className="w-14 shrink-0 font-sans text-xs uppercase tracking-wide text-stone-500 dark:text-stone-400">
               {t('day', { day: index + 1 })}
             </span>
 
@@ -70,7 +70,7 @@ export function PlanDayList({ days, completed, onToggle }: Props) {
                   href={reading.href}
                   className={`font-serif text-sm underline-offset-2 hover:underline ${
                     isDone
-                      ? 'text-stone-400 dark:text-stone-500'
+                      ? 'text-stone-500 dark:text-stone-400'
                       : 'text-stone-800 hover:text-lapis-600 dark:text-sand-100'
                   }`}
                 >

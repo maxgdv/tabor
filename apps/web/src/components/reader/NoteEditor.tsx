@@ -32,7 +32,9 @@ export function NoteEditor({ reference, verseText, initialBody, onSave, onDelete
   const canSave = trimmed.length > 0 && trimmed !== initialBody;
 
   // Foco inicial al textarea; Tab queda dentro del diálogo (aria-modal).
+  // Al cerrar, el foco vuelve a donde estaba (WCAG 2.4.3) si sigue en el DOM.
   useEffect(() => {
+    const opener = document.activeElement;
     textareaRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -61,7 +63,10 @@ export function NoteEditor({ reference, verseText, initialBody, onSave, onDelete
       }
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
+    };
   }, [onClose]);
 
   return createPortal(
@@ -92,9 +97,10 @@ export function NoteEditor({ reference, verseText, initialBody, onSave, onDelete
           maxLength={NOTE_MAX_LENGTH}
           rows={6}
           placeholder={t('notePlaceholder')}
-          className="mt-4 w-full resize-y rounded-md border border-sand-200 bg-white/70 p-3 font-sans text-sm text-stone-800 placeholder:text-stone-400 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-700 dark:bg-stone-800/70 dark:text-sand-100"
+          aria-label={t('noteDialog')}
+          className="mt-4 w-full resize-y rounded-md border border-sand-200 bg-white/70 p-3 font-sans text-sm text-stone-800 placeholder:text-stone-500 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-700 dark:bg-stone-800/70 dark:text-sand-100 dark:placeholder:text-stone-400"
         />
-        <p className="mt-1 text-right font-sans text-xs tabular-nums text-stone-400">
+        <p className="mt-1 text-right font-sans text-xs tabular-nums text-stone-500 dark:text-stone-400">
           {body.length} / {NOTE_MAX_LENGTH}
         </p>
 

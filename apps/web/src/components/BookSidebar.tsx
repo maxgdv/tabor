@@ -175,7 +175,7 @@ export function BookSidebar({ books }: Props) {
                 if (!list?.length) return null;
                 return (
                   <div key={category} className="mb-4">
-                    <p className="mb-2 font-sans text-[10px] uppercase tracking-wider text-stone-400">
+                    <p className="mb-2 font-sans text-[10px] uppercase tracking-wider text-stone-500 dark:text-stone-400">
                       {t(`category.${category}`)}
                     </p>
                     <ul className="space-y-0.5">

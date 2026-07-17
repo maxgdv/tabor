@@ -11,7 +11,7 @@ export function PlanProgressBar({ done, totalDays }: { done: number; totalDays: 
 
   if (done === 0) {
     return (
-      <span className="font-sans text-xs text-stone-500">
+      <span className="font-sans text-xs text-stone-500 dark:text-stone-400">
         {t('duration', { count: totalDays })}
       </span>
     );
@@ -20,10 +20,12 @@ export function PlanProgressBar({ done, totalDays }: { done: number; totalDays: 
   return (
     <div className="w-full">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="font-sans text-xs text-stone-500">
+        <span className="font-sans text-xs text-stone-500 dark:text-stone-400">
           {done === totalDays ? t('completed') : t('progress', { done, total: totalDays })}
         </span>
-        <span className="font-sans text-xs tabular-nums text-stone-400">{pct}%</span>
+        <span className="font-sans text-xs tabular-nums text-stone-500 dark:text-stone-400">
+          {pct}%
+        </span>
       </div>
       <div
         role="progressbar"

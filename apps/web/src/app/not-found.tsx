@@ -22,7 +22,9 @@ export default function GlobalNotFound() {
         <main style={{ textAlign: 'center', padding: '2rem' }}>
           <p style={{ letterSpacing: '0.2em', fontSize: '0.75rem' }}>TABOR</p>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>404</h1>
-          <p>Página no encontrada · Page not found</p>
+          <p>
+            Página no encontrada · <span lang="en">Page not found</span>
+          </p>
           <Link href="/es" style={{ color: '#3a5a85' }}>
             proyectotabor.org
           </Link>

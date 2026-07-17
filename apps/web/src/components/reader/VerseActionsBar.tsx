@@ -80,7 +80,7 @@ export function VerseActionsBar({
         <>
           <label
             htmlFor="highlight-label-input"
-            className="shrink-0 font-sans text-xs uppercase tracking-wide text-stone-500"
+            className="shrink-0 font-sans text-xs uppercase tracking-wide text-stone-500 dark:text-stone-400"
           >
             {t('labelName')}
           </label>
@@ -95,7 +95,7 @@ export function VerseActionsBar({
             }}
             maxLength={HIGHLIGHT_LABEL_MAX}
             placeholder={t('labelPlaceholder')}
-            className="min-w-0 flex-1 rounded-md border border-sand-200 bg-white/70 px-2.5 py-1 font-sans text-sm text-stone-800 placeholder:text-stone-400 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100"
+            className="min-w-0 flex-1 rounded-md border border-sand-200 bg-white/70 px-2.5 py-1 font-sans text-sm text-stone-800 placeholder:text-stone-500 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100 dark:placeholder:text-stone-400"
           />
           <button
             type="button"
@@ -114,7 +114,7 @@ export function VerseActionsBar({
         </>
       ) : (
         <>
-          <span className="shrink-0 font-sans text-xs uppercase tracking-wide text-stone-500">
+          <span className="shrink-0 font-sans text-xs uppercase tracking-wide text-stone-500 dark:text-stone-400">
             {refLabel}
           </span>
 

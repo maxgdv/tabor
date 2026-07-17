@@ -61,22 +61,24 @@ export function AuthForm() {
   };
 
   const inputClass =
-    'w-full rounded-md border border-sand-200 bg-white/70 px-3 py-2 font-sans text-sm text-stone-800 placeholder:text-stone-400 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-700 dark:bg-stone-800/70 dark:text-sand-100';
+    'w-full rounded-md border border-sand-200 bg-white/70 px-3 py-2 font-sans text-sm text-stone-800 placeholder:text-stone-500 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-700 dark:bg-stone-800/70 dark:text-sand-100 dark:placeholder:text-stone-400';
 
   return (
     <div className="mx-auto w-full max-w-sm rounded-lg border border-sand-200 bg-white/60 p-6 dark:border-stone-700 dark:bg-stone-800/60">
-      <div role="tablist" aria-label={t('title')} className="mb-6 flex rounded-md bg-sand-100 p-1 dark:bg-stone-800">
+      {/* Toggles con aria-pressed, no role="tab": el patrón tabs completo
+          (tabpanel, flechas, un solo tabstop) sobra para dos modos de un
+          mismo formulario. */}
+      <div role="group" aria-label={t('title')} className="mb-6 flex rounded-md bg-sand-100 p-1 dark:bg-stone-800">
         {(['signin', 'signup'] as const).map((m) => (
           <button
             key={m}
             type="button"
-            role="tab"
-            aria-selected={mode === m}
+            aria-pressed={mode === m}
             onClick={() => switchMode(m)}
             className={`flex-1 rounded px-3 py-1.5 font-sans text-sm font-medium transition-colors ${
               mode === m
                 ? 'bg-white text-stone-800 shadow-sm dark:bg-stone-700 dark:text-sand-100'
-                : 'text-stone-500 hover:text-stone-700 dark:hover:text-sand-200'
+                : 'text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-sand-200'
             }`}
           >
             {t(m === 'signin' ? 'signInTab' : 'signUpTab')}
@@ -128,7 +130,7 @@ export function AuthForm() {
             className={inputClass}
           />
           {mode === 'signup' && (
-            <span className="mt-1 block font-sans text-xs text-stone-500">
+            <span className="mt-1 block font-sans text-xs text-stone-500 dark:text-stone-400">
               {t('passwordHint')}
             </span>
           )}

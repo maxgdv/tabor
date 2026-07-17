@@ -146,9 +146,24 @@ export function BibleMap({ chapter, places }: Props) {
         label.textContent = place.name;
         marker.getElement().appendChild(label);
 
-        marker.getElement().addEventListener('click', () => {
+        // El marcador es operable por teclado (WCAG 2.1.1): focusable, con
+        // nombre accesible, y Enter/Espacio equivalen al click (ir al
+        // versículo). El popup lo alterna MapLibre en el mismo gesto.
+        const markerEl = marker.getElement();
+        markerEl.setAttribute('tabindex', '0');
+        markerEl.setAttribute('role', 'button');
+        markerEl.setAttribute('aria-label', place.name);
+        const goToVerse = () => {
           const firstVerse = chapter.verses.find((v) => v.placeSlugs.includes(place.slug));
           if (firstVerse) requestScrollTo(firstVerse.number);
+        };
+        markerEl.addEventListener('click', goToVerse);
+        markerEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            marker.togglePopup();
+            goToVerse();
+          }
         });
         markersRef.current.set(place.slug, marker);
       }
@@ -203,11 +218,12 @@ export function BibleMap({ chapter, places }: Props) {
     if (targets.length === 0) return;
 
     if (targets.length === 1 && targets[0]) {
+      // Sin `essential: true`: así MapLibre respeta prefers-reduced-motion
+      // y salta sin animación para quien lo pide.
       map.flyTo({
         center: [targets[0].lng, targets[0].lat],
         zoom: 6,
         duration: 1200,
-        essential: true,
       });
     } else {
       const bounds = new maplibregl.LngLatBounds();
@@ -234,7 +250,7 @@ export function BibleMap({ chapter, places }: Props) {
       <div
         ref={containerRef}
         className="h-full w-full"
-        aria-label="Mapa interactivo del capítulo"
+        aria-label={t('mapAria')}
         role="application"
       />
 

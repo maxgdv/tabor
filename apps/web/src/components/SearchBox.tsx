@@ -125,7 +125,7 @@ export function SearchBox() {
   };
 
   return (
-    <div ref={rootRef} className="relative min-w-0 flex-1 max-w-xs sm:max-w-sm">
+    <div ref={rootRef} role="search" className="relative min-w-0 flex-1 max-w-xs sm:max-w-sm">
       {/* Anuncio para lectores de pantalla: el dropdown visual no basta,
           hay que verbalizar cuántos resultados aparecieron. */}
       <div aria-live="polite" className="sr-only">
@@ -163,14 +163,14 @@ export function SearchBox() {
           placeholder={t('placeholder')}
           aria-label={t('label')}
           aria-expanded={open && items.length > 0}
-          aria-controls="search-results"
+          aria-controls={open && (items.length > 0 || showNoResults) ? 'search-results' : undefined}
           aria-autocomplete="list"
           aria-activedescendant={
             open && items[activeIndex] ? `search-item-${activeIndex}` : undefined
           }
           autoComplete="off"
           spellCheck={false}
-          className="w-full rounded-lg border border-sand-200 bg-white/70 py-1.5 pl-8 pr-3 font-sans text-sm text-stone-800 placeholder:text-stone-400 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-700 dark:bg-stone-800/70 dark:text-sand-100"
+          className="w-full rounded-lg border border-sand-200 bg-white/70 py-1.5 pl-8 pr-3 font-sans text-sm text-stone-800 placeholder:text-stone-500 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-700 dark:bg-stone-800/70 dark:text-sand-100 dark:placeholder:text-stone-400"
         />
       </div>
 
@@ -182,7 +182,10 @@ export function SearchBox() {
           className="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-[70vh] overflow-y-auto rounded-lg border border-sand-200 bg-sand-50 py-1 shadow-xl dark:border-stone-700 dark:bg-stone-900 sm:min-w-96"
         >
           {showNoResults && (
-            <li className="px-3 py-2 font-sans text-sm text-stone-500" role="presentation">
+            <li
+              className="px-3 py-2 font-sans text-sm text-stone-500 dark:text-stone-400"
+              role="presentation"
+            >
               {t('noResults', { query: query.trim() })}
             </li>
           )}
@@ -192,7 +195,7 @@ export function SearchBox() {
             return (
               <li key={item.key} role="presentation">
                 {isFirstOfGroup && (
-                  <p className="px-3 pb-1 pt-2 font-sans text-[10px] uppercase tracking-wider text-stone-400">
+                  <p className="px-3 pb-1 pt-2 font-sans text-[10px] uppercase tracking-wider text-stone-500 dark:text-stone-400">
                     {groupLabel[item.group]}
                   </p>
                 )}
@@ -201,6 +204,11 @@ export function SearchBox() {
                   id={`search-item-${index}`}
                   role="option"
                   aria-selected={isActive}
+                  // Fuera del orden de Tab (patrón combobox: se navega con
+                  // flechas desde el input); onClick cubre el Enter/Espacio
+                  // si algo enfoca la opción directamente.
+                  tabIndex={-1}
+                  onClick={() => navigateTo(item)}
                   // pointerdown navega antes de que el input pierda el foco.
                   onPointerDown={(e) => {
                     e.preventDefault();
@@ -214,7 +222,7 @@ export function SearchBox() {
                   <span className="block font-serif text-sm text-stone-800 dark:text-sand-100">
                     {item.title}
                     {item.subtitle && (
-                      <span className="ml-2 font-sans text-xs text-stone-500">
+                      <span className="ml-2 font-sans text-xs text-stone-500 dark:text-stone-400">
                         {item.subtitle}
                       </span>
                     )}

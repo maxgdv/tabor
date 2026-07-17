@@ -59,6 +59,9 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
   // color se aplica por rangos contiguos (un tap solo = comportamiento v1).
   const [selected, setSelected] = useState<ReadonlySet<number>>(() => new Set());
   const [noteEditorVerse, setNoteEditorVerse] = useState<number | null>(null);
+  // Anuncio sr-only cuando un guardado optimista revierte por fallo de red:
+  // el cambio visual solo no basta para un lector de pantalla (WCAG 4.1.3).
+  const [saveFailed, setSaveFailed] = useState(false);
   const [highlights, setHighlights] = useState<ReadonlyMap<number, VerseHighlight>>(
     () =>
       new Map(
@@ -84,6 +87,7 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
    *  por rango contiguo, con actualización optimista y revert conjunto. */
   const applyHighlight = (color: HighlightColor | null, label: string | null) => {
     if (selectedNumbers.length === 0) return;
+    setSaveFailed(false);
     const previous = highlights;
     setHighlights((prev) => {
       const next = new Map(prev);
@@ -111,10 +115,14 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
           if (!res.ok) throw new Error(`highlights → ${res.status}`);
         }),
       ),
-    ).catch(() => setHighlights(previous));
+    ).catch(() => {
+      setHighlights(previous);
+      setSaveFailed(true);
+    });
   };
 
   const saveNote = (verseNumber: number, body: string | null) => {
+    setSaveFailed(false);
     const previous = notes.get(verseNumber) ?? null;
     const set = (value: string | null) =>
       setNotes((prev) => {
@@ -138,13 +146,13 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
       .then((res) => {
         if (!res.ok) throw new Error(`notes → ${res.status}`);
       })
-      .catch(() => set(previous));
+      .catch(() => {
+        set(previous);
+        setSaveFailed(true);
+      });
   };
 
-  // Tap en el texto del versículo = añadirlo/quitarlo de la selección. Los
-  // clicks nacidos en botones interiores (marcador, icono de nota) no cuentan.
-  const onVerseClick = (verseNumber: number) => (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button')) return;
+  const toggleVerseSelection = (verseNumber: number) => {
     setSelected((current) => {
       const next = new Set(current);
       if (next.has(verseNumber)) next.delete(verseNumber);
@@ -153,7 +161,15 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
     });
   };
 
+  // Tap en el texto del versículo = añadirlo/quitarlo de la selección. Los
+  // clicks nacidos en botones interiores (marcador, icono de nota) no cuentan.
+  const onVerseClick = (verseNumber: number) => (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    toggleVerseSelection(verseNumber);
+  };
+
   const toggleBookmark = async (verseNumber: number) => {
+    setSaveFailed(false);
     const wasBookmarked = bookmarks.has(verseNumber);
     const apply = (add: boolean) =>
       setBookmarks((prev) => {
@@ -177,6 +193,7 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
     } catch {
       // Revertir: la red o la sesión fallaron y el estado visual mentiría.
       apply(wasBookmarked);
+      setSaveFailed(true);
     }
   };
 
@@ -225,12 +242,14 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
     }
   }, [chapter, setActiveVerse]);
 
-  // Cuando el mapa pide scroll a un versículo concreto, lo llevamos suavemente.
+  // Cuando el mapa (o la lectura en voz alta) pide scroll a un versículo,
+  // lo llevamos suavemente — salvo que el usuario prefiera menos movimiento.
   useEffect(() => {
     if (scrollTarget == null) return;
     const el = verseRefs.current.get(scrollTarget);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
     }
     clearScrollTarget();
   }, [scrollTarget, clearScrollTarget]);
@@ -252,11 +271,15 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
     </div>
     <div
       ref={containerRef}
-      className="h-full overflow-y-auto px-6 py-10 sm:px-10 sm:py-14"
+      // El pb extra con selección activa evita que la barra de acciones
+      // fija al fondo tape el versículo enfocado (WCAG 2.4.11).
+      className={`h-full overflow-y-auto px-6 py-10 sm:px-10 sm:py-14 ${
+        isAuthed && selected.size > 0 ? 'pb-28 sm:pb-28' : ''
+      }`}
     >
       <article className="mx-auto max-w-reader">
         <header className="mb-10">
-          <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
+          <p className="text-xs uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400">
             {chapter.versionFullName}
           </p>
           <h1 className="mt-2 font-serif text-3xl text-stone-800 dark:text-sand-100">
@@ -275,9 +298,9 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
               data-verse={verse.number}
               data-bookmarked={isAuthed && bookmarks.has(verse.number) ? 'true' : undefined}
               data-selected={selected.has(verse.number) ? 'true' : undefined}
-              // A11y v1 documentada: seleccionar para anotar es por puntero
-              // (hacer focusables ~170 spans degradaría el teclado del
-              // lector); barra y editor sí son 100 % accesibles por teclado.
+              // Seleccionar por puntero es el tap en el texto; por teclado,
+              // Mayús+Intro sobre el número del versículo (hacer focusables
+              // ~170 spans degradaría la navegación por teclado del lector).
               onClick={isAuthed ? onVerseClick(verse.number) : undefined}
               className={`group inline transition-colors ${
                 isAuthed && highlights.has(verse.number)
@@ -290,17 +313,22 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
                 // misma tipografía que el <sup> de invitado, alineado arriba.
                 <button
                   type="button"
-                  onClick={() => toggleBookmark(verse.number)}
+                  // Mayús+click o Mayús+Intro selecciona el versículo para
+                  // resaltar/anotar: es la vía de teclado de la anotación.
+                  onClick={(e) =>
+                    e.shiftKey ? toggleVerseSelection(verse.number) : toggleBookmark(verse.number)
+                  }
                   aria-pressed={bookmarks.has(verse.number)}
-                  aria-label={t(bookmarks.has(verse.number) ? 'bookmarkRemove' : 'bookmarkAdd', {
+                  aria-keyshortcuts="Shift+Enter"
+                  aria-label={`${t(bookmarks.has(verse.number) ? 'bookmarkRemove' : 'bookmarkAdd', {
                     n: verse.number,
-                  })}
-                  className="mr-1 inline-block select-none align-super font-sans text-xs leading-none text-stone-400 transition-colors hover:text-lapis-500 group-data-[active=true]:text-lapis-500 group-data-[bookmarked=true]:font-semibold group-data-[bookmarked=true]:text-sand-500"
+                  })} ${t('selectHint')}`}
+                  className="mr-1 inline-block select-none align-super font-sans text-xs leading-none text-stone-500 transition-colors hover:text-lapis-500 group-data-[active=true]:text-lapis-500 group-data-[bookmarked=true]:font-semibold group-data-[bookmarked=true]:text-sand-600 dark:text-stone-400 dark:group-data-[bookmarked=true]:text-sand-500"
                 >
                   {verse.number}
                 </button>
               ) : (
-                <sup className="mr-1 select-none font-sans text-xs text-stone-400 group-data-[active=true]:text-lapis-500">
+                <sup className="mr-1 select-none font-sans text-xs text-stone-500 group-data-[active=true]:text-lapis-500 dark:text-stone-400">
                   {verse.number}
                 </sup>
               )}
@@ -328,7 +356,7 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
             </span>
           ))}
         </p>
-        <footer className="mt-16 border-t border-sand-200 pt-6 text-xs text-stone-500 dark:border-stone-700">
+        <footer className="mt-16 border-t border-sand-200 pt-6 text-xs text-stone-500 dark:border-stone-700 dark:text-stone-400">
           <p>{chapter.copyright}</p>
           <p className="mt-1">
             {t.rich('geoCredits', {
@@ -364,6 +392,12 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
         onClose={() => setSelected(new Set())}
       />
     )}
+
+    {/* Anuncio de fallos de guardado para lectores de pantalla (el revert
+        optimista es solo visual). role="status" = aria-live polite. */}
+    <p role="status" className="sr-only">
+      {saveFailed ? t('saveError') : ''}
+    </p>
 
     {isAuthed && noteEditorVerse != null && (
       <NoteEditor

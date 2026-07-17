@@ -36,6 +36,8 @@
   --color-olive-700: #46532b;
 
   --color-lapis-200: #ccd8e8;
+  /* Tono claro para texto/enlaces lapis sobre fondos oscuros (≥7:1 en stone-900). */
+  --color-lapis-300: #9db4d1;
   --color-lapis-500: #3a5a85;
   --color-lapis-600: #2c4669;
 

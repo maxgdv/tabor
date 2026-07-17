@@ -79,7 +79,7 @@ export default async function NotesPage({
                       >
                         {item.bookName} {item.chapterNumber}, {item.verseNumber}
                       </Link>
-                      <span className="font-sans text-xs text-stone-400">
+                      <span className="font-sans text-xs text-stone-500 dark:text-stone-400">
                         {dateFormat.format(item.updatedAt)}
                       </span>
                     </div>
