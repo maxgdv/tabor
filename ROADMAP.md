@@ -43,8 +43,16 @@ con ajustes según el aprendizaje real.
   sincronizado con la cuenta.
 - **Lectura en voz alta** con la síntesis de voz del navegador
   (Web Speech API): versículo a versículo desde el versículo actual,
-  con el texto y el mapa siguiendo la lectura. Sin licencias ni
-  backend; disponible también para invitados.
+  con el texto y el mapa siguiendo la lectura, y voz y velocidad
+  configurables. Sin licencias ni backend; también para invitados.
+- **Arte sacro** de dominio público en 18 capítulos sin geografía
+  (Rembrandt, Caravaggio, Durero, Van Eyck…), con atribución y
+  enlace a Wikimedia Commons.
+- **Época histórica del pasaje**: cada capítulo se sitúa en su época
+  (Orígenes → Iglesia primitiva) con una línea de tiempo sobre el
+  mapa, y la primera capa histórica: las **regiones de la Palestina
+  del s. I** (Galilea, Samaria, Judea, Perea, Decápolis…) dibujadas
+  al leer los Evangelios, con límites declarados aproximados.
 
 ---
 
@@ -90,10 +98,11 @@ Ideas que multiplican el valor del lector. Casi todas requieren
   existan.
 - **Planes de lectura**: Año bíblico, Cuaresma, Adviento, Evangelios
   en 30 días, Salmos en 60 días.
-- **Capas históricas múltiples**: Patriarcas, Reinos, Exilio, Imperio
-  Persa, Helenismo, Tiempos de Jesús, Iglesia Primitiva. Hoy solo
-  hay una capa implícita ("actual").
-- **Línea de tiempo interactiva** que mueve la capa histórica del mapa.
+- **Más capas históricas**: la época por pasaje y las regiones del
+  s. I ya existen; faltan overlays para el resto de épocas (reinos
+  de Israel y Judá, imperios, viajes de Pablo…).
+- **Línea de tiempo interactiva** que permita cambiar la capa
+  histórica del mapa (hoy la línea de tiempo es informativa).
 - **Lectura comparada** de varias versiones en paralelo.
 - **Modo presentación / catequesis** (pantalla grande, controles
   simplificados).

@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import type { Chapter, Place } from '@/lib/bible';
+import type { PeriodId } from '@/lib/periods';
 
 function MapLoading() {
   const t = useTranslations('reader');
@@ -20,7 +21,11 @@ const BibleMap = dynamic(() => import('./BibleMap').then((m) => m.BibleMap), {
   loading: MapLoading,
 });
 
-type Props = { chapter: Chapter; places: Place[] };
+type Props = {
+  chapter: Chapter;
+  places: Place[];
+  period: PeriodId | null;
+};
 
 export function BibleMapClient(props: Props) {
   return <BibleMap {...props} />;

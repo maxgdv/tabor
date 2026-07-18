@@ -132,6 +132,7 @@
     "mapAria": "Interactive chapter map",
     "mapLoading": "Loading map…",
     "artCredit": "Public domain · Wikimedia Commons",
+    "regionsAttribution": "1st-century regions: approximate boundaries",
     "verseActions": "Verse {n}",
     "verseActionsRange": "Verses {refs}",
     "listenGroup": "Read aloud",
@@ -175,6 +176,23 @@
     "noteDelete": "Delete note",
     "noteCancel": "Cancel",
     "close": "Close"
+  },
+  "periods": {
+    "bc": "BC",
+    "ad": "AD",
+    "beforeAbout": "before c. {year} BC",
+    "name": {
+      "origins": "Origins",
+      "patriarchs": "Patriarchs",
+      "exodus": "Exodus and conquest",
+      "judges": "Judges",
+      "kingdoms": "Kingdoms",
+      "exile": "Exile",
+      "persia": "Persian Empire",
+      "hellenism": "Hellenism",
+      "jesus": "Times of Jesus",
+      "church": "Early Church"
+    }
   },
   "books": {
     "title": "Bible",

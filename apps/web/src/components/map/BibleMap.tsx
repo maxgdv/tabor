@@ -8,13 +8,17 @@ import maplibregl, {
   type StyleSpecification,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useReaderStore } from '@/lib/reader-store';
 import type { Chapter, Place } from '@/lib/bible';
+import { JESUS_REGIONS } from '@/lib/regions-jesus';
+import type { PeriodId } from '@/lib/periods';
 
 type Props = {
   chapter: Chapter;
   places: Place[];
+  /** Época del capítulo; con 'jesus' el mapa pinta las regiones del s. I. */
+  period: PeriodId | null;
 };
 
 // Estilo vectorial gratuito y open-source. Para el MVP basta y no requiere
@@ -25,6 +29,9 @@ const VECTOR_STYLE = 'https://demotiles.maplibre.org/style.json';
 // uso no comercial, atribución obligatoria visible.
 const SATELLITE_STYLE: StyleSpecification = {
   version: 8,
+  // Glyphs para capas de texto propias (rótulos de regiones históricas);
+  // el estilo vectorial de demotiles ya trae los suyos.
+  glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
   sources: {
     esri: {
       type: 'raster',
@@ -76,7 +83,7 @@ function setStoredStyle(s: MapStyleId): void {
 }
 
 // --- Componente --------------------------------------------------------
-export function BibleMap({ chapter, places }: Props) {
+export function BibleMap({ chapter, places, period }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Map<string, Marker>>(new Map());
@@ -87,6 +94,56 @@ export function BibleMap({ chapter, places }: Props) {
   const activeVerse = useReaderStore((s) => s.activeVerseNumber);
   const requestScrollTo = useReaderStore((s) => s.requestScrollTo);
   const t = useTranslations('reader');
+  const locale = useLocale();
+
+  // Capa histórica «Tiempos de Jesús»: regiones aproximadas del s. I.
+  // Los cambios de estilo borran las capas propias, así que se re-añade
+  // tras cada 'style.load'. try/catch: un fallo aquí no debe tumbar el mapa.
+  const addRegionLayers = (map: MapLibreMap) => {
+    if (period !== 'jesus' || map.getSource('tabor-regions')) return;
+    try {
+      map.addSource('tabor-regions', {
+        type: 'geojson',
+        data: JESUS_REGIONS,
+        attribution: t('regionsAttribution'),
+      });
+      map.addLayer({
+        id: 'tabor-regions-fill',
+        type: 'fill',
+        source: 'tabor-regions',
+        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.14 },
+      });
+      map.addLayer({
+        id: 'tabor-regions-line',
+        type: 'line',
+        source: 'tabor-regions',
+        paint: {
+          'line-color': ['get', 'color'],
+          'line-opacity': 0.55,
+          'line-width': 1.2,
+          'line-dasharray': [2, 2],
+        },
+      });
+      map.addLayer({
+        id: 'tabor-regions-label',
+        type: 'symbol',
+        source: 'tabor-regions',
+        layout: {
+          'text-field': ['get', locale === 'en' ? 'nameEn' : 'nameEs'],
+          'text-size': 13,
+          'text-letter-spacing': 0.15,
+          'text-transform': 'uppercase',
+        },
+        paint: {
+          'text-color': ['get', 'color'],
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 1.4,
+        },
+      });
+    } catch {
+      // Estilo sin glyphs u otra limitación: el mapa sigue sin la capa.
+    }
+  };
   // Último estilo aplicado al mapa vivo. Evita el setStyle redundante del
   // montaje: setStyle antes de que el estilo inicial termine de cargar
   // fuerza un "rebuild from scratch" y puede perder el evento 'load' (y con
@@ -120,6 +177,7 @@ export function BibleMap({ chapter, places }: Props) {
     appliedStyleRef.current = mapStyle;
 
     map.on('load', () => {
+      addRegionLayers(map);
       // En modo overview no añadimos marcadores ni hacemos fitBounds:
       // queremos una vista panorámica fija del mundo bíblico.
       if (isOverview) return;
@@ -204,11 +262,14 @@ export function BibleMap({ chapter, places }: Props) {
   }, [chapter, places, requestScrollTo, isOverview]);
 
   // Cambio de estilo en caliente (no recrea el mapa, conserva marcadores).
+  // Las capas propias (regiones) sí se pierden con el estilo: re-añadir.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || appliedStyleRef.current === mapStyle) return;
     appliedStyleRef.current = mapStyle;
     map.setStyle(mapStyle === 'satellite' ? SATELLITE_STYLE : VECTOR_STYLE);
+    map.once('style.load', () => addRegionLayers(map));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapStyle]);
 
   // Vuela al versículo activo (solo en modo específico).

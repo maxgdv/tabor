@@ -132,6 +132,7 @@
     "mapAria": "Mapa interactivo del capítulo",
     "mapLoading": "Cargando mapa…",
     "artCredit": "Dominio público · Wikimedia Commons",
+    "regionsAttribution": "Regiones del s. I: límites aproximados",
     "verseActions": "Versículo {n}",
     "verseActionsRange": "Versículos {refs}",
     "listenGroup": "Lectura en voz alta",
@@ -175,6 +176,23 @@
     "noteDelete": "Borrar nota",
     "noteCancel": "Cancelar",
     "close": "Cerrar"
+  },
+  "periods": {
+    "bc": "a. C.",
+    "ad": "d. C.",
+    "beforeAbout": "antes de c. {year} a. C.",
+    "name": {
+      "origins": "Orígenes",
+      "patriarchs": "Patriarcas",
+      "exodus": "Éxodo y conquista",
+      "judges": "Jueces",
+      "kingdoms": "Reinos",
+      "exile": "Exilio",
+      "persia": "Imperio persa",
+      "hellenism": "Helenismo",
+      "jesus": "Tiempos de Jesús",
+      "church": "Iglesia primitiva"
+    }
   },
   "books": {
     "title": "Biblia",

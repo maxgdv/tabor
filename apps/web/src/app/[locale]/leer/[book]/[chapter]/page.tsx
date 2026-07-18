@@ -10,8 +10,10 @@ import { SITE_URL, localeAlternates, openGraphFor, verseSnippet } from '@/lib/se
 import { ChapterReader } from '@/components/reader/ChapterReader';
 import { ActiveVerseMarker } from '@/components/reader/ActiveVerseMarker';
 import { ChapterArt } from '@/components/reader/ChapterArt';
+import { PeriodTimeline } from '@/components/reader/PeriodTimeline';
 import { BibleMapClient } from '@/components/map/BibleMapClient';
 import { getChapterArt } from '@/lib/chapter-art';
+import { getPeriod } from '@/lib/periods';
 
 const VERSION_BY_LOCALE: Record<string, string> = {
   es: 'STRA',
@@ -102,6 +104,7 @@ export default async function ReaderPage({ params }: { params: Params }) {
   // si no, cae al mapa panorámico con badge (comportamiento de siempre).
   const art =
     places.length === 0 ? getChapterArt(chapterData.bookCanonicalId, chapterData.number) : null;
+  const period = getPeriod(chapterData.bookCanonicalId, chapterData.number);
 
   // Datos estructurados schema.org: Google los usa para mostrar la ruta
   // "Biblia › Génesis › 12" en los resultados en vez de la URL cruda.
@@ -230,7 +233,14 @@ export default async function ReaderPage({ params }: { params: Params }) {
           {/* Con lugares: mapa sincronizado. Sin lugares: arte sacro del
               pasaje si está curado; si no, la vista panorámica con badge
               explicativo (gestionado en BibleMap). */}
-          {art ? <ChapterArt art={art} /> : <BibleMapClient chapter={chapterData} places={places} />}
+          {art ? (
+            <ChapterArt art={art} />
+          ) : (
+            <>
+              <BibleMapClient chapter={chapterData} places={places} period={period} />
+              {period && <PeriodTimeline period={period} />}
+            </>
+          )}
         </section>
       </div>
     </div>
