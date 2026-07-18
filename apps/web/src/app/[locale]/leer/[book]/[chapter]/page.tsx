@@ -5,11 +5,18 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { getAdjacentChapter, getBookmarkedVerseNumbers, getChapterAnnotations } from '@tabor/db';
 import { auth } from '@/lib/auth';
 import { Link } from '@/i18n/routing';
-import { getChapter, getPlacesForChapter } from '@/lib/bible';
+import {
+  getChapter,
+  getPlacesForChapter,
+  getSecondaryChapter,
+  resolveCompare,
+  versionForLocale,
+} from '@/lib/bible';
 import { SITE_URL, localeAlternates, openGraphFor, verseSnippet } from '@/lib/seo';
 import { ChapterReader } from '@/components/reader/ChapterReader';
 import { ActiveVerseMarker } from '@/components/reader/ActiveVerseMarker';
 import { ChapterArt } from '@/components/reader/ChapterArt';
+import { CompareSelector } from '@/components/reader/CompareSelector';
 import { PeriodTimeline } from '@/components/reader/PeriodTimeline';
 import { BibleMapClient } from '@/components/map/BibleMapClient';
 import { getChapterArt } from '@/lib/chapter-art';
@@ -52,8 +59,14 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
-export default async function ReaderPage({ params }: { params: Params }) {
-  const { locale, book, chapter } = await params;
+export default async function ReaderPage({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const [{ locale, book, chapter }, query] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
 
   const chapterNumber = Number.parseInt(chapter, 10);
@@ -62,9 +75,16 @@ export default async function ReaderPage({ params }: { params: Params }) {
   const versionCode = VERSION_BY_LOCALE[locale] ?? 'STRA';
   const upperBook = book.toUpperCase();
 
-  // Capítulo, vecinos, sesión y traducciones — todo en paralelo.
-  const [chapterData, prev, next, session, tBooks, tReader] = await Promise.all([
+  // Lectura comparada: ?vs=vul|stra|cpdv (saneado; nunca contra sí misma).
+  const vsParam = typeof query.vs === 'string' ? query.vs : undefined;
+  const compareOption = resolveCompare(vsParam, versionForLocale(locale));
+  // prev/next conservan el modo comparado.
+  const vsSuffix = compareOption ? `?vs=${compareOption.param}` : '';
+
+  // Capítulo, vecinos, texto comparado, sesión y traducciones — en paralelo.
+  const [chapterData, secondary, prev, next, session, tBooks, tReader] = await Promise.all([
     getChapter(book, chapterNumber, locale),
+    compareOption ? getSecondaryChapter(upperBook, chapterNumber, compareOption) : null,
     getAdjacentChapter({
       bookCanonicalId: upperBook,
       chapterNumber,
@@ -168,7 +188,7 @@ export default async function ReaderPage({ params }: { params: Params }) {
           <nav aria-label={tReader('sectionNav')} className="flex items-center gap-1.5 font-sans text-sm">
             {prev ? (
               <Link
-                href={`/leer/${prev.bookUrlSegment}/${prev.chapterNumber}`}
+                href={`/leer/${prev.bookUrlSegment}/${prev.chapterNumber}${vsSuffix}`}
                 aria-label={tReader('ariaPrev')}
                 className="inline-flex items-center gap-1.5 rounded-md border border-sand-200 bg-white/60 px-3 py-1.5 text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-700 dark:bg-stone-800/60 dark:text-sand-100"
               >
@@ -187,7 +207,7 @@ export default async function ReaderPage({ params }: { params: Params }) {
             )}
             {next ? (
               <Link
-                href={`/leer/${next.bookUrlSegment}/${next.chapterNumber}`}
+                href={`/leer/${next.bookUrlSegment}/${next.chapterNumber}${vsSuffix}`}
                 aria-label={tReader('ariaNext')}
                 className="inline-flex items-center gap-1.5 rounded-md border border-sand-200 bg-white/60 px-3 py-1.5 text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-700 dark:bg-stone-800/60 dark:text-sand-100"
               >
@@ -222,10 +242,27 @@ export default async function ReaderPage({ params }: { params: Params }) {
           {/* key: al navegar entre capítulos el componente se remonta y el
               estado local de marcadores arranca limpio desde el server. */}
           <ChapterReader
-            key={`${chapterData.bookCanonicalId}-${chapterData.number}`}
+            key={`${chapterData.bookCanonicalId}-${chapterData.number}-${secondary?.versionCode ?? ''}`}
             chapter={chapterData}
             initialBookmarks={initialBookmarks}
             initialAnnotations={initialAnnotations}
+            secondary={
+              secondary
+                ? {
+                    versionFullName: secondary.versionFullName,
+                    copyright: secondary.copyright,
+                    lang: secondary.lang,
+                    byVerse: secondary.byVerse,
+                  }
+                : null
+            }
+            headerExtra={
+              <CompareSelector
+                basePath={`/leer/${book.toLowerCase()}/${chapterNumber}`}
+                primaryVersionCode={versionForLocale(locale)}
+                activeCode={secondary?.versionCode ?? null}
+              />
+            }
           />
           <ActiveVerseMarker />
         </section>

@@ -133,6 +133,13 @@
     "mapLoading": "Loading map…",
     "artCredit": "Public domain · Wikimedia Commons",
     "regionsAttribution": "Historical layers: approximate boundaries and routes",
+    "compare": {
+      "label": "Compare",
+      "none": "Reading only",
+      "stra": "Spanish (Straubinger)",
+      "cpdv": "English (CPDV)",
+      "vul": "Latin (Vulgate)"
+    },
     "verseActions": "Verse {n}",
     "verseActionsRange": "Verses {refs}",
     "listenGroup": "Read aloud",

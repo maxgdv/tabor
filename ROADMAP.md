@@ -50,9 +50,14 @@ con ajustes según el aprendizaje real.
   enlace a Wikimedia Commons.
 - **Época histórica del pasaje**: cada capítulo se sitúa en su época
   (Orígenes → Iglesia primitiva) con una línea de tiempo sobre el
-  mapa, y la primera capa histórica: las **regiones de la Palestina
-  del s. I** (Galilea, Samaria, Judea, Perea, Decápolis…) dibujadas
-  al leer los Evangelios, con límites declarados aproximados.
+  mapa, y capas históricas dibujadas sobre él: regiones de la
+  Palestina del s. I en los Evangelios, reinos de Israel y Judá en
+  los libros históricos, y la ruta tradicional del Éxodo — siempre
+  con límites declarados aproximados.
+- **Vulgata Clementina** (dominio público, 73 libros) como tercera
+  versión, y **lectura comparada**: cualquier capítulo puede leerse
+  con una segunda versión intercalada por versículo — español,
+  inglés o latín.
 
 ---
 
@@ -103,7 +108,6 @@ Ideas que multiplican el valor del lector. Casi todas requieren
   de Israel y Judá, imperios, viajes de Pablo…).
 - **Línea de tiempo interactiva** que permita cambiar la capa
   histórica del mapa (hoy la línea de tiempo es informativa).
-- **Lectura comparada** de varias versiones en paralelo.
 - **Modo presentación / catequesis** (pantalla grande, controles
   simplificados).
 

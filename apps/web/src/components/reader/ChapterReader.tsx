@@ -22,6 +22,16 @@ export type ChapterAnnotations = {
 
 type VerseHighlight = { color: HighlightColor; label: string | null };
 
+/** Contenedor de versículos: texto corrido o bloques comparados. */
+function VersesContainer({ compare, children }: { compare: boolean; children: React.ReactNode }) {
+  const className = 'font-serif text-lg leading-loose text-stone-800 dark:text-sand-100';
+  return compare ? (
+    <div className={`${className} space-y-4`}>{children}</div>
+  ) : (
+    <p className={className}>{children}</p>
+  );
+}
+
 /** Valor común de todos los elementos, o `null` si difieren o no hay ninguno. */
 function uniformValue<T>(values: Array<T | null>): T | null {
   if (values.length === 0) return null;
@@ -29,15 +39,33 @@ function uniformValue<T>(values: Array<T | null>): T | null {
   return values.every((v) => v === first) ? (first ?? null) : null;
 }
 
+export type SecondaryText = {
+  versionFullName: string;
+  copyright: string;
+  /** BCP-47 del texto comparado (a11y: pronunciación del lector de pantalla). */
+  lang: string;
+  byVerse: Record<number, string>;
+};
+
 type Props = {
   chapter: Chapter;
   /** Versículos marcados por el usuario; `null` = invitado (sin UI de marcadores). */
   initialBookmarks: number[] | null;
   /** Resaltados y notas del capítulo; `null` = invitado. */
   initialAnnotations: ChapterAnnotations | null;
+  /** Lectura comparada: segunda versión intercalada por versículo. */
+  secondary?: SecondaryText | null;
+  /** Selector de comparación (server component inyectado desde la página). */
+  headerExtra?: React.ReactNode;
 };
 
-export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }: Props) {
+export function ChapterReader({
+  chapter,
+  initialBookmarks,
+  initialAnnotations,
+  secondary = null,
+  headerExtra,
+}: Props) {
   const t = useTranslations('reader');
   const setActiveVerse = useReaderStore((s) => s.setActiveVerse);
   const scrollTarget = useReaderStore((s) => s.scrollTarget);
@@ -281,12 +309,18 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
         <header className="mb-10">
           <p className="text-xs uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400">
             {chapter.versionFullName}
+            {secondary && (
+              <span className="normal-case tracking-normal"> · {secondary.versionFullName}</span>
+            )}
           </p>
           <h1 className="mt-2 font-serif text-3xl text-stone-800 dark:text-sand-100">
             {chapter.bookName} {chapter.number}
           </h1>
+          {headerExtra && <div className="mt-3">{headerExtra}</div>}
         </header>
-        <p className="font-serif text-lg leading-loose text-stone-800 dark:text-sand-100">
+        {/* En modo comparado cada versículo es un bloque (primario +
+            secundario debajo); en lectura normal, texto corrido. */}
+        <VersesContainer compare={secondary != null}>
           {chapter.verses.map((verse) => (
             <span
               key={verse.number}
@@ -302,7 +336,7 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
               // Mayús+Intro sobre el número del versículo (hacer focusables
               // ~170 spans degradaría la navegación por teclado del lector).
               onClick={isAuthed ? onVerseClick(verse.number) : undefined}
-              className={`group inline transition-colors ${
+              className={`group ${secondary ? 'block' : 'inline'} transition-colors ${
                 isAuthed && highlights.has(verse.number)
                   ? `${HIGHLIGHT_CLASSES[highlights.get(verse.number)!.color]} box-decoration-clone rounded-sm`
                   : ''
@@ -353,11 +387,20 @@ export function ChapterReader({ chapter, initialBookmarks, initialAnnotations }:
                 </button>
               )}
               {verse.text}{' '}
+              {secondary && (
+                <span
+                  lang={secondary.lang}
+                  className="mt-1 block border-l-2 border-sand-200 pl-3 font-serif text-[1.05rem] italic leading-relaxed text-stone-600 dark:border-stone-700 dark:text-stone-400"
+                >
+                  {secondary.byVerse[verse.number] ?? '—'}
+                </span>
+              )}
             </span>
           ))}
-        </p>
+        </VersesContainer>
         <footer className="mt-16 border-t border-sand-200 pt-6 text-xs text-stone-500 dark:border-stone-700 dark:text-stone-400">
           <p>{chapter.copyright}</p>
+          {secondary && <p className="mt-1">{secondary.copyright}</p>}
           <p className="mt-1">
             {t.rich('geoCredits', {
               link: (chunks) => (

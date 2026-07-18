@@ -133,6 +133,13 @@
     "mapLoading": "Cargando mapa…",
     "artCredit": "Dominio público · Wikimedia Commons",
     "regionsAttribution": "Capas históricas: límites y recorridos aproximados",
+    "compare": {
+      "label": "Comparar",
+      "none": "Solo lectura",
+      "stra": "Español (Straubinger)",
+      "cpdv": "English (CPDV)",
+      "vul": "Latín (Vulgata)"
+    },
     "verseActions": "Versículo {n}",
     "verseActionsRange": "Versículos {refs}",
     "listenGroup": "Lectura en voz alta",

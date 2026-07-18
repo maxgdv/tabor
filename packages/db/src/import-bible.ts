@@ -28,7 +28,7 @@ const url =
 // --- Catálogo de versiones que sabemos importar ---------------------------
 type VersionSpec = {
   code: string;
-  language: 'es' | 'en';
+  language: 'es' | 'en' | 'la';
   fullName: string;
   copyright: string;
   file: string; // nombre del archivo dentro de data/bible-sources/
@@ -49,6 +49,96 @@ const VERSIONS: Record<string, VersionSpec> = {
     copyright: 'Public domain — Catholic Public Domain Version (Ronald L. Conte Jr.)',
     file: 'CPDV.json',
   },
+  // La versificación clementina de los Salmos coincide con la de STRA/CPDV
+  // (numeración greco-latina: el «Dominus regit me» es el 22), así que los
+  // huecos canónicos alinean sin renumerar. El apéndice clementino (Oratio
+  // Manassae, III-IV Esdrae, Ps 151, Laodicenses) cae solo: no está en
+  // BOOK_META y el importador lo descarta con aviso.
+  VUL: {
+    code: 'VUL',
+    language: 'la',
+    fullName: 'Biblia Sacra Vulgata (Clementina)',
+    copyright: 'Dominio público — Vulgata Clementina (Clementine Text Project)',
+    file: 'VulgClementine.json',
+  },
+};
+
+// Títulos latinos de los libros (la Vulgata no es un locale de la interfaz;
+// book_translation los quiere para cabeceras y referencias).
+const LATIN_NAMES: Record<string, { name: string; short: string }> = {
+  GEN: { name: 'Genesis', short: 'Gn' },
+  EXO: { name: 'Exodus', short: 'Ex' },
+  LEV: { name: 'Leviticus', short: 'Lv' },
+  NUM: { name: 'Numeri', short: 'Nm' },
+  DEU: { name: 'Deuteronomium', short: 'Dt' },
+  JOS: { name: 'Josue', short: 'Jos' },
+  JDG: { name: 'Judices', short: 'Jdc' },
+  RUT: { name: 'Ruth', short: 'Rt' },
+  '1SA': { name: '1 Samuelis', short: '1 Sm' },
+  '2SA': { name: '2 Samuelis', short: '2 Sm' },
+  '1KI': { name: '1 Regum', short: '1 Rg' },
+  '2KI': { name: '2 Regum', short: '2 Rg' },
+  '1CH': { name: '1 Paralipomenon', short: '1 Par' },
+  '2CH': { name: '2 Paralipomenon', short: '2 Par' },
+  EZR: { name: 'Esdrae', short: 'Esd' },
+  NEH: { name: 'Nehemiae', short: 'Neh' },
+  TOB: { name: 'Tobiae', short: 'Tb' },
+  JDT: { name: 'Judith', short: 'Jdt' },
+  EST: { name: 'Esther', short: 'Est' },
+  '1MA': { name: '1 Machabaeorum', short: '1 Mcc' },
+  '2MA': { name: '2 Machabaeorum', short: '2 Mcc' },
+  JOB: { name: 'Job', short: 'Job' },
+  PSA: { name: 'Psalmi', short: 'Ps' },
+  PRO: { name: 'Proverbia', short: 'Prv' },
+  ECC: { name: 'Ecclesiastes', short: 'Eccl' },
+  SNG: { name: 'Canticum Canticorum', short: 'Ct' },
+  WIS: { name: 'Sapientia', short: 'Sap' },
+  SIR: { name: 'Ecclesiasticus', short: 'Eccli' },
+  ISA: { name: 'Isaias', short: 'Is' },
+  JER: { name: 'Jeremias', short: 'Jer' },
+  LAM: { name: 'Lamentationes', short: 'Lam' },
+  BAR: { name: 'Baruch', short: 'Bar' },
+  EZK: { name: 'Ezechiel', short: 'Ez' },
+  DAN: { name: 'Daniel', short: 'Dn' },
+  HOS: { name: 'Osee', short: 'Os' },
+  JOL: { name: 'Joel', short: 'Joel' },
+  AMO: { name: 'Amos', short: 'Am' },
+  OBA: { name: 'Abdias', short: 'Abd' },
+  JON: { name: 'Jonas', short: 'Jon' },
+  MIC: { name: 'Michaeas', short: 'Mch' },
+  NAM: { name: 'Nahum', short: 'Nah' },
+  HAB: { name: 'Habacuc', short: 'Hab' },
+  ZEP: { name: 'Sophonias', short: 'Soph' },
+  HAG: { name: 'Aggaeus', short: 'Agg' },
+  ZEC: { name: 'Zacharias', short: 'Zach' },
+  MAL: { name: 'Malachias', short: 'Mal' },
+  MAT: { name: 'Matthaeus', short: 'Mt' },
+  MRK: { name: 'Marcus', short: 'Mc' },
+  LUK: { name: 'Lucas', short: 'Lc' },
+  JHN: { name: 'Joannes', short: 'Jo' },
+  ACT: { name: 'Actus Apostolorum', short: 'Act' },
+  ROM: { name: 'Ad Romanos', short: 'Rom' },
+  '1CO': { name: '1 Ad Corinthios', short: '1 Cor' },
+  '2CO': { name: '2 Ad Corinthios', short: '2 Cor' },
+  GAL: { name: 'Ad Galatas', short: 'Gal' },
+  EPH: { name: 'Ad Ephesios', short: 'Eph' },
+  PHP: { name: 'Ad Philippenses', short: 'Phil' },
+  COL: { name: 'Ad Colossenses', short: 'Col' },
+  '1TH': { name: '1 Ad Thessalonicenses', short: '1 Thess' },
+  '2TH': { name: '2 Ad Thessalonicenses', short: '2 Thess' },
+  '1TI': { name: '1 Ad Timotheum', short: '1 Tim' },
+  '2TI': { name: '2 Ad Timotheum', short: '2 Tim' },
+  TIT: { name: 'Ad Titum', short: 'Tit' },
+  PHM: { name: 'Ad Philemonem', short: 'Phlm' },
+  HEB: { name: 'Ad Hebraeos', short: 'Hebr' },
+  JAS: { name: 'Jacobi', short: 'Jac' },
+  '1PE': { name: '1 Petri', short: '1 Pt' },
+  '2PE': { name: '2 Petri', short: '2 Pt' },
+  '1JN': { name: '1 Joannis', short: '1 Jo' },
+  '2JN': { name: '2 Joannis', short: '2 Jo' },
+  '3JN': { name: '3 Joannis', short: '3 Jo' },
+  JUD: { name: 'Judae', short: 'Jud' },
+  REV: { name: 'Apocalypsis', short: 'Apoc' },
 };
 
 // --- Forma del JSON de origen ---------------------------------------------
@@ -121,7 +211,12 @@ async function importVersion(
       console.warn(`  ! libro ${meta.canonicalId} ausente de la tabla book — ¿falta el seed?`);
       continue;
     }
-    const loc = spec.language === 'es' ? meta.es : meta.en;
+    const loc =
+      spec.language === 'la'
+        ? (LATIN_NAMES[meta.canonicalId] ?? meta.en)
+        : spec.language === 'es'
+          ? meta.es
+          : meta.en;
     bookTranslations.push({ bookId, versionId: ver.id, name: loc.name, shortName: loc.short });
     for (const ch of sb.chapters) {
       chapterKeys.push({ bookId, number: ch.chapter });

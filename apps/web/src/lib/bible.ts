@@ -47,6 +47,60 @@ export function versionForLocale(locale: string): string {
   return map[locale] ?? 'STRA';
 }
 
+// --- Lectura comparada ------------------------------------------------------
+// Versiones disponibles como segunda columna. `param` viaja en ?vs= y `lang`
+// alimenta el atributo lang del texto secundario (a11y: pronunciación).
+
+export type CompareOption = { code: string; param: string; lang: string };
+
+export const COMPARE_VERSIONS: CompareOption[] = [
+  { code: 'STRA', param: 'stra', lang: 'es' },
+  { code: 'CPDV', param: 'cpdv', lang: 'en' },
+  { code: 'VUL', param: 'vul', lang: 'la' },
+];
+
+/** Opción de comparación válida para `?vs=`, o `null` (incluye "contra sí misma"). */
+export function resolveCompare(
+  param: string | undefined,
+  primaryVersionCode: string,
+): CompareOption | null {
+  if (!param) return null;
+  const option = COMPARE_VERSIONS.find((v) => v.param === param.toLowerCase());
+  return option && option.code !== primaryVersionCode ? option : null;
+}
+
+export type SecondaryChapter = {
+  versionCode: string;
+  versionFullName: string;
+  copyright: string;
+  lang: string;
+  /** Texto por número de versículo (los huecos de versificación quedan fuera). */
+  byVerse: Record<number, string>;
+};
+
+/** Texto de un capítulo en la versión de comparación, alineado por versículo. */
+export async function getSecondaryChapter(
+  bookCanonicalId: string,
+  number: number,
+  option: CompareOption,
+): Promise<SecondaryChapter | null> {
+  const text = await getChapterText({
+    bookCanonicalId: bookCanonicalId.toUpperCase(),
+    chapterNumber: number,
+    versionCode: option.code,
+  });
+  if (!text) return null;
+  const byVerse: Record<number, string> = {};
+  for (const v of text.verses) byVerse[v.number] = v.text;
+  return {
+    versionCode: text.versionCode,
+    versionFullName: text.versionFullName,
+    copyright: text.copyright,
+    lang: option.lang,
+    byVerse,
+  };
+}
+
 export type Verse = {
   number: number;
   text: string;
