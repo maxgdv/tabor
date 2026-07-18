@@ -142,6 +142,15 @@
     "listenResume": "Reanudar la lectura",
     "listenResumeShort": "Reanudar",
     "listenStop": "Detener la lectura",
+    "listenSettings": "Ajustes de la lectura en voz alta",
+    "listenVoice": "Voz",
+    "listenRate": "Velocidad",
+    "rate": {
+      "0_9": "Pausada",
+      "1": "Normal",
+      "1_15": "Ágil",
+      "1_3": "Rápida"
+    },
     "highlightGroup": "Resaltar con color",
     "highlightRemove": "Quitar el resaltado",
     "labelName": "Etiqueta",

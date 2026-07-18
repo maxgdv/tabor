@@ -142,6 +142,15 @@
     "listenResume": "Resume reading",
     "listenResumeShort": "Resume",
     "listenStop": "Stop reading",
+    "listenSettings": "Read-aloud settings",
+    "listenVoice": "Voice",
+    "listenRate": "Speed",
+    "rate": {
+      "0_9": "Unhurried",
+      "1": "Normal",
+      "1_15": "Brisk",
+      "1_3": "Fast"
+    },
     "highlightGroup": "Highlight with color",
     "highlightRemove": "Remove highlight",
     "labelName": "Label",
