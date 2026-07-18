@@ -11,7 +11,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { useLocale, useTranslations } from 'next-intl';
 import { useReaderStore } from '@/lib/reader-store';
 import type { Chapter, Place } from '@/lib/bible';
-import { JESUS_REGIONS } from '@/lib/regions-jesus';
+import { HISTORICAL_OVERLAYS } from '@/lib/historical-overlays';
 import type { PeriodId } from '@/lib/periods';
 
 type Props = {
@@ -96,32 +96,48 @@ export function BibleMap({ chapter, places, period }: Props) {
   const t = useTranslations('reader');
   const locale = useLocale();
 
-  // Capa histórica «Tiempos de Jesús»: regiones aproximadas del s. I.
+  // Capa histórica de la época del capítulo (regiones, rutas, hitos).
   // Los cambios de estilo borran las capas propias, así que se re-añade
   // tras cada 'style.load'. try/catch: un fallo aquí no debe tumbar el mapa.
   const addRegionLayers = (map: MapLibreMap) => {
-    if (period !== 'jesus' || map.getSource('tabor-regions')) return;
+    const overlay = period ? HISTORICAL_OVERLAYS[period] : undefined;
+    if (!overlay || map.getSource('tabor-regions')) return;
     try {
       map.addSource('tabor-regions', {
         type: 'geojson',
-        data: JESUS_REGIONS,
+        data: overlay,
         attribution: t('regionsAttribution'),
       });
       map.addLayer({
         id: 'tabor-regions-fill',
         type: 'fill',
         source: 'tabor-regions',
+        filter: ['==', ['geometry-type'], 'Polygon'],
         paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.14 },
       });
+      // Contornos de regiones y rutas comparten capa (discontinua).
       map.addLayer({
         id: 'tabor-regions-line',
         type: 'line',
         source: 'tabor-regions',
+        filter: ['!=', ['geometry-type'], 'Point'],
         paint: {
           'line-color': ['get', 'color'],
-          'line-opacity': 0.55,
-          'line-width': 1.2,
+          'line-opacity': 0.6,
+          'line-width': 1.4,
           'line-dasharray': [2, 2],
+        },
+      });
+      map.addLayer({
+        id: 'tabor-regions-point',
+        type: 'circle',
+        source: 'tabor-regions',
+        filter: ['==', ['geometry-type'], 'Point'],
+        paint: {
+          'circle-radius': 3.5,
+          'circle-color': ['get', 'color'],
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 1.2,
         },
       });
       map.addLayer({
@@ -130,14 +146,19 @@ export function BibleMap({ chapter, places, period }: Props) {
         source: 'tabor-regions',
         layout: {
           'text-field': ['get', locale === 'en' ? 'nameEn' : 'nameEs'],
-          'text-size': 13,
-          'text-letter-spacing': 0.15,
+          // Única fuente disponible en el servidor de glyphs de demotiles;
+          // sin fijarla, MapLibre pide su default y el texto sale corrupto.
+          'text-font': ['Open Sans Semibold'],
+          'text-size': 12,
+          'text-letter-spacing': 0.08,
           'text-transform': 'uppercase',
+          'text-offset': [0, 0.8],
         },
         paint: {
-          'text-color': ['get', 'color'],
-          'text-halo-color': '#ffffff',
-          'text-halo-width': 1.4,
+          // Texto oscuro con halo claro: legible sobre vector y satélite.
+          'text-color': '#2b2622',
+          'text-halo-color': 'rgba(255,255,255,0.9)',
+          'text-halo-width': 1.6,
         },
       });
     } catch {
