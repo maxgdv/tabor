@@ -9,7 +9,9 @@ import { getChapter, getPlacesForChapter } from '@/lib/bible';
 import { SITE_URL, localeAlternates, openGraphFor, verseSnippet } from '@/lib/seo';
 import { ChapterReader } from '@/components/reader/ChapterReader';
 import { ActiveVerseMarker } from '@/components/reader/ActiveVerseMarker';
+import { ChapterArt } from '@/components/reader/ChapterArt';
 import { BibleMapClient } from '@/components/map/BibleMapClient';
+import { getChapterArt } from '@/lib/chapter-art';
 
 const VERSION_BY_LOCALE: Record<string, string> = {
   es: 'STRA',
@@ -96,6 +98,10 @@ export default async function ReaderPage({ params }: { params: Params }) {
     : [null, null];
 
   const places = getPlacesForChapter(chapterData);
+  // Sin geografía, el panel muestra arte sacro del pasaje si lo hay curado;
+  // si no, cae al mapa panorámico con badge (comportamiento de siempre).
+  const art =
+    places.length === 0 ? getChapterArt(chapterData.bookCanonicalId, chapterData.number) : null;
 
   // Datos estructurados schema.org: Google los usa para mostrar la ruta
   // "Biblia › Génesis › 12" en los resultados en vez de la URL cruda.
@@ -221,10 +227,10 @@ export default async function ReaderPage({ params }: { params: Params }) {
           <ActiveVerseMarker />
         </section>
         <section aria-label={tReader('sectionMap')} className="relative min-h-0">
-          {/* El mapa siempre se renderiza, incluso en capítulos sin lugares.
-              En ese caso muestra una vista panorámica del mundo bíblico con
-              un badge explicativo (gestionado en BibleMap). */}
-          <BibleMapClient chapter={chapterData} places={places} />
+          {/* Con lugares: mapa sincronizado. Sin lugares: arte sacro del
+              pasaje si está curado; si no, la vista panorámica con badge
+              explicativo (gestionado en BibleMap). */}
+          {art ? <ChapterArt art={art} /> : <BibleMapClient chapter={chapterData} places={places} />}
         </section>
       </div>
     </div>
