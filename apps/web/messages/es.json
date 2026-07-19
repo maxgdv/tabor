@@ -1,7 +1,7 @@
 {
   "metadata": {
     "title": "Tabor — La Biblia, lugar a lugar",
-    "description": "Lee la Biblia mientras un mapa interactivo sitúa, en tiempo real, los lugares donde sucede cada pasaje.",
+    "description": "Lee la Biblia con un mapa interactivo que sitúa cada pasaje en su lugar y su época: tres versiones (español, inglés y latín), lectura comparada, rutas con lecturas, planes y audio.",
     "chapterDescription": "«{snippet}» — {book} {chapter}, con mapa interactivo de los lugares del pasaje.",
     "bookDescription": "{book}: {count, plural, one {# capítulo} other {# capítulos}}. Lee cada capítulo junto a un mapa interactivo de los lugares bíblicos."
   },
