@@ -33,7 +33,7 @@
     "soon": "Coming soon",
     "now": {
       "title": "What you'll find today",
-      "body": "The complete text of the 73 books of the Catholic canon in two public-domain versions (Biblia Platense / Straubinger in Spanish, Catholic Public Domain Version in English). An interactive map with 1,335 biblical places synchronized with the reading, search by reference, place, or free text, and reading plans to keep a steady pace. Coming soon: bookmarks and personal notes."
+      "body": "The 73 books of the Catholic canon in three public-domain versions — Biblia Platense (Straubinger), Catholic Public Domain Version and the Latin Vulgate, with verse-by-verse compared reading. An interactive map with 1,335 places synchronized with the text, historical layers by era, map routes with readings at every stop, global search, reading plans, read-aloud, and with your account: bookmarks, highlights and personal notes."
     },
     "principles": {
       "title": "Our principles",
@@ -184,6 +184,13 @@
     "noteDelete": "Delete note",
     "noteCancel": "Cancel",
     "close": "Close"
+  },
+  "seasons": {
+    "adviento": "Advent",
+    "navidad": "Christmas",
+    "cuaresma": "Lent",
+    "semana-santa": "Holy Week",
+    "pascua": "Easter"
   },
   "routes": {
     "title": "Map routes",

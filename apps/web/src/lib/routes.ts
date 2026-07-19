@@ -27,16 +27,21 @@ export type RouteStop = {
   readings: RouteReading[];
 };
 
+/** Tiempo litúrgico al que se asocia una ruta o un plan (badge en tarjetas). */
+export type LiturgicalSeason = 'adviento' | 'navidad' | 'cuaresma' | 'semana-santa' | 'pascua';
+
 export type BibleRoute = {
   slug: string;
   name: { es: string; en: string };
   description: { es: string; en: string };
+  season?: LiturgicalSeason;
   stops: RouteStop[];
 };
 
-export const ROUTES: BibleRoute[] = [
+const CORE_ROUTES: BibleRoute[] = [
   {
     slug: 'ultima-semana-de-jesus',
+    season: 'semana-santa',
     name: { es: 'La última semana de Jesús', en: 'The Last Week of Jesus' },
     description: {
       es: 'De la unción en Betania al encuentro de Emaús: los lugares de la Pasión, muerte y resurrección, paso a paso alrededor de Jerusalén.',
@@ -282,6 +287,307 @@ export const ROUTES: BibleRoute[] = [
     ],
   },
 ];
+
+const MORE_ROUTES: BibleRoute[] = [
+  {
+    slug: 'infancia-de-jesus',
+    season: 'navidad',
+    name: { es: 'La infancia de Jesús', en: 'The Infancy of Jesus' },
+    description: {
+      es: 'De la Anunciación en Nazaret al regreso del exilio en Egipto: los caminos de la Sagrada Familia en torno al Nacimiento.',
+      en: 'From the Annunciation in Nazareth to the return from Egypt: the paths of the Holy Family around the Nativity.',
+    },
+    stops: [
+      {
+        placeSlug: 'nazareth',
+        title: { es: 'Nazaret — la Anunciación', en: 'Nazareth — the Annunciation' },
+        note: {
+          es: 'El ángel Gabriel visita a una virgen desposada con José. El «hágase» de María abre la historia nueva.',
+          en: 'The angel Gabriel visits a virgin betrothed to Joseph. Mary’s "let it be" opens the new history.',
+        },
+        readings: [{ book: 'LUK', chapter: 1, verses: [26, 38] }],
+      },
+      {
+        placeSlug: 'bethlehem-1',
+        title: { es: 'Belén — el Nacimiento', en: 'Bethlehem — the Nativity' },
+        note: {
+          es: 'Por el censo de Augusto, José sube con María a la ciudad de David. No hay sitio en la posada; hay un pesebre, pastores y un ángel.',
+          en: 'For the census of Augustus, Joseph goes up with Mary to the city of David. There is no room at the inn; there is a manger, shepherds and an angel.',
+        },
+        readings: [
+          { book: 'LUK', chapter: 2, verses: [1, 20] },
+          { book: 'MAT', chapter: 2, verses: [1, 12] },
+        ],
+      },
+      {
+        placeSlug: 'jerusalem',
+        title: { es: 'Jerusalén — la Presentación', en: 'Jerusalem — the Presentation' },
+        note: {
+          es: 'A los cuarenta días, sus padres presentan al Niño en el Templo. Simeón lo toma en brazos: «luz para alumbrar a las naciones».',
+          en: 'After forty days, his parents present the Child in the Temple. Simeon takes him in his arms: "a light to enlighten the nations".',
+        },
+        readings: [{ book: 'LUK', chapter: 2, verses: [22, 40] }],
+      },
+      {
+        placeSlug: 'egypt',
+        title: { es: 'Egipto — la huida', en: 'Egypt — the flight' },
+        note: {
+          es: 'Avisado en sueños, José toma al Niño y a su madre de noche y parte a Egipto, lejos de Herodes. «De Egipto llamé a mi hijo».',
+          en: 'Warned in a dream, Joseph takes the Child and his mother by night and departs for Egypt, away from Herod. "Out of Egypt I called my son".',
+        },
+        readings: [{ book: 'MAT', chapter: 2, verses: [13, 18] }],
+      },
+      {
+        placeSlug: 'nazareth',
+        title: { es: 'Nazaret — el regreso', en: 'Nazareth — the return' },
+        note: {
+          es: 'Muerto Herodes, la familia vuelve y se establece en Nazaret. Allí el Niño crece en sabiduría y gracia.',
+          en: 'After Herod’s death the family returns and settles in Nazareth. There the Child grows in wisdom and grace.',
+        },
+        readings: [
+          { book: 'MAT', chapter: 2, verses: [19, 23] },
+          { book: 'LUK', chapter: 2, verses: [41, 52] },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'abraham',
+    name: { es: 'Abraham, el camino de la fe', en: 'Abraham, the Journey of Faith' },
+    description: {
+      es: 'De Ur de los caldeos al monte Moria: el itinerario del padre de los creyentes, promesa a promesa.',
+      en: 'From Ur of the Chaldeans to Mount Moriah: the itinerary of the father of believers, promise by promise.',
+    },
+    stops: [
+      {
+        placeSlug: 'ur-1',
+        title: { es: 'Ur de los caldeos — la partida', en: 'Ur of the Chaldeans — the departure' },
+        note: {
+          es: 'De la gran ciudad de Mesopotamia sale la familia de Téraj camino de Canaán. Abrán va con ellos.',
+          en: 'From the great Mesopotamian city, Terah’s family sets out for Canaan. Abram goes with them.',
+        },
+        readings: [{ book: 'GEN', chapter: 11, verses: [27, 32] }],
+      },
+      {
+        placeSlug: 'haran',
+        title: { es: 'Harán — la llamada', en: 'Haran — the call' },
+        note: {
+          es: '«Sal de tu tierra y de tu parentela». Con setenta y cinco años, Abrán parte sin saber a dónde va, con una promesa por equipaje.',
+          en: '"Go from your land and your kindred". At seventy-five, Abram sets out not knowing where he goes, carrying a promise.',
+        },
+        readings: [{ book: 'GEN', chapter: 12, verses: [1, 9] }],
+      },
+      {
+        placeSlug: 'shechem',
+        title: { es: 'Siquem — la primera promesa en Canaán', en: 'Shechem — the first promise in Canaan' },
+        note: {
+          es: 'Junto a la encina de Moré, el Señor se aparece: «A tu descendencia daré esta tierra». Abrán levanta su primer altar.',
+          en: 'By the oak of Moreh the Lord appears: "To your offspring I will give this land". Abram builds his first altar.',
+        },
+        readings: [{ book: 'GEN', chapter: 12, verses: [4, 9] }],
+      },
+      {
+        placeSlug: 'bethel-1',
+        title: { es: 'Betel — el altar y el nombre', en: 'Bethel — the altar and the Name' },
+        note: {
+          es: 'Entre Betel y Ay planta su tienda e invoca el nombre del Señor. A este altar volverá tras Egipto.',
+          en: 'Between Bethel and Ai he pitches his tent and calls on the name of the Lord. He will return to this altar after Egypt.',
+        },
+        readings: [{ book: 'GEN', chapter: 13, verses: [1, 18] }],
+      },
+      {
+        placeSlug: 'mamre',
+        title: { es: 'Mambré — los tres visitantes', en: 'Mamre — the three visitors' },
+        note: {
+          es: 'A la hora del calor, tres hombres. Abraham corre, sirve, y escucha: «Por estas fechas volveré, y Sara tendrá un hijo».',
+          en: 'In the heat of the day, three men. Abraham runs, serves, and hears: "I will return about this time, and Sarah shall have a son".',
+        },
+        readings: [
+          { book: 'GEN', chapter: 18, verses: [1, 15] },
+          { book: 'GEN', chapter: 21, verses: [1, 8] },
+        ],
+      },
+      {
+        placeSlug: 'moriah',
+        title: { es: 'Moria — la prueba', en: 'Moriah — the test' },
+        note: {
+          es: 'Tres días de camino con la leña a cuestas. En el monte, Dios provee el cordero y jura colmar la promesa.',
+          en: 'Three days’ walk carrying the wood. On the mount God provides the lamb and swears to fulfil the promise.',
+        },
+        readings: [{ book: 'GEN', chapter: 22, verses: [1, 19] }],
+      },
+      {
+        placeSlug: 'machpelah',
+        title: { es: 'Macpelá — la primera posesión', en: 'Machpelah — the first possession' },
+        note: {
+          es: 'Para sepultar a Sara, Abraham compra la cueva de Macpelá: el primer palmo de la tierra prometida que es suyo.',
+          en: 'To bury Sarah, Abraham buys the cave of Machpelah: the first plot of the promised land that is his own.',
+        },
+        readings: [{ book: 'GEN', chapter: 23 }],
+      },
+    ],
+  },
+  {
+    slug: 'segundo-viaje-de-pablo',
+    name: { es: 'El segundo viaje de Pablo', en: 'Paul’s Second Journey' },
+    description: {
+      es: 'El Evangelio salta a Europa: de Antioquía a Filipos, Atenas y Corinto (Hechos 15,36-18,22).',
+      en: 'The Gospel leaps into Europe: from Antioch to Philippi, Athens and Corinth (Acts 15:36-18:22).',
+    },
+    stops: [
+      {
+        placeSlug: 'antioch-1',
+        title: { es: 'Antioquía — nuevos compañeros', en: 'Antioch — new companions' },
+        note: {
+          es: 'Pablo y Bernabé se separan por Juan Marcos. Pablo parte con Silas; en Listra se les unirá Timoteo.',
+          en: 'Paul and Barnabas part over John Mark. Paul sets out with Silas; at Lystra Timothy will join them.',
+        },
+        readings: [{ book: 'ACT', chapter: 15, verses: [36, 41] }],
+      },
+      {
+        placeSlug: 'troas',
+        title: { es: 'Tróade — el hombre de Macedonia', en: 'Troas — the man of Macedonia' },
+        note: {
+          es: 'De noche, una visión: «Pasa a Macedonia y ayúdanos». El Evangelio cruza a Europa.',
+          en: 'By night, a vision: "Come over to Macedonia and help us". The Gospel crosses into Europe.',
+        },
+        readings: [{ book: 'ACT', chapter: 16, verses: [6, 10] }],
+      },
+      {
+        placeSlug: 'philippi',
+        title: { es: 'Filipos — Lidia y el carcelero', en: 'Philippi — Lydia and the jailer' },
+        note: {
+          es: 'Lidia abre su casa; una paliza y un terremoto abren la del carcelero. Nace la comunidad más querida de Pablo.',
+          en: 'Lydia opens her home; a beating and an earthquake open the jailer’s. Paul’s best-loved community is born.',
+        },
+        readings: [{ book: 'ACT', chapter: 16, verses: [11, 40] }],
+      },
+      {
+        placeSlug: 'thessalonica',
+        title: { es: 'Tesalónica — tres sábados', en: 'Thessalonica — three sabbaths' },
+        note: {
+          es: 'Tres sábados razonando en la sinagoga bastan para fundar una iglesia — y para levantar un tumulto.',
+          en: 'Three sabbaths reasoning in the synagogue suffice to found a church — and to raise a riot.',
+        },
+        readings: [{ book: 'ACT', chapter: 17, verses: [1, 9] }],
+      },
+      {
+        placeSlug: 'berea',
+        title: { es: 'Berea — examinar las Escrituras', en: 'Beroea — searching the Scriptures' },
+        note: {
+          es: 'Los de Berea reciben la Palabra con avidez y examinan cada día las Escrituras para ver si es así.',
+          en: 'The Beroeans receive the Word eagerly and examine the Scriptures daily to see if it is so.',
+        },
+        readings: [{ book: 'ACT', chapter: 17, verses: [10, 15] }],
+      },
+      {
+        placeSlug: 'athens',
+        title: { es: 'Atenas — el Dios desconocido', en: 'Athens — the unknown God' },
+        note: {
+          es: 'En el Areópago, Pablo parte del altar «al Dios desconocido» para anunciar al Resucitado. Unos se burlan; Dionisio y Dámaris creen.',
+          en: 'At the Areopagus Paul starts from the altar "to the unknown God" to proclaim the Risen One. Some mock; Dionysius and Damaris believe.',
+        },
+        readings: [{ book: 'ACT', chapter: 17, verses: [16, 34] }],
+      },
+      {
+        placeSlug: 'corinth',
+        title: { es: 'Corinto — año y medio', en: 'Corinth — a year and a half' },
+        note: {
+          es: 'Con Áquila y Priscila, tejiendo tiendas. «No temas, sigue hablando: tengo un pueblo numeroso en esta ciudad».',
+          en: 'With Aquila and Priscilla, making tents. "Do not be afraid, go on speaking: I have many people in this city".',
+        },
+        readings: [{ book: 'ACT', chapter: 18, verses: [1, 17] }],
+      },
+      {
+        placeSlug: 'ephesus',
+        title: { es: 'Éfeso — la promesa de volver', en: 'Ephesus — the promise to return' },
+        note: {
+          es: 'Una escala breve camino de casa: «Volveré, si Dios quiere». La cumplirá — y serán tres años.',
+          en: 'A brief stop on the way home: "I will return, God willing". He will — for three years.',
+        },
+        readings: [{ book: 'ACT', chapter: 18, verses: [18, 22] }],
+      },
+    ],
+  },
+  {
+    slug: 'viaje-a-roma',
+    name: { es: 'El viaje a Roma', en: 'The Voyage to Rome' },
+    description: {
+      es: 'Preso y apelando al César: tempestad, naufragio en Malta y llegada a la capital del mundo (Hechos 27-28).',
+      en: 'A prisoner appealing to Caesar: storm, shipwreck on Malta, and arrival at the world’s capital (Acts 27-28).',
+    },
+    stops: [
+      {
+        placeSlug: 'caesarea',
+        title: { es: 'Cesarea — rumbo al César', en: 'Caesarea — bound for Caesar' },
+        note: {
+          es: 'Tras dos años preso, Pablo apela al César. Lo embarcan con otros presos bajo la custodia del centurión Julio.',
+          en: 'After two years in custody, Paul appeals to Caesar. He is put aboard with other prisoners under the centurion Julius.',
+        },
+        readings: [{ book: 'ACT', chapter: 27, verses: [1, 8] }],
+      },
+      {
+        placeSlug: 'fair-havens',
+        title: { es: 'Buenos Puertos — el aviso', en: 'Fair Havens — the warning' },
+        note: {
+          es: '«Veo que la navegación va a ser peligrosa», advierte Pablo. El piloto y el patrón deciden seguir.',
+          en: '"I perceive that the voyage will be with injury", Paul warns. The pilot and the owner decide to sail on.',
+        },
+        readings: [{ book: 'ACT', chapter: 27, verses: [9, 12] }],
+      },
+      {
+        placeSlug: 'malta',
+        title: { es: 'Malta — el naufragio', en: 'Malta — the shipwreck' },
+        note: {
+          es: 'Catorce noches de temporal y la nave encalla: los doscientos setenta y seis llegan a tierra sanos. La isla los acoge con humanidad poco común.',
+          en: 'Fourteen nights of storm and the ship runs aground: all two hundred and seventy-six reach land safe. The island shows them unusual kindness.',
+        },
+        readings: [
+          { book: 'ACT', chapter: 27, verses: [13, 44] },
+          { book: 'ACT', chapter: 28, verses: [1, 10] },
+        ],
+      },
+      {
+        placeSlug: 'syracuse',
+        title: { es: 'Siracusa — escala en Sicilia', en: 'Syracuse — a Sicilian stop' },
+        note: {
+          es: 'En una nave alejandrina que invernó en la isla, tres días en Siracusa antes de costear hacia el estrecho.',
+          en: 'Aboard an Alexandrian ship that wintered in the island, three days at Syracuse before coasting toward the strait.',
+        },
+        readings: [{ book: 'ACT', chapter: 28, verses: [11, 13] }],
+      },
+      {
+        placeSlug: 'puteoli',
+        title: { es: 'Puteoli — hermanos en el puerto', en: 'Puteoli — brethren at the port' },
+        note: {
+          es: 'En el gran puerto de Italia ya hay hermanos, que les ruegan quedarse siete días. La fe llegó antes que Pablo.',
+          en: 'At Italy’s great port there are already brethren, who beg them to stay seven days. The faith arrived before Paul did.',
+        },
+        readings: [{ book: 'ACT', chapter: 28, verses: [13, 14] }],
+      },
+      {
+        placeSlug: 'forum-of-appius',
+        title: { es: 'Foro de Apio — el ánimo', en: 'Forum of Appius — taking courage' },
+        note: {
+          es: 'Los hermanos de Roma salen a su encuentro hasta el Foro de Apio. Al verlos, Pablo da gracias a Dios y cobra ánimo.',
+          en: 'The brethren of Rome come out to meet him as far as the Forum of Appius. Seeing them, Paul thanks God and takes courage.',
+        },
+        readings: [{ book: 'ACT', chapter: 28, verses: [15, 15] }],
+      },
+      {
+        placeSlug: 'rome',
+        title: { es: 'Roma — sin trabas', en: 'Rome — without hindrance' },
+        note: {
+          es: 'Dos años en una casa alquilada, recibiendo a todos y anunciando el Reino «con toda libertad, sin estorbo». Así termina Hechos; no la historia.',
+          en: 'Two years in rented lodgings, welcoming all and proclaiming the Kingdom "with all boldness, unhindered". So ends Acts; not the story.',
+        },
+        readings: [{ book: 'ACT', chapter: 28, verses: [16, 31] }],
+      },
+    ],
+  },
+];
+
+export const ROUTES: BibleRoute[] = [...CORE_ROUTES, ...MORE_ROUTES];
 
 export function getRoute(slug: string): BibleRoute | null {
   return ROUTES.find((r) => r.slug === slug) ?? null;

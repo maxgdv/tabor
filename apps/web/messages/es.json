@@ -33,7 +33,7 @@
     "soon": "Próximamente",
     "now": {
       "title": "Qué encontrarás hoy",
-      "body": "El texto completo de los 73 libros del canon católico en dos versiones de dominio público (Biblia Platense / Straubinger en español, Catholic Public Domain Version en inglés). Un mapa interactivo con 1.335 lugares bíblicos sincronizado con la lectura, búsqueda por referencia, lugar o texto libre, y planes de lectura para leer con constancia. Próximamente: marcadores y notas personales."
+      "body": "Los 73 libros del canon católico en tres versiones de dominio público — Biblia Platense (Straubinger), Catholic Public Domain Version y la Vulgata latina, con lectura comparada versículo a versículo. Un mapa interactivo con 1.335 lugares sincronizado con la lectura, capas históricas por época, rutas con lecturas en cada parada, búsqueda global, planes de lectura, lectura en voz alta, y con tu cuenta: marcadores, resaltados y notas personales."
     },
     "principles": {
       "title": "Nuestros principios",
@@ -184,6 +184,13 @@
     "noteDelete": "Borrar nota",
     "noteCancel": "Cancelar",
     "close": "Cerrar"
+  },
+  "seasons": {
+    "adviento": "Adviento",
+    "navidad": "Navidad",
+    "cuaresma": "Cuaresma",
+    "semana-santa": "Semana Santa",
+    "pascua": "Pascua"
   },
   "routes": {
     "title": "Rutas por el mapa",

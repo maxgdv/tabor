@@ -7,6 +7,7 @@ import { auth } from '@/lib/auth';
 import { PLANS } from '@/lib/plans';
 import { localeAlternates, openGraphFor } from '@/lib/seo';
 import { PlanProgress } from '@/components/plans/PlanProgress';
+import { SeasonBadge } from '@/components/SeasonBadge';
 import { PlanProgressSync } from '@/components/plans/PlanProgressSync';
 
 export async function generateMetadata({
@@ -57,9 +58,12 @@ export default async function PlansIndexPage({
               href={`/planes/${plan.slug}`}
               className="group block rounded-lg border border-sand-200 bg-white/60 p-5 transition-colors hover:border-lapis-500 hover:bg-white dark:border-stone-700 dark:bg-stone-800/60 dark:hover:bg-stone-800"
             >
-              <h2 className="font-serif text-xl text-stone-800 group-hover:text-lapis-600 dark:text-sand-100">
-                {plan.name[lang]}
-              </h2>
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h2 className="font-serif text-xl text-stone-800 group-hover:text-lapis-600 dark:text-sand-100">
+                  {plan.name[lang]}
+                </h2>
+                {plan.season && <SeasonBadge season={plan.season} />}
+              </div>
               <p className="mt-1.5 text-sm leading-relaxed text-stone-600 dark:text-sand-200">
                 {plan.description[lang]}
               </p>

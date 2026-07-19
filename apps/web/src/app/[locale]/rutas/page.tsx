@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { ROUTES } from '@/lib/routes';
+import { SeasonBadge } from '@/components/SeasonBadge';
 import { localeAlternates, openGraphFor } from '@/lib/seo';
 
 type Params = Promise<{ locale: string }>;
@@ -39,9 +40,12 @@ export default async function RoutesIndexPage({ params }: { params: Params }) {
               href={`/rutas/${route.slug}`}
               className="block rounded-lg border border-sand-200 bg-white/60 p-5 transition-colors hover:border-lapis-500 dark:border-stone-700 dark:bg-stone-800/60"
             >
-              <h2 className="font-serif text-xl text-stone-800 dark:text-sand-100">
-                {route.name[lang]}
-              </h2>
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h2 className="font-serif text-xl text-stone-800 dark:text-sand-100">
+                  {route.name[lang]}
+                </h2>
+                {route.season && <SeasonBadge season={route.season} />}
+              </div>
               <p className="mt-1.5 text-sm leading-relaxed text-stone-600 dark:text-sand-200">
                 {route.description[lang]}
               </p>

@@ -10,6 +10,7 @@
 // (lib/plan-progress.ts) hasta que exista autenticación.
 
 import { BOOK_META } from '@tabor/db/book-meta';
+import type { LiturgicalSeason } from './routes';
 
 export type PlanReading = {
   book: string; // canonicalId ('MAT')
@@ -25,6 +26,8 @@ export type ReadingPlan = {
   slug: string;
   name: { es: string; en: string };
   description: { es: string; en: string };
+  /** Tiempo litúrgico al que se asocia el plan (badge en las tarjetas). */
+  season?: LiturgicalSeason;
   days: PlanDay[];
 };
 
@@ -123,6 +126,7 @@ export const PLANS: ReadingPlan[] = [
   },
   {
     slug: 'camino-belen-24',
+    season: 'adviento',
     name: {
       es: 'Camino a Belén (24 días)',
       en: 'The Road to Bethlehem (24 Days)',
@@ -157,6 +161,108 @@ export const PLANS: ReadingPlan[] = [
       ['MAT', 1], // la genealogía y José
       ['LUK', 2], // el nacimiento en Belén
     ]),
+  },
+  {
+    slug: 'navidad-12',
+    season: 'navidad',
+    name: {
+      es: 'Los doce días de Navidad',
+      en: 'The Twelve Days of Christmas',
+    },
+    description: {
+      es: 'De Nochebuena a Epifanía: el Misterio del Nacimiento contemplado desde los Evangelios, los profetas y las cartas, un capítulo al día.',
+      en: 'From Christmas Eve to Epiphany: the Mystery of the Nativity through the Gospels, the prophets and the letters, one chapter a day.',
+    },
+    days: oneChapterDays([
+      ['LUK', 1], // anunciación y visitación
+      ['LUK', 2], // el nacimiento
+      ['MAT', 1], // la genealogía y José
+      ['MAT', 2], // los magos y la huida
+      ['JHN', 1], // el Verbo hecho carne
+      ['ISA', 7], // el Emmanuel
+      ['ISA', 9], // un niño nos ha nacido
+      ['ISA', 11], // el retoño de Jesé
+      ['MIC', 5], // y tú, Belén
+      ['GAL', 4], // nacido de mujer, en la plenitud del tiempo
+      ['TIT', 2], // ha aparecido la gracia de Dios
+      ['PSA', 97], // «Cantad al Señor un cántico nuevo» (98 hebreo)
+    ]),
+  },
+  {
+    slug: 'cuaresma-40',
+    season: 'cuaresma',
+    name: {
+      es: 'Cuaresma: 40 días hacia la Pascua',
+      en: 'Lent: 40 Days towards Easter',
+    },
+    description: {
+      es: 'Cuarenta días como los del desierto: la liberación del Éxodo, los salmos penitenciales, los profetas de la conversión y la subida a Jerusalén.',
+      en: 'Forty days like those in the desert: the liberation of Exodus, the penitential psalms, the prophets of conversion, and the road up to Jerusalem.',
+    },
+    days: oneChapterDays([
+      // La liberación: de la esclavitud a la Alianza (Ex 1-17).
+      ['EXO', 1], ['EXO', 2], ['EXO', 3], ['EXO', 4], ['EXO', 5], ['EXO', 6],
+      ['EXO', 7], ['EXO', 8], ['EXO', 9], ['EXO', 10], ['EXO', 11], ['EXO', 12],
+      ['EXO', 13], ['EXO', 14], ['EXO', 15], ['EXO', 16], ['EXO', 17],
+      ['DEU', 8], // la memoria del desierto
+      // Los siete salmos penitenciales (numeración greco-latina).
+      ['PSA', 6], ['PSA', 31], ['PSA', 37], ['PSA', 50], ['PSA', 101],
+      ['PSA', 129], ['PSA', 142],
+      // Los profetas de la conversión.
+      ['ISA', 53], ['ISA', 55], ['ISA', 58], ['JOL', 2], ['JON', 3],
+      // La subida a Jerusalén y la Pasión.
+      ['MRK', 8], ['MRK', 9], ['MRK', 10], ['MRK', 14], ['MRK', 15],
+      ['JHN', 18], ['JHN', 19],
+      ['LAM', 3], // la esperanza en la aflicción
+      ['HEB', 4], ['HEB', 5], // el sumo sacerdote que se compadece
+    ]),
+  },
+  {
+    slug: 'semana-santa-8',
+    season: 'semana-santa',
+    name: {
+      es: 'Semana Santa, día a día',
+      en: 'Holy Week, Day by Day',
+    },
+    description: {
+      es: 'Del Domingo de Ramos al Domingo de Resurrección: cada día de la semana grande con su Evangelio.',
+      en: 'From Palm Sunday to Easter Sunday: each day of the great week with its Gospel.',
+    },
+    days: [
+      { readings: [{ book: 'LUK', chapters: [19, 19] }] }, // Domingo de Ramos
+      { readings: [{ book: 'MRK', chapters: [11, 11] }] }, // Lunes Santo
+      { readings: [{ book: 'MAT', chapters: [25, 25] }] }, // Martes Santo
+      { readings: [{ book: 'LUK', chapters: [22, 22] }] }, // Miércoles Santo
+      { readings: [{ book: 'JHN', chapters: [13, 13] }] }, // Jueves Santo
+      { readings: [{ book: 'JHN', chapters: [18, 19] }] }, // Viernes Santo
+      { readings: [{ book: 'LAM', chapters: [3, 3] }] }, // Sábado Santo
+      { readings: [{ book: 'JHN', chapters: [20, 20] }] }, // Domingo de Resurrección
+    ],
+  },
+  {
+    slug: 'pascua-pentecostes-50',
+    season: 'pascua',
+    name: {
+      es: 'De Pascua a Pentecostés (50 días)',
+      en: 'From Easter to Pentecost (50 Days)',
+    },
+    description: {
+      es: 'La cincuentena pascual: del sepulcro vacío al fuego del Espíritu — los relatos de la Resurrección, los Hechos enteros y las cartas de la vida nueva.',
+      en: 'The fifty days of Easter: from the empty tomb to the fire of the Spirit — the Resurrection accounts, the whole of Acts, and the letters of new life.',
+    },
+    days: [
+      { readings: [{ book: 'JHN', chapters: [20, 20] }] },
+      { readings: [{ book: 'JHN', chapters: [21, 21] }] },
+      { readings: [{ book: 'LUK', chapters: [24, 24] }] },
+      ...sequentialDays([['ACT', 28]], 1),
+      { readings: [{ book: '1CO', chapters: [15, 15] }] },
+      ...sequentialDays([['ROM', 8]], 1).slice(4, 8), // Rom 5-8
+      ...sequentialDays([['1PE', 5]], 1),
+      ...sequentialDays([['EPH', 6]], 1),
+      { readings: [{ book: 'PSA', chapters: [103, 103] }] }, // «envías tu Espíritu» (104 hebreo)
+      { readings: [{ book: 'REV', chapters: [21, 21] }] },
+      { readings: [{ book: 'REV', chapters: [22, 22] }] },
+    ],
   },
 ];
 
