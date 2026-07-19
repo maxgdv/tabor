@@ -19,6 +19,11 @@ const client = postgres(connectionString, {
   max: isPooled ? 5 : 10,
   idle_timeout: 20,
   connect_timeout: 10,
+  // Recicla cada socket a los 5 min: las lambdas congeladas de Vercel
+  // retienen sockets que el pooler ya mató, y una query escrita a un socket
+  // muerto espera para siempre (caída real del 2026-07-19: página colgada
+  // sin timeout, con BD sana). Con max_lifetime corto, el pool los renueva.
+  max_lifetime: 60 * 5,
   prepare: !isPooled,
 });
 
