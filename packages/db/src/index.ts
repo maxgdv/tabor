@@ -15,14 +15,19 @@ const isPooled = connectionString.includes(':6543');
 // varias queries en paralelo (p.ej. getChapterText + getChapterGeo con
 // Promise.all) sin serializarlas. Sigue muy por debajo del límite de
 // conexiones de Supabase (200 en plan Free).
+// Anatomía de la caída del 2026-07-19 (página colgada, BD sana, cero SQL
+// activo en pg_stat_activity): Vercel congela la lambda con sockets abiertos,
+// el pooler los corta por inactividad, y al descongelar la query se escribe
+// en un socket medio muerto y espera sin límite. Defensas:
+// - keep_alive: TCP keepalive detecta el peer caído y el socket falla en
+//   segundos en vez de colgar minutos.
+// - idle_timeout corto: menos sockets ociosos que congelar.
+// - max_lifetime: ningún socket sobrevive lo bastante para volverse zombi.
 const client = postgres(connectionString, {
   max: isPooled ? 5 : 10,
-  idle_timeout: 20,
+  idle_timeout: 10,
   connect_timeout: 10,
-  // Recicla cada socket a los 5 min: las lambdas congeladas de Vercel
-  // retienen sockets que el pooler ya mató, y una query escrita a un socket
-  // muerto espera para siempre (caída real del 2026-07-19: página colgada
-  // sin timeout, con BD sana). Con max_lifetime corto, el pool los renueva.
+  keep_alive: 20,
   max_lifetime: 60 * 5,
   prepare: !isPooled,
 });
