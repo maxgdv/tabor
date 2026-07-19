@@ -587,7 +587,235 @@ const MORE_ROUTES: BibleRoute[] = [
   },
 ];
 
-export const ROUTES: BibleRoute[] = [...CORE_ROUTES, ...MORE_ROUTES];
+const HEROES_ROUTES: BibleRoute[] = [
+  {
+    slug: 'elias',
+    name: { es: 'Elías, el profeta del fuego', en: 'Elijah, the Prophet of Fire' },
+    description: {
+      es: 'Del arroyo Querit al carro de fuego: la geografía del profeta que caminó hasta el Horeb para oír una brisa suave (1 Reyes 17 - 2 Reyes 2).',
+      en: 'From the brook Cherith to the chariot of fire: the geography of the prophet who walked to Horeb to hear a gentle whisper (1 Kings 17 - 2 Kings 2).',
+    },
+    stops: [
+      {
+        placeSlug: 'cherith',
+        title: { es: 'El arroyo Querit — alimentado por cuervos', en: 'The Brook Cherith — fed by ravens' },
+        note: {
+          es: 'Anunciada la sequía a Ajab, Elías se esconde junto al torrente: agua del arroyo y pan que traen los cuervos, mañana y tarde.',
+          en: 'Having announced the drought to Ahab, Elijah hides by the brook: water from the stream and bread brought by ravens, morning and evening.',
+        },
+        readings: [{ book: '1KI', chapter: 17, verses: [1, 7] }],
+      },
+      {
+        placeSlug: 'zarephath',
+        title: { es: 'Sarepta — la viuda y el aceite', en: 'Zarephath — the widow and the oil' },
+        note: {
+          es: 'En tierra pagana, una viuda comparte su último puñado de harina. Ni la harina ni el aceite se acaban, y su hijo vuelve a la vida.',
+          en: 'In pagan territory a widow shares her last handful of flour. Neither the flour nor the oil runs out, and her son is restored to life.',
+        },
+        readings: [{ book: '1KI', chapter: 17, verses: [8, 24] }],
+      },
+      {
+        placeSlug: 'mount-carmel',
+        title: { es: 'Monte Carmelo — el fuego del cielo', en: 'Mount Carmel — fire from heaven' },
+        note: {
+          es: '«¿Hasta cuándo cojearéis con los dos pies?». Contra cuatrocientos cincuenta profetas de Baal, cae el fuego y el pueblo cae de rodillas.',
+          en: '"How long will you limp between two opinions?" Against four hundred and fifty prophets of Baal, the fire falls and the people fall to their knees.',
+        },
+        readings: [{ book: '1KI', chapter: 18, verses: [20, 46] }],
+      },
+      {
+        placeSlug: 'beersheba-1',
+        title: { es: 'Berseba — el pan del ángel', en: 'Beersheba — the angel’s bread' },
+        note: {
+          es: 'Huyendo de Jezabel, el profeta se rinde bajo la retama: «Basta ya, Señor». Un ángel lo despierta dos veces: «Levántate y come; el camino es largo».',
+          en: 'Fleeing Jezebel, the prophet gives up under the broom tree: "It is enough, Lord". An angel wakes him twice: "Arise and eat; the journey is long".',
+        },
+        readings: [{ book: '1KI', chapter: 19, verses: [1, 8] }],
+      },
+      {
+        placeSlug: 'mount-horeb',
+        title: { es: 'Monte Horeb — la brisa suave', en: 'Mount Horeb — the gentle whisper' },
+        note: {
+          es: 'Cuarenta días hasta el monte de Moisés. Ni el huracán, ni el terremoto, ni el fuego: el Señor pasa en el susurro de una brisa.',
+          en: 'Forty days to the mountain of Moses. Not the wind, nor the earthquake, nor the fire: the Lord passes in the sound of a gentle whisper.',
+        },
+        readings: [{ book: '1KI', chapter: 19, verses: [9, 18] }],
+      },
+      {
+        placeSlug: 'jezreel-2',
+        title: { es: 'Yizreel — la viña de Nabot', en: 'Jezreel — Naboth’s vineyard' },
+        note: {
+          es: 'Un rey que codicia, una reina que mata, y el profeta que baja a la viña robada: «¿Has asesinado y además heredas?».',
+          en: 'A coveting king, a murdering queen, and the prophet who comes down to the stolen vineyard: "Have you killed and also taken possession?".',
+        },
+        readings: [{ book: '1KI', chapter: 21 }],
+      },
+      {
+        placeSlug: 'jordan',
+        title: { es: 'El Jordán — el carro de fuego', en: 'The Jordan — the chariot of fire' },
+        note: {
+          es: 'El manto golpea las aguas y se abren. Al otro lado, un torbellino se lleva a Elías, y Eliseo recoge el manto que cae.',
+          en: 'The mantle strikes the waters and they part. On the far side a whirlwind takes Elijah up, and Elisha picks up the fallen mantle.',
+        },
+        readings: [{ book: '2KI', chapter: 2, verses: [1, 14] }],
+      },
+    ],
+  },
+  {
+    slug: 'david',
+    name: { es: 'David, del rebaño al trono', en: 'David, from Flock to Throne' },
+    description: {
+      es: 'De la unción secreta en Belén a la Ciudad de David: el largo camino del pastor ungido, huida a huida, hasta el trono (1 Samuel 16 - 2 Samuel 6).',
+      en: 'From the secret anointing at Bethlehem to the City of David: the long road of the anointed shepherd, flight after flight, to the throne (1 Samuel 16 - 2 Samuel 6).',
+    },
+    stops: [
+      {
+        placeSlug: 'bethlehem-1',
+        title: { es: 'Belén — la unción', en: 'Bethlehem — the anointing' },
+        note: {
+          es: 'Samuel descarta a siete hermanos; falta el menor, que guarda el rebaño. «El hombre mira las apariencias; el Señor mira el corazón».',
+          en: 'Samuel passes over seven brothers; the youngest is missing, keeping the sheep. "Man looks on the outward appearance; the Lord looks on the heart".',
+        },
+        readings: [{ book: '1SA', chapter: 16, verses: [1, 13] }],
+      },
+      {
+        placeSlug: 'valley-of-elah',
+        title: { es: 'El valle del Terebinto — Goliat', en: 'The Valley of Elah — Goliath' },
+        note: {
+          es: 'Cuarenta días de desafío y un zagal con cinco piedras: «Tú vienes con espada y lanza; yo voy contra ti en nombre del Señor de los ejércitos».',
+          en: 'Forty days of defiance and a shepherd boy with five stones: "You come with sword and spear; I come against you in the name of the Lord of hosts".',
+        },
+        readings: [{ book: '1SA', chapter: 17 }],
+      },
+      {
+        placeSlug: 'adullam',
+        title: { es: 'La cueva de Adulam — los descartados', en: 'The Cave of Adullam — the outcasts' },
+        note: {
+          es: 'Huyendo de Saúl, David se refugia en la cueva. Se le unen los apurados, los endeudados y los amargados: cuatrocientos hombres — el germen de un reino.',
+          en: 'Fleeing Saul, David shelters in the cave. The distressed, the indebted and the bitter gather to him: four hundred men — the seed of a kingdom.',
+        },
+        readings: [{ book: '1SA', chapter: 22, verses: [1, 5] }],
+      },
+      {
+        placeSlug: 'engedi',
+        title: { es: 'Engadí — perdonar al rey', en: 'En-gedi — sparing the king' },
+        note: {
+          es: 'Saúl duerme al alcance de su lanza en la cueva, y David corta solo la orla de su manto: «No alzaré mi mano contra el ungido del Señor».',
+          en: 'Saul sleeps within reach in the cave, and David cuts only the corner of his robe: "I will not raise my hand against the Lord’s anointed".',
+        },
+        readings: [{ book: '1SA', chapter: 24 }],
+      },
+      {
+        placeSlug: 'ziklag',
+        title: { es: 'Siquelag — la hora más baja', en: 'Ziklag — the darkest hour' },
+        note: {
+          es: 'La ciudad arrasada, las familias cautivas, y sus propios hombres hablando de apedrearlo. «David se fortaleció en el Señor su Dios» — y lo recuperó todo.',
+          en: 'The town burned, the families taken, and his own men speaking of stoning him. "David strengthened himself in the Lord his God" — and recovered all.',
+        },
+        readings: [{ book: '1SA', chapter: 30 }],
+      },
+      {
+        placeSlug: 'hebron',
+        title: { es: 'Hebrón — rey al fin', en: 'Hebron — king at last' },
+        note: {
+          es: 'Muerto Saúl, Judá unge a David en Hebrón; siete años después, todo Israel. El pastor de Belén tiene treinta años.',
+          en: 'After Saul’s death, Judah anoints David at Hebron; seven years later, all Israel. The shepherd of Bethlehem is thirty years old.',
+        },
+        readings: [
+          { book: '2SA', chapter: 2, verses: [1, 7] },
+          { book: '2SA', chapter: 5, verses: [1, 5] },
+        ],
+      },
+      {
+        placeSlug: 'jerusalem',
+        title: { es: 'Jerusalén — la Ciudad de David', en: 'Jerusalem — the City of David' },
+        note: {
+          es: 'Toma la fortaleza jebusea y sube el Arca entre danzas: la ciudad conquistada se convierte en la ciudad santa.',
+          en: 'He takes the Jebusite stronghold and brings up the Ark with dancing: the conquered city becomes the holy city.',
+        },
+        readings: [
+          { book: '2SA', chapter: 5, verses: [6, 16] },
+          { book: '2SA', chapter: 6, verses: [12, 19] },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'tercer-viaje-de-pablo',
+    name: { es: 'El tercer viaje de Pablo', en: 'Paul’s Third Journey' },
+    description: {
+      es: 'Tres años en Éfeso y la larga subida a Jerusalén, despedida a despedida: el viaje del adiós (Hechos 18,23-21,17).',
+      en: 'Three years at Ephesus and the long road up to Jerusalem, farewell after farewell: the journey of goodbyes (Acts 18:23-21:17).',
+    },
+    stops: [
+      {
+        placeSlug: 'ephesus',
+        title: { es: 'Éfeso — tres años que cambian Asia', en: 'Ephesus — three years that change Asia' },
+        note: {
+          es: 'La escuela de Tiranno, los libros de magia ardiendo, y un tumulto de plateros al grito de «¡Grande es Artemisa!»: la Palabra crecía con fuerza.',
+          en: 'The hall of Tyrannus, the magic books burning, and a silversmiths’ riot shouting "Great is Artemis!": the Word grew mightily.',
+        },
+        readings: [{ book: 'ACT', chapter: 19 }],
+      },
+      {
+        placeSlug: 'corinth',
+        title: { es: 'Corinto — tres meses de invierno', en: 'Corinth — three winter months' },
+        note: {
+          es: 'En Grecia pasa el invierno con la comunidad de Corinto. De aquí, según la tradición, escribe la carta a los Romanos.',
+          en: 'He winters in Greece with the church of Corinth. From here, by tradition, he writes the letter to the Romans.',
+        },
+        readings: [{ book: 'ACT', chapter: 20, verses: [1, 6] }],
+      },
+      {
+        placeSlug: 'troas',
+        title: { es: 'Tróade — Eutico en la ventana', en: 'Troas — Eutychus at the window' },
+        note: {
+          es: 'Pablo alarga el discurso hasta medianoche y un muchacho se duerme en la ventana del tercer piso. Cae, lo dan por muerto — y vuelve vivo a casa.',
+          en: 'Paul speaks on till midnight and a young man dozes off in the third-floor window. He falls, is taken for dead — and goes home alive.',
+        },
+        readings: [{ book: 'ACT', chapter: 20, verses: [7, 12] }],
+      },
+      {
+        placeSlug: 'miletus',
+        title: { es: 'Mileto — el adiós a los presbíteros', en: 'Miletus — farewell to the elders' },
+        note: {
+          es: 'Los ancianos de Éfeso bajan al puerto. «Hay más dicha en dar que en recibir» — y lloran abrazados, sabiendo que no volverán a verle.',
+          en: 'The elders of Ephesus come down to the harbour. "It is more blessed to give than to receive" — and they weep and embrace him, knowing they will not see his face again.',
+        },
+        readings: [{ book: 'ACT', chapter: 20, verses: [17, 38] }],
+      },
+      {
+        placeSlug: 'tyre',
+        title: { es: 'Tiro — siete días con los discípulos', en: 'Tyre — seven days with the disciples' },
+        note: {
+          es: 'Mientras descargan la nave, los discípulos le repiten por el Espíritu que no suba a Jerusalén. Toda la comunidad lo despide de rodillas en la playa.',
+          en: 'While the ship unloads, the disciples urge him through the Spirit not to go up to Jerusalem. The whole community kneels on the beach to bid him farewell.',
+        },
+        readings: [{ book: 'ACT', chapter: 21, verses: [1, 6] }],
+      },
+      {
+        placeSlug: 'caesarea',
+        title: { es: 'Cesarea — el cinturón de Ágabo', en: 'Caesarea — Agabus’s belt' },
+        note: {
+          es: 'El profeta Ágabo se ata pies y manos con el cinturón de Pablo: «Así atarán en Jerusalén a su dueño». «Dispuesto estoy no solo a ser atado, sino a morir».',
+          en: 'The prophet Agabus binds his own feet and hands with Paul’s belt: "So shall they bind its owner in Jerusalem". "I am ready not only to be bound, but to die".',
+        },
+        readings: [{ book: 'ACT', chapter: 21, verses: [7, 14] }],
+      },
+      {
+        placeSlug: 'jerusalem',
+        title: { es: 'Jerusalén — el final del camino libre', en: 'Jerusalem — the end of the free road' },
+        note: {
+          es: 'Los hermanos lo reciben con alegría; días después, el arresto en el Templo. Empieza el camino de cadenas que lo llevará a Roma.',
+          en: 'The brethren receive him gladly; days later, the arrest in the Temple. The road in chains that will lead him to Rome begins.',
+        },
+        readings: [{ book: 'ACT', chapter: 21, verses: [15, 26] }],
+      },
+    ],
+  },
+];
+
+export const ROUTES: BibleRoute[] = [...CORE_ROUTES, ...MORE_ROUTES, ...HEROES_ROUTES];
 
 export function getRoute(slug: string): BibleRoute | null {
   return ROUTES.find((r) => r.slug === slug) ?? null;
