@@ -170,6 +170,55 @@ export async function getChapterGeo(opts: {
   return { places: Array.from(placeBySlug.values()), placeSlugsByVerse };
 }
 
+export type DbRoutePlace = {
+  slug: string;
+  name: string;
+  lng: number;
+  lat: number;
+};
+
+/**
+ * Lugares por slug con nombre localizado y coordenadas — para las paradas de
+ * las rutas. Mismo criterio de nombre que getChapterGeo: traducción curada si
+ * existe, si no el canónico sin sufijo de desambiguación. Los slugs que no
+ * existan simplemente no vuelven (el llamante decide si avisar).
+ */
+export async function listPlacesBySlugs(opts: {
+  slugs: string[];
+  language?: string;
+}): Promise<DbRoutePlace[]> {
+  if (opts.slugs.length === 0) return [];
+  const rows = await db
+    .select({
+      slug: place.slug,
+      canonicalName: place.canonicalName,
+      localizedName: placeAlternateName.name,
+      lng: sql<number>`ST_X(${place.geom}::geometry)`,
+      lat: sql<number>`ST_Y(${place.geom}::geometry)`,
+    })
+    .from(place)
+    .leftJoin(
+      placeAlternateName,
+      and(
+        eq(placeAlternateName.placeId, place.id),
+        eq(placeAlternateName.language, opts.language ?? '__none__'),
+      ),
+    )
+    .where(inArray(place.slug, opts.slugs));
+
+  const bySlug = new Map<string, DbRoutePlace>();
+  for (const r of rows) {
+    if (bySlug.has(r.slug)) continue;
+    bySlug.set(r.slug, {
+      slug: r.slug,
+      name: r.localizedName ?? stripDisambiguation(r.canonicalName),
+      lng: Number(r.lng),
+      lat: Number(r.lat),
+    });
+  }
+  return Array.from(bySlug.values());
+}
+
 // --- Búsqueda de lugares ---------------------------------------------------
 
 export type DbPlaceSearchResult = {

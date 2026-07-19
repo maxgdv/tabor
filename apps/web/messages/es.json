@@ -29,6 +29,7 @@
     "ctaRead": "Comenzar a leer",
     "ctaExplore": "Explorar el mapa",
     "ctaPlans": "Planes de lectura",
+    "ctaRoutes": "Rutas por el mapa",
     "soon": "Próximamente",
     "now": {
       "title": "Qué encontrarás hoy",
@@ -183,6 +184,20 @@
     "noteDelete": "Borrar nota",
     "noteCancel": "Cancelar",
     "close": "Cerrar"
+  },
+  "routes": {
+    "title": "Rutas por el mapa",
+    "lede": "Itinerarios geográficos con lecturas en cada parada: sigue en el mapa el camino que recorre el texto, lugar a lugar.",
+    "breadcrumb": "Volver a rutas",
+    "stops": "{count, plural, one {# parada} other {# paradas}}",
+    "stopCount": "Parada {n} de {total}",
+    "readings": "Lecturas de esta parada",
+    "stopMark": "Marcar parada como leída",
+    "stopDone": "Parada leída ✓",
+    "prevStop": "Anterior",
+    "nextStop": "Siguiente",
+    "mapLabel": "Mapa de la ruta",
+    "stopPanel": "Parada actual"
   },
   "periods": {
     "bc": "a. C.",

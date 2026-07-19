@@ -58,6 +58,10 @@ con ajustes según el aprendizaje real.
   versión, y **lectura comparada**: cualquier capítulo puede leerse
   con una segunda versión intercalada por versículo — español,
   inglés o latín.
+- **Rutas por el mapa**: itinerarios geográficos con lecturas en
+  cada parada (La última semana de Jesús, El Éxodo, el primer viaje
+  de Pablo) — el mapa vuela de parada en parada y el progreso se
+  sincroniza con la cuenta, como en los planes.
 
 ---
 

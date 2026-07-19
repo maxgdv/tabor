@@ -1,49 +1,20 @@
 'use client';
 
 import { useEffect, useRef, useSyncExternalStore } from 'react';
-import maplibregl, {
-  Marker,
-  Popup,
-  type Map as MapLibreMap,
-  type StyleSpecification,
-} from 'maplibre-gl';
+import maplibregl, { Marker, Popup, type Map as MapLibreMap } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useLocale, useTranslations } from 'next-intl';
 import { useReaderStore } from '@/lib/reader-store';
 import type { Chapter, Place } from '@/lib/bible';
 import { HISTORICAL_OVERLAYS } from '@/lib/historical-overlays';
 import type { PeriodId } from '@/lib/periods';
+import { SATELLITE_STYLE, VECTOR_STYLE } from './styles';
 
 type Props = {
   chapter: Chapter;
   places: Place[];
   /** Época del capítulo; con 'jesus' el mapa pinta las regiones del s. I. */
   period: PeriodId | null;
-};
-
-// Estilo vectorial gratuito y open-source. Para el MVP basta y no requiere
-// API key. En el futuro podemos servir nuestro propio tile server.
-const VECTOR_STYLE = 'https://demotiles.maplibre.org/style.json';
-
-// Estilo satélite con teselas raster de Esri World Imagery — gratis para
-// uso no comercial, atribución obligatoria visible.
-const SATELLITE_STYLE: StyleSpecification = {
-  version: 8,
-  // Glyphs para capas de texto propias (rótulos de regiones históricas);
-  // el estilo vectorial de demotiles ya trae los suyos.
-  glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
-  sources: {
-    esri: {
-      type: 'raster',
-      tiles: [
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      ],
-      tileSize: 256,
-      maxzoom: 19,
-      attribution: 'Imagery © Esri, Maxar, Earthstar Geographics',
-    },
-  },
-  layers: [{ id: 'esri-imagery', type: 'raster', source: 'esri' }],
 };
 
 // Vista panorámica del "mundo bíblico": Egipto + Levante + Mesopotamia.

@@ -2,12 +2,19 @@
 // Funciones puras (sin React ni BD): las comparten la API route y los tests.
 
 import { PLANS, type ReadingPlan } from '@/lib/plans';
+import { ROUTES, routeProgressSlug } from '@/lib/routes';
 
 /** slug → nº de días, derivado de los planes en código. */
 export function planDayCounts(
   plans: Array<Pick<ReadingPlan, 'slug' | 'days'>> = PLANS,
 ): Map<string, number> {
-  return new Map(plans.map((p) => [p.slug, p.days.length]));
+  const counts = new Map(plans.map((p) => [p.slug, p.days.length]));
+  // Las rutas comparten la maquinaria de progreso bajo `ruta-<slug>`
+  // (una "parada" = un "día"). Mismo saneado y misma tabla.
+  for (const route of ROUTES) {
+    counts.set(routeProgressSlug(route.slug), route.stops.length);
+  }
+  return counts;
 }
 
 export type SetDayBody = {
