@@ -30,6 +30,8 @@
     "ctaExplore": "Explore the map",
     "ctaPlans": "Reading plans",
     "ctaRoutes": "Map routes",
+    "seasonNow": "It is {season}",
+    "seasonLede": "Reading plans and map routes to walk this season of the Church.",
     "soon": "Coming soon",
     "now": {
       "title": "What you'll find today",

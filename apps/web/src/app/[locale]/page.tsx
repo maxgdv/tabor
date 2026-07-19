@@ -1,14 +1,34 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
+import { getLiturgicalSeason } from '@/lib/liturgical';
+import type { LiturgicalSeason } from '@/lib/routes';
+import { SeasonHighlight } from '@/components/SeasonHighlight';
+
+const SEASONS: readonly LiturgicalSeason[] = [
+  'adviento',
+  'navidad',
+  'cuaresma',
+  'semana-santa',
+  'pascua',
+];
 
 export default async function HomePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { locale } = await params;
+  const [{ locale }, query] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
   const t = await getTranslations('home');
+
+  // Tiempo litúrgico actual; ?season= permite previsualizar cualquiera
+  // fuera de fecha (útil para revisar el diseño en Tiempo Ordinario).
+  const preview = typeof query.season === 'string' ? query.season : undefined;
+  const season = SEASONS.includes(preview as LiturgicalSeason)
+    ? (preview as LiturgicalSeason)
+    : getLiturgicalSeason(new Date());
 
   const principles = ['rigor', 'calm', 'privacy', 'access'] as const;
 
@@ -50,6 +70,8 @@ export default async function HomePage({
           </Link>
         </div>
       </section>
+
+      {season && <SeasonHighlight season={season} locale={locale} />}
 
       <section className="mt-20 rounded-lg border border-sand-200 bg-white/60 p-8 dark:border-stone-700 dark:bg-stone-800/60">
         <h2 className="font-serif text-xl text-stone-800 dark:text-sand-100">
