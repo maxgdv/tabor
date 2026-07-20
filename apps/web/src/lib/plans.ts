@@ -264,6 +264,54 @@ export const PLANS: ReadingPlan[] = [
       { readings: [{ book: 'REV', chapters: [22, 22] }] },
     ],
   },
+  {
+    slug: 'exodo-40',
+    name: {
+      es: 'El Éxodo en 40 días',
+      en: 'Exodus in 40 Days',
+    },
+    description: {
+      es: 'El libro de la liberación entero, un capítulo al día: de la esclavitud a la nube que llena el santuario. Cuarenta capítulos, cuarenta días — como los del desierto.',
+      en: 'The whole book of liberation, one chapter a day: from slavery to the cloud filling the sanctuary. Forty chapters, forty days — like those in the desert.',
+    },
+    days: sequentialDays([['EXO', 40]], 1),
+  },
+  {
+    slug: 'josue-24',
+    name: {
+      es: 'Josué en 24 días',
+      en: 'Joshua in 24 Days',
+    },
+    description: {
+      es: 'La entrada en la Tierra Prometida capítulo a capítulo: el Jordán, Jericó, el reparto de la herencia y la gran elección de Siquem.',
+      en: 'The entry into the Promised Land chapter by chapter: the Jordan, Jericho, the allotment of the inheritance, and the great choice at Shechem.',
+    },
+    days: sequentialDays([['JOS', 24]], 1),
+  },
+  {
+    slug: 'juan-21',
+    name: {
+      es: 'El Evangelio de Juan en 21 días',
+      en: 'The Gospel of John in 21 Days',
+    },
+    description: {
+      es: 'Tres semanas con el Evangelio del discípulo amado, un capítulo al día: los signos, los grandes discursos y la hora de la gloria.',
+      en: 'Three weeks with the Gospel of the beloved disciple, one chapter a day: the signs, the great discourses, and the hour of glory.',
+    },
+    days: sequentialDays([['JHN', 21]], 1),
+  },
+  {
+    slug: 'proverbios-31',
+    name: {
+      es: 'Proverbios, uno al día (31 días)',
+      en: 'Proverbs, One a Day (31 Days)',
+    },
+    description: {
+      es: 'La sabiduría práctica de Israel en un mes: un capítulo por cada día, al ritmo clásico de leer el capítulo que marca el calendario.',
+      en: 'Israel’s practical wisdom in a month: one chapter for each day, in the classic rhythm of reading the day’s chapter.',
+    },
+    days: sequentialDays([['PRO', 31]], 1),
+  },
 ];
 
 export function getPlan(slug: string): ReadingPlan | null {

@@ -815,7 +815,231 @@ const HEROES_ROUTES: BibleRoute[] = [
   },
 ];
 
-export const ROUTES: BibleRoute[] = [...CORE_ROUTES, ...MORE_ROUTES, ...HEROES_ROUTES];
+const CONQUEST_ROUTES: BibleRoute[] = [
+  {
+    slug: 'josue-y-la-conquista',
+    name: { es: 'Josué y la conquista', en: 'Joshua and the Conquest' },
+    description: {
+      es: 'Del campamento de Sitim a la asamblea de Siquem: el paso del Jordán, las murallas de Jericó y la tierra por fin pisada.',
+      en: 'From the camp at Shittim to the assembly at Shechem: the Jordan crossing, the walls of Jericho, and the land finally trodden.',
+    },
+    stops: [
+      {
+        placeSlug: 'shittim',
+        title: { es: 'Sitim — el relevo y los espías', en: 'Shittim — the succession and the spies' },
+        note: {
+          es: 'Muerto Moisés, el Señor habla a Josué: «Sé fuerte y valiente». Del campamento parten dos espías hacia Jericó, donde Rajab los esconde.',
+          en: 'After Moses’ death the Lord speaks to Joshua: "Be strong and courageous". From the camp two spies set out for Jericho, where Rahab hides them.',
+        },
+        readings: [
+          { book: 'JOS', chapter: 1 },
+          { book: 'JOS', chapter: 2 },
+        ],
+      },
+      {
+        placeSlug: 'jordan',
+        title: { es: 'El Jordán — el paso a pie enjuto', en: 'The Jordan — crossing on dry ground' },
+        note: {
+          es: 'El Arca entra en el río y las aguas se detienen. Doce piedras del cauce guardarán la memoria: «¿Qué significan estas piedras?».',
+          en: 'The Ark enters the river and the waters stand still. Twelve stones from the riverbed will keep the memory: "What do these stones mean?".',
+        },
+        readings: [
+          { book: 'JOS', chapter: 3 },
+          { book: 'JOS', chapter: 4 },
+        ],
+      },
+      {
+        placeSlug: 'gilgal-1',
+        title: { es: 'Guilgal — la primera Pascua en la tierra', en: 'Gilgal — the first Passover in the land' },
+        note: {
+          es: 'Cesa el maná: el pueblo come ya del fruto de la tierra. Y ante Josué, un guerrero con la espada desenvainada: «Descálzate».',
+          en: 'The manna ceases: the people now eat the produce of the land. And before Joshua, a warrior with drawn sword: "Take off your sandals".',
+        },
+        readings: [{ book: 'JOS', chapter: 5 }],
+      },
+      {
+        placeSlug: 'jericho-1',
+        title: { es: 'Jericó — las murallas', en: 'Jericho — the walls' },
+        note: {
+          es: 'Siete días de vueltas en silencio, siete trompetas, y al séptimo día el grito: la muralla se desploma. Solo se salva la casa de Rajab, la del cordón rojo.',
+          en: 'Seven days of silent circuits, seven trumpets, and on the seventh day the shout: the wall collapses. Only Rahab’s house, marked with the scarlet cord, is spared.',
+        },
+        readings: [{ book: 'JOS', chapter: 6 }],
+      },
+      {
+        placeSlug: 'ai-1',
+        title: { es: 'Hai — la derrota y la lección', en: 'Ai — defeat and lesson' },
+        note: {
+          es: 'La ciudad pequeña vence al pueblo confiado: el pecado de Acán pesaba en el campamento. Purificado Israel, Hai cae con estrategia y obediencia.',
+          en: 'The small city defeats the overconfident people: Achan’s sin weighed on the camp. Once Israel is purified, Ai falls by strategy and obedience.',
+        },
+        readings: [
+          { book: 'JOS', chapter: 7 },
+          { book: 'JOS', chapter: 8, verses: [1, 29] },
+        ],
+      },
+      {
+        placeSlug: 'gibeon',
+        title: { es: 'Gabaón — el sol detenido', en: 'Gibeon — the sun stands still' },
+        note: {
+          es: 'Los gabaonitas salvan la vida con astucia, y defendiendo a los nuevos aliados Josué reza en plena batalla: «Sol, detente en Gabaón».',
+          en: 'The Gibeonites save their lives by cunning, and defending his new allies Joshua prays mid-battle: "Sun, stand still over Gibeon".',
+        },
+        readings: [
+          { book: 'JOS', chapter: 9 },
+          { book: 'JOS', chapter: 10, verses: [1, 15] },
+        ],
+      },
+      {
+        placeSlug: 'shechem',
+        title: { es: 'Siquem — «yo y mi casa serviremos al Señor»', en: 'Shechem — "as for me and my house"' },
+        note: {
+          es: 'Anciano ya, Josué reúne a las tribus donde Abraham levantó su primer altar y les hace elegir: «Escoged hoy a quién queréis servir».',
+          en: 'Now old, Joshua gathers the tribes where Abraham built his first altar and makes them choose: "Choose this day whom you will serve".',
+        },
+        readings: [{ book: 'JOS', chapter: 24, verses: [1, 28] }],
+      },
+    ],
+  },
+  {
+    slug: 'jesus-en-galilea',
+    name: { es: 'Jesús en Galilea', en: 'Jesus in Galilee' },
+    description: {
+      es: 'Del rechazo en Nazaret a la luz del Tabor: los caminos del ministerio junto al lago, pueblo a pueblo.',
+      en: 'From the rejection at Nazareth to the light of Tabor: the paths of the ministry around the lake, village by village.',
+    },
+    stops: [
+      {
+        placeSlug: 'nazareth',
+        title: { es: 'Nazaret — «hoy se cumple esta Escritura»', en: 'Nazareth — "today this Scripture is fulfilled"' },
+        note: {
+          es: 'En la sinagoga de su pueblo, Jesús lee a Isaías y anuncia su programa. La admiración se vuelve furia: nadie es profeta en su tierra.',
+          en: 'In his hometown synagogue Jesus reads Isaiah and announces his mission. Wonder turns to fury: no prophet is accepted in his own country.',
+        },
+        readings: [{ book: 'LUK', chapter: 4, verses: [16, 30] }],
+      },
+      {
+        placeSlug: 'capernaum',
+        title: { es: 'Cafarnaúm — «su ciudad»', en: 'Capernaum — "his own town"' },
+        note: {
+          es: 'Junto al lago, la base del ministerio: enseña con autoridad, cura a la suegra de Pedro y, al anochecer, el pueblo entero se agolpa a la puerta.',
+          en: 'By the lake, the base of the ministry: he teaches with authority, heals Peter’s mother-in-law and, at sundown, the whole town crowds the door.',
+        },
+        readings: [
+          { book: 'MRK', chapter: 1, verses: [21, 39] },
+          { book: 'MRK', chapter: 2, verses: [1, 12] },
+        ],
+      },
+      {
+        placeSlug: 'sea-of-galilee',
+        title: { es: 'El mar de Galilea — pescadores de hombres', en: 'The Sea of Galilee — fishers of men' },
+        note: {
+          es: 'La pesca milagrosa dobla las rodillas de Pedro: «Apártate de mí, que soy pecador». Dejan las barcas en la orilla y lo siguen.',
+          en: 'The miraculous catch brings Peter to his knees: "Depart from me, for I am a sinful man". They leave the boats on the shore and follow him.',
+        },
+        readings: [{ book: 'LUK', chapter: 5, verses: [1, 11] }],
+      },
+      {
+        placeSlug: 'nain',
+        title: { es: 'Naín — el hijo de la viuda', en: 'Nain — the widow’s son' },
+        note: {
+          es: 'Dos cortejos se cruzan a la puerta del pueblo: el de la muerte y el de la Vida. «Joven, a ti te digo: levántate».',
+          en: 'Two processions meet at the town gate: death’s and Life’s. "Young man, I say to you, arise".',
+        },
+        readings: [{ book: 'LUK', chapter: 7, verses: [11, 17] }],
+      },
+      {
+        placeSlug: 'bethsaida-1',
+        title: { es: 'Betsaida — los cinco panes', en: 'Bethsaida — the five loaves' },
+        note: {
+          es: 'En un lugar apartado, cinco panes y dos peces para cinco mil: «Dadles vosotros de comer». Sobraron doce canastos.',
+          en: 'In a deserted place, five loaves and two fish for five thousand: "You give them something to eat". Twelve baskets were left over.',
+        },
+        readings: [{ book: 'LUK', chapter: 9, verses: [10, 17] }],
+      },
+      {
+        placeSlug: 'caesarea-philippi',
+        title: { es: 'Cesarea de Filipo — «¿quién decís que soy yo?»', en: 'Caesarea Philippi — "who do you say that I am?"' },
+        note: {
+          es: 'Lejos, al pie del Hermón, la pregunta decisiva y la confesión de Pedro: «Tú eres el Cristo». Y el primer anuncio de la cruz.',
+          en: 'Far north, at the foot of Hermon, the decisive question and Peter’s confession: "You are the Christ". And the first announcement of the cross.',
+        },
+        readings: [{ book: 'MAT', chapter: 16, verses: [13, 28] }],
+      },
+      {
+        placeSlug: 'mount-tabor',
+        title: { es: 'El monte Tabor — la Transfiguración', en: 'Mount Tabor — the Transfiguration' },
+        note: {
+          es: 'En el monte alto su rostro se vuelve luz, con Moisés y Elías a los lados: «Este es mi Hijo amado; escuchadle». El monte que da nombre a este proyecto.',
+          en: 'On the high mountain his face becomes light, with Moses and Elijah beside him: "This is my beloved Son; listen to him". The mountain that gives this project its name.',
+        },
+        readings: [{ book: 'LUK', chapter: 9, verses: [28, 36] }],
+      },
+    ],
+  },
+  {
+    slug: 'regreso-del-exilio',
+    name: { es: 'El regreso del Exilio', en: 'The Return from Exile' },
+    description: {
+      es: 'De los ríos de Babilonia a la Ley leída en la plaza: el pueblo que vuelve, reconstruye el Templo y levanta las murallas (Esdras y Nehemías).',
+      en: 'From the rivers of Babylon to the Law read in the square: the people who return, rebuild the Temple and raise the walls (Ezra and Nehemiah).',
+    },
+    stops: [
+      {
+        placeSlug: 'babylon-1',
+        title: { es: 'Babilonia — el edicto de Ciro', en: 'Babylon — the edict of Cyrus' },
+        note: {
+          es: 'Setenta años después, un rey persa firma la libertad: «Quien de entre vosotros pertenezca a su pueblo, suba a Jerusalén».',
+          en: 'Seventy years on, a Persian king signs the liberation: "Whoever among you belongs to his people, let him go up to Jerusalem".',
+        },
+        readings: [
+          { book: 'EZR', chapter: 1 },
+          { book: 'PSA', chapter: 125 },
+        ],
+      },
+      {
+        placeSlug: 'ahava',
+        title: { es: 'El río Ahavá — el ayuno del camino', en: 'The river Ahava — the fast of the road' },
+        note: {
+          es: 'Antes de cruzar el desierto sin escolta, Esdras proclama un ayuno: «La mano de nuestro Dios protege a los que le buscan».',
+          en: 'Before crossing the desert without an escort, Ezra proclaims a fast: "The hand of our God is upon all who seek him".',
+        },
+        readings: [{ book: 'EZR', chapter: 8, verses: [15, 36] }],
+      },
+      {
+        placeSlug: 'jerusalem',
+        title: { es: 'Jerusalén — los cimientos del Templo', en: 'Jerusalem — the Temple foundations' },
+        note: {
+          es: 'Al poner los cimientos, los jóvenes gritan de alegría y los ancianos, que conocieron el primer Templo, lloran: nadie distingue un clamor del otro.',
+          en: 'As the foundations are laid, the young shout for joy and the elders, who knew the first Temple, weep: no one can tell one sound from the other.',
+        },
+        readings: [
+          { book: 'EZR', chapter: 3 },
+          { book: 'EZR', chapter: 6, verses: [13, 22] },
+        ],
+      },
+      {
+        placeSlug: 'jerusalem',
+        title: { es: 'Jerusalén — las murallas y la Ley', en: 'Jerusalem — the walls and the Law' },
+        note: {
+          es: 'Nehemías ronda de noche las ruinas y las levanta en cincuenta y dos días; después, junto a la puerta de las Aguas, Esdras lee la Ley y el pueblo llora y celebra.',
+          en: 'Nehemiah surveys the ruins by night and raises them in fifty-two days; then, by the Water Gate, Ezra reads the Law and the people weep and rejoice.',
+        },
+        readings: [
+          { book: 'NEH', chapter: 2 },
+          { book: 'NEH', chapter: 8, verses: [1, 12] },
+        ],
+      },
+    ],
+  },
+];
+
+export const ROUTES: BibleRoute[] = [
+  ...CORE_ROUTES,
+  ...MORE_ROUTES,
+  ...HEROES_ROUTES,
+  ...CONQUEST_ROUTES,
+];
 
 export function getRoute(slug: string): BibleRoute | null {
   return ROUTES.find((r) => r.slug === slug) ?? null;
