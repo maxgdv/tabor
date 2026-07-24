@@ -128,11 +128,14 @@ const CORE_ROUTES: BibleRoute[] = [
         readings: [{ book: 'EXO', chapter: 12, verses: [29, 42] }],
       },
       {
-        placeSlug: 'red-sea-1',
-        title: { es: 'El mar Rojo — el paso', en: 'The Red Sea — the crossing' },
+        // Ex 14, 2 sitúa el paso en el campamento de Fihahirot, «entre Migdol
+        // y el mar»: la franja de lagos del istmo de Suez (el «mar de las
+        // Cañas» hebreo), no el mar Rojo profundo de red-sea-1.
+        placeSlug: 'pi-hahiroth',
+        title: { es: 'Fihahirot — el paso del mar', en: 'Pi-hahiroth — the crossing of the sea' },
         note: {
-          es: 'Con el ejército del faraón a la espalda, el mar se abre; Israel pasa a pie enjuto y canta la primera alabanza de su historia.',
-          en: 'With Pharaoh’s army behind them, the sea parts; Israel crosses on dry ground and sings its first song of praise.',
+          es: 'Acampados «entre Migdol y el mar», con el ejército del faraón a la espalda, el mar se abre; Israel pasa a pie enjuto y canta la primera alabanza de su historia. El hebreo lo llama yam suf, «mar de las Cañas»: los lagos poco profundos del istmo de Suez.',
+          en: 'Camped "between Migdol and the sea", with Pharaoh’s army behind them, the sea parts; Israel crosses on dry ground and sings its first song of praise. The Hebrew calls it yam suph, the "Sea of Reeds": the shallow lakes of the isthmus of Suez.',
         },
         readings: [{ book: 'EXO', chapter: 14 }],
       },
