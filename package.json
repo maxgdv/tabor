@@ -17,6 +17,10 @@
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f postgres meilisearch"
   },
+  "overridesComment": "sharp <0.35 arrastra CVEs de libvips (GHSA-f88m-g3jw-g9cj). Next 16.2.11 lo trae como dependencia opcional fijada en 0.34.5 y no hay release suya que lo suba, así que lo forzamos aquí. Revisar en cada subida de Next: si Next pasa a 0.35+, este override sobra.",
+  "overrides": {
+    "sharp": "^0.35.3"
+  },
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
