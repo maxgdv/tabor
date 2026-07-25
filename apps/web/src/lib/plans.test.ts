@@ -102,6 +102,20 @@ describe('planes de situación', () => {
   it('no llevan tiempo litúrgico: no son de temporada', () => {
     for (const plan of situacion) expect(plan.season, plan.slug).toBeUndefined();
   });
+
+  it('tienen nombre corto para el acceso directo de la portada', () => {
+    for (const plan of situacion) {
+      expect(plan.shortName, `${plan.slug} sin shortName`).toBeDefined();
+      for (const lang of ['es', 'en'] as const) {
+        const label = plan.shortName![lang];
+        expect(label.length, `${plan.slug}.${lang} vacío`).toBeGreaterThan(0);
+        // Son pastillas en una fila: un nombre largo rompe la retícula y
+        // deja de leerse de un vistazo, que es para lo que existen.
+        expect(label.length, `${plan.slug}.${lang} demasiado largo`).toBeLessThanOrEqual(16);
+        expect(label, `${plan.slug}.${lang} no debe repetir la duración`).not.toMatch(/\d/);
+      }
+    }
+  });
 });
 
 describe('helpers', () => {

@@ -55,6 +55,11 @@
         "title": "Accessibility",
         "body": "WCAG 2.2 AA from day one."
       }
+    },
+    "situations": {
+      "title": "For what you are going through",
+      "lede": "Plans of three to seven days, with short passages, for a particular moment. They are no substitute for professional help or for the care of someone who knows you.",
+      "all": "See all reading plans"
     }
   },
   "auth": {
@@ -184,8 +189,8 @@
     "listenVoice": "Voice",
     "listenRate": "Speed",
     "rate": {
-      "0_9": "Unhurried",
       "1": "Normal",
+      "0_9": "Unhurried",
       "1_15": "Brisk",
       "1_3": "Fast"
     },

@@ -4,6 +4,7 @@ import { getLiturgicalSeason } from '@/lib/liturgical';
 import type { LiturgicalSeason } from '@/lib/routes';
 import { getVerseOfDayContent } from '@/lib/verse-of-day-content';
 import { SeasonHighlight } from '@/components/SeasonHighlight';
+import { SituationPlansSection } from '@/components/plans/SituationPlansSection';
 import { VerseOfDayCard } from '@/components/VerseOfDayCard';
 
 const SEASONS: readonly LiturgicalSeason[] = [
@@ -81,6 +82,10 @@ export default async function HomePage({
           a la portada viene a buscarlo. El destacado de temporada, que dura
           semanas, queda debajo. */}
       {verse && <VerseOfDayCard content={verse} locale={locale} />}
+
+      {/* Antes del destacado de temporada: esto no se busca cuando toca el
+          calendario, se busca el día que hace falta. */}
+      <SituationPlansSection locale={locale} />
 
       {season && <SeasonHighlight season={season} locale={locale} />}
 

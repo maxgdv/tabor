@@ -49,6 +49,7 @@ export const SITUATION_PLANS: ReadingPlan[] = [
       es: 'Cuando la ansiedad aprieta (5 días)',
       en: 'When Anxiety Presses In (5 Days)',
     },
+    shortName: { es: 'Ansiedad', en: 'Anxiety' },
     description: {
       es: 'Cinco pasajes breves para los días en que la cabeza no para y el pecho va por delante del cuerpo.\nNo prometen que se pase: ofrecen dónde apoyar el peso mientras dura.',
       en: 'Five short passages for the days when the mind will not stop and the chest runs ahead of the body.\nThey do not promise it will pass: they offer somewhere to set down the weight while it lasts.',
@@ -76,6 +77,7 @@ export const SITUATION_PLANS: ReadingPlan[] = [
       es: 'Duelo: siete días para el llanto (7 días)',
       en: 'Grief: Seven Days for Weeping (7 Days)',
     },
+    shortName: { es: 'Duelo', en: 'Grief' },
     description: {
       es: 'Una semana para quien acaba de perder a alguien: primero el lamento, sin prisa por consolar.\nLa Escritura deja llorar antes de decir nada, y este plan hace lo mismo.',
       en: 'A week for someone who has just lost a loved one: lament first, with no hurry to console.\nScripture lets us weep before it says anything, and this plan does the same.',
@@ -104,6 +106,7 @@ export const SITUATION_PLANS: ReadingPlan[] = [
       es: 'En la enfermedad (5 días)',
       en: 'In Sickness (5 Days)',
     },
+    shortName: { es: 'Enfermedad', en: 'Illness' },
     description: {
       es: 'Para quien está enfermo o cuida a alguien que lo está: la queja también es oración.\nNi culpa ni promesa de curación; la compañía de un Dios que conoce el dolor por dentro.',
       en: 'For those who are ill, or caring for someone who is: complaint is prayer too.\nNo blame and no promise of a cure; the company of a God who knows pain from the inside.',
@@ -136,6 +139,7 @@ export const SITUATION_PLANS: ReadingPlan[] = [
       es: 'Perdonar a quien me hizo daño (5 días)',
       en: 'Forgiving the One Who Hurt Me (5 Days)',
     },
+    shortName: { es: 'Perdonar', en: 'Forgiving' },
     description: {
       es: 'Cinco pasajes para cuando el rencor pesa y perdonar todavía parece imposible.\nNo mandan sentir otra cosa: muestran a quien lo hizo antes, empezando por el Crucificado.',
       en: 'Five passages for when resentment weighs and forgiveness still looks impossible.\nThey do not order you to feel differently: they show those who did it first, beginning with the Crucified.',
@@ -166,6 +170,7 @@ export const SITUATION_PLANS: ReadingPlan[] = [
       es: 'Cuando uno se siente solo (5 días)',
       en: 'When You Feel Alone (5 Days)',
     },
+    shortName: { es: 'Soledad', en: 'Loneliness' },
     description: {
       es: 'Para los días de casa vacía o de sentirse invisible entre la gente.\nLa soledad se dice primero tal cual es, y sólo después aparece quien se sienta al lado.',
       en: 'For the days of an empty house, or of feeling invisible among people.\nLoneliness is first said plainly, and only then does someone sit down beside you.',
@@ -189,6 +194,7 @@ export const SITUATION_PLANS: ReadingPlan[] = [
       es: 'Dar gracias (3 días)',
       en: 'Giving Thanks (3 Days)',
     },
+    shortName: { es: 'Gratitud', en: 'Gratitude' },
     description: {
       es: 'Tres días cortos para cuando uno quiere agradecer algo y no sabe con qué palabras.\nUn salmo, un evangelio y una bendición de Pablo: el vocabulario ya está escrito.',
       en: 'Three short days for when you want to give thanks and cannot find the words.\nA psalm, a Gospel scene and one of Paul’s blessings: the vocabulary is already written.',
@@ -212,6 +218,7 @@ export const SITUATION_PLANS: ReadingPlan[] = [
       es: 'Ante una decisión (5 días)',
       en: 'Facing a Decision (5 Days)',
     },
+    shortName: { es: 'Una decisión', en: 'A decision' },
     description: {
       es: 'Cinco días para quien tiene delante una elección que le supera y quiere rezarla antes de tomarla.\nNo dan la respuesta: enseñan a pedir un corazón capaz de reconocerla.',
       en: 'Five days for someone facing a choice too big for them, who wants to pray it before making it.\nThey do not supply the answer: they teach you to ask for a heart able to recognise it.',
@@ -238,6 +245,7 @@ export const SITUATION_PLANS: ReadingPlan[] = [
       es: 'Cuando uno no se perdona (5 días)',
       en: 'When You Cannot Forgive Yourself (5 Days)',
     },
+    shortName: { es: 'Culpa', en: 'Guilt' },
     description: {
       es: 'Para el peso que queda después de haber hecho daño, incluso después de confesarlo.\nDe lo hondo del pozo al abrazo del padre, sin pasar por ningún castigo añadido.',
       en: 'For the weight that remains after doing harm, even after confessing it.\nFrom the depths of the pit to the father’s embrace, with no added punishment on the way.',
@@ -271,6 +279,7 @@ export const SITUATION_PLANS: ReadingPlan[] = [
       es: 'Cuando da miedo (5 días)',
       en: 'When You Are Afraid (5 Days)',
     },
+    shortName: { es: 'Miedo', en: 'Fear' },
     description: {
       es: 'Cinco pasajes para el miedo que no se va con razones: una prueba médica, una noticia, lo que viene.\nNinguno regaña por tenerlo; todos ofrecen una compañía concreta.',
       en: 'Five passages for the fear that reasoning does not dispel: a test result, a piece of news, what lies ahead.\nNone of them scolds you for it; each offers concrete company.',
@@ -296,6 +305,7 @@ export const SITUATION_PLANS: ReadingPlan[] = [
       es: 'Agotado (5 días)',
       en: 'Worn Out (5 Days)',
     },
+    shortName: { es: 'Cansancio', en: 'Weariness' },
     description: {
       es: 'Para el cansancio que ya no se arregla durmiendo: el trabajo, los cuidados, el ir tirando.\nLa Escritura trata el agotamiento con comida, descanso y ayuda repartida, antes que con consejos.',
       en: 'For the tiredness that sleep no longer fixes: work, caregiving, just getting by.\nScripture treats exhaustion with food, rest and shared help before it offers any advice.',
@@ -321,6 +331,7 @@ export const SITUATION_PLANS: ReadingPlan[] = [
       es: 'Volver a esperar (7 días)',
       en: 'Learning to Hope Again (7 Days)',
     },
+    shortName: { es: 'Esperanza', en: 'Hope' },
     description: {
       es: 'Una semana para cuando lo que viene parece cerrado y la esperanza suena a consuelo barato.\nEmpieza en un valle de huesos secos y en un destierro que aún dura, no en un final feliz.',
       en: 'A week for when the future looks shut and hope sounds like cheap comfort.\nIt begins in a valley of dry bones and in an exile that is not over yet, not at a happy ending.',
@@ -346,6 +357,7 @@ export const SITUATION_PLANS: ReadingPlan[] = [
       es: 'Días de alegría (3 días)',
       en: 'Days of Joy (3 Days)',
     },
+    shortName: { es: 'Alegría', en: 'Joy' },
     description: {
       es: 'Tres días para cuando ha pasado algo bueno y uno quiere hacer algo con esa alegría.\nEl salmo del regreso, la fiesta de Nehemías y el cántico de María.',
       en: 'Three days for when something good has happened and you want to do something with the joy.\nThe psalm of the return, Nehemiah’s feast, and Mary’s canticle.',

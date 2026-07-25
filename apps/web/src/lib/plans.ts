@@ -43,6 +43,13 @@ export type PlanKind = 'itinerario' | 'situacion';
 export type ReadingPlan = {
   slug: string;
   name: { es: string; en: string };
+  /**
+   * Nombre de una o dos palabras para los accesos rápidos de la portada,
+   * donde el nombre completo («Cuando la ansiedad aprieta (5 días)») no
+   * cabe ni conviene: quien lo busca necesita reconocer lo que le pasa de
+   * un vistazo. Sin él se cae al `name` completo.
+   */
+  shortName?: { es: string; en: string };
   description: { es: string; en: string };
   /** Por defecto 'itinerario'. */
   kind?: PlanKind;

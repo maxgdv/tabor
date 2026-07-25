@@ -55,6 +55,11 @@
         "title": "Accesibilidad",
         "body": "WCAG 2.2 AA desde el primer día."
       }
+    },
+    "situations": {
+      "title": "Para lo que estás viviendo",
+      "lede": "Planes de tres a siete días, con pasajes breves, para un momento concreto. No sustituyen la ayuda profesional ni el acompañamiento de alguien que te conozca.",
+      "all": "Ver todos los planes de lectura"
     }
   },
   "auth": {
@@ -184,8 +189,8 @@
     "listenVoice": "Voz",
     "listenRate": "Velocidad",
     "rate": {
-      "0_9": "Pausada",
       "1": "Normal",
+      "0_9": "Pausada",
       "1_15": "Ágil",
       "1_3": "Rápida"
     },
