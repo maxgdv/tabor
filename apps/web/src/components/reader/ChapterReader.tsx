@@ -111,9 +111,7 @@ export function ChapterReader({
   // Swatch activo solo si TODA la selección comparte color; ídem etiqueta.
   const selectionColor = uniformValue(selectedHighlights.map((h) => h?.color ?? null));
   const selectionLabel =
-    selectionColor !== null
-      ? uniformValue(selectedHighlights.map((h) => h?.label ?? null))
-      : null;
+    selectionColor !== null ? uniformValue(selectedHighlights.map((h) => h?.label ?? null)) : null;
 
   /** Aplica color (o null = quitar) y etiqueta a toda la selección, un POST
    *  por rango contiguo, con actualización optimista y revert conjunto. */
@@ -296,170 +294,180 @@ export function ChapterReader({
 
   return (
     <div className="relative h-full">
-    {/* Fijo al panel (no al texto): los controles siguen a mano mientras la
+      {/* Fijo al panel (no al texto): los controles siguen a mano mientras la
         lectura en voz alta desplaza el capítulo. */}
-    <div className="absolute right-3 top-3 z-10 sm:right-4">
-      <ListenControls verses={chapter.verses} />
-    </div>
-    <div
-      ref={containerRef}
-      // El pb extra con selección activa evita que la barra de acciones
-      // fija al fondo tape el versículo enfocado (WCAG 2.4.11).
-      // overscroll-contain: al llegar al final del capítulo, el gesto no
-      // arrastra la página entera (en móvil se llevaría por delante la barra
-      // inferior del pulgar).
-      className={`h-full overflow-y-auto overscroll-contain px-5 py-8 sm:px-10 sm:py-14 ${
-        isAuthed && selected.size > 0 ? 'pb-28 sm:pb-28' : ''
-      }`}
-    >
-      <article className="mx-auto max-w-reader">
-        <header className="mb-8 sm:mb-10">
-          {/* pr en móvil: los controles de escucha flotan en esta esquina. */}
-          <p className="pr-24 text-xs uppercase tracking-[0.2em] text-stone-500 sm:pr-0 dark:text-stone-400">
-            {chapter.versionFullName}
-            {secondary && (
-              <span className="normal-case tracking-normal"> · {secondary.versionFullName}</span>
-            )}
-          </p>
-          <h1 className="mt-2 font-serif text-3xl text-stone-800 dark:text-sand-100">
-            {chapter.bookName} {chapter.number}
-          </h1>
-          {headerExtra && <div className="mt-3">{headerExtra}</div>}
-        </header>
-        {/* En modo comparado cada versículo es un bloque (primario +
-            secundario debajo); en lectura normal, texto corrido. */}
-        <VersesContainer compare={secondary != null}>
-          {chapter.verses.map((verse) => (
-            <span
-              key={verse.number}
-              ref={(el) => {
-                if (el) verseRefs.current.set(verse.number, el);
-                else verseRefs.current.delete(verse.number);
-              }}
-              id={`v${verse.number}`}
-              data-verse={verse.number}
-              data-bookmarked={isAuthed && bookmarks.has(verse.number) ? 'true' : undefined}
-              data-selected={selected.has(verse.number) ? 'true' : undefined}
-              // Seleccionar por puntero es el tap en el texto; por teclado,
-              // Mayús+Intro sobre el número del versículo (hacer focusables
-              // ~170 spans degradaría la navegación por teclado del lector).
-              onClick={isAuthed ? onVerseClick(verse.number) : undefined}
-              className={`group ${secondary ? 'block' : 'inline'} transition-colors ${
-                isAuthed && highlights.has(verse.number)
-                  ? `${HIGHLIGHT_CLASSES[highlights.get(verse.number)!.color]} box-decoration-clone rounded-sm`
-                  : ''
-              } data-[selected=true]:underline data-[selected=true]:decoration-stone-400 data-[selected=true]:decoration-dotted data-[selected=true]:underline-offset-4`}
-            >
-              {isAuthed ? (
-                // Con sesión, el número del versículo es el botón de marcador:
-                // misma tipografía que el <sup> de invitado, alineado arriba.
-                <button
-                  type="button"
-                  // Mayús+click o Mayús+Intro selecciona el versículo para
-                  // resaltar/anotar: es la vía de teclado de la anotación.
-                  onClick={(e) =>
-                    e.shiftKey ? toggleVerseSelection(verse.number) : toggleBookmark(verse.number)
-                  }
-                  aria-pressed={bookmarks.has(verse.number)}
-                  aria-keyshortcuts="Shift+Enter"
-                  aria-label={`${t(bookmarks.has(verse.number) ? 'bookmarkRemove' : 'bookmarkAdd', {
-                    n: verse.number,
-                  })} ${t('selectHint')}`}
-                  className="mr-1 inline-block select-none align-super font-sans text-xs leading-none text-stone-500 transition-colors hover:text-lapis-500 group-data-[active=true]:text-lapis-500 group-data-[bookmarked=true]:font-semibold group-data-[bookmarked=true]:text-sand-600 dark:text-stone-400 dark:group-data-[bookmarked=true]:text-sand-500"
-                >
-                  {verse.number}
-                </button>
-              ) : (
-                <sup className="mr-1 select-none font-sans text-xs text-stone-500 group-data-[active=true]:text-lapis-500 dark:text-stone-400">
-                  {verse.number}
-                </sup>
-              )}
-              {isAuthed && notes.has(verse.number) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelected(new Set([verse.number]));
-                    setNoteEditorVerse(verse.number);
-                  }}
-                  aria-label={t('noteOpen', { n: verse.number })}
-                  title={t('noteOpen', { n: verse.number })}
-                  className="mr-1 inline-block align-super text-lapis-500 transition-colors hover:text-lapis-600 dark:text-lapis-300"
-                >
-                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.4-9.4a2 2 0 112.8 2.8L11 15l-4 1 1-4 8.6-8.4z"
-                    />
-                  </svg>
-                </button>
-              )}
-              {verse.text}{' '}
+      <div className="absolute right-3 top-3 z-10 sm:right-4">
+        <ListenControls verses={chapter.verses} />
+      </div>
+      <div
+        ref={containerRef}
+        // El pb extra con selección activa evita que la barra de acciones
+        // fija al fondo tape el versículo enfocado (WCAG 2.4.11).
+        // overscroll-contain: al llegar al final del capítulo, el gesto no
+        // arrastra la página entera (en móvil se llevaría por delante la barra
+        // inferior del pulgar).
+        className={`h-full overflow-y-auto overscroll-contain px-5 py-8 sm:px-10 sm:py-14 ${
+          isAuthed && selected.size > 0 ? 'pb-28 sm:pb-28' : ''
+        }`}
+      >
+        <article className="mx-auto max-w-reader">
+          <header className="mb-8 sm:mb-10">
+            {/* pr en móvil: los controles de escucha flotan en esta esquina. */}
+            <p className="pr-24 text-xs uppercase tracking-[0.2em] text-stone-500 sm:pr-0 dark:text-stone-400">
+              {chapter.versionFullName}
               {secondary && (
-                <span
-                  lang={secondary.lang}
-                  className="mt-1 block border-l-2 border-sand-200 pl-3 font-serif text-[1.05rem] italic leading-relaxed text-stone-600 dark:border-stone-700 dark:text-stone-400"
-                >
-                  {secondary.byVerse[verse.number] ?? '—'}
-                </span>
+                <span className="normal-case tracking-normal"> · {secondary.versionFullName}</span>
               )}
-            </span>
-          ))}
-        </VersesContainer>
-        <footer className="mt-16 border-t border-sand-200 pt-6 text-xs text-stone-500 dark:border-stone-700 dark:text-stone-400">
-          <p>{chapter.copyright}</p>
-          {secondary && <p className="mt-1">{secondary.copyright}</p>}
-          <p className="mt-1">
-            {t.rich('geoCredits', {
-              link: (chunks) => (
-                <a
-                  href="https://www.openbible.info/geo/"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="underline hover:text-stone-700 dark:hover:text-sand-200"
-                >
-                  {chunks}
-                </a>
-              ),
-            })}
-          </p>
-        </footer>
-      </article>
-    </div>
+            </p>
+            <h1 className="mt-2 font-serif text-3xl text-stone-800 dark:text-sand-100">
+              {chapter.bookName} {chapter.number}
+            </h1>
+            {headerExtra && <div className="mt-3">{headerExtra}</div>}
+          </header>
+          {/* En modo comparado cada versículo es un bloque (primario +
+            secundario debajo); en lectura normal, texto corrido. */}
+          <VersesContainer compare={secondary != null}>
+            {chapter.verses.map((verse) => (
+              <span
+                key={verse.number}
+                ref={(el) => {
+                  if (el) verseRefs.current.set(verse.number, el);
+                  else verseRefs.current.delete(verse.number);
+                }}
+                id={`v${verse.number}`}
+                data-verse={verse.number}
+                data-bookmarked={isAuthed && bookmarks.has(verse.number) ? 'true' : undefined}
+                data-selected={selected.has(verse.number) ? 'true' : undefined}
+                // Seleccionar por puntero es el tap en el texto; por teclado,
+                // Mayús+Intro sobre el número del versículo (hacer focusables
+                // ~170 spans degradaría la navegación por teclado del lector).
+                onClick={isAuthed ? onVerseClick(verse.number) : undefined}
+                className={`group ${secondary ? 'block' : 'inline'} transition-colors ${
+                  isAuthed && highlights.has(verse.number)
+                    ? `${HIGHLIGHT_CLASSES[highlights.get(verse.number)!.color]} box-decoration-clone rounded-sm`
+                    : ''
+                } data-[selected=true]:underline data-[selected=true]:decoration-stone-400 data-[selected=true]:decoration-dotted data-[selected=true]:underline-offset-4`}
+              >
+                {isAuthed ? (
+                  // Con sesión, el número del versículo es el botón de marcador:
+                  // misma tipografía que el <sup> de invitado, alineado arriba.
+                  <button
+                    type="button"
+                    // Mayús+click o Mayús+Intro selecciona el versículo para
+                    // resaltar/anotar: es la vía de teclado de la anotación.
+                    onClick={(e) =>
+                      e.shiftKey ? toggleVerseSelection(verse.number) : toggleBookmark(verse.number)
+                    }
+                    aria-pressed={bookmarks.has(verse.number)}
+                    aria-keyshortcuts="Shift+Enter"
+                    aria-label={`${t(
+                      bookmarks.has(verse.number) ? 'bookmarkRemove' : 'bookmarkAdd',
+                      {
+                        n: verse.number,
+                      },
+                    )} ${t('selectHint')}`}
+                    className="mr-1 inline-block select-none align-super font-sans text-xs leading-none text-stone-500 transition-colors hover:text-lapis-500 group-data-[active=true]:text-lapis-500 group-data-[bookmarked=true]:font-semibold group-data-[bookmarked=true]:text-sand-600 dark:text-stone-400 dark:group-data-[bookmarked=true]:text-sand-500"
+                  >
+                    {verse.number}
+                  </button>
+                ) : (
+                  <sup className="mr-1 select-none font-sans text-xs text-stone-500 group-data-[active=true]:text-lapis-500 dark:text-stone-400">
+                    {verse.number}
+                  </sup>
+                )}
+                {isAuthed && notes.has(verse.number) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelected(new Set([verse.number]));
+                      setNoteEditorVerse(verse.number);
+                    }}
+                    aria-label={t('noteOpen', { n: verse.number })}
+                    title={t('noteOpen', { n: verse.number })}
+                    className="mr-1 inline-block align-super text-lapis-500 transition-colors hover:text-lapis-600 dark:text-lapis-300"
+                  >
+                    <svg
+                      className="h-3 w-3"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.4-9.4a2 2 0 112.8 2.8L11 15l-4 1 1-4 8.6-8.4z"
+                      />
+                    </svg>
+                  </button>
+                )}
+                {verse.text}{' '}
+                {secondary && (
+                  <span
+                    lang={secondary.lang}
+                    className="mt-1 block border-l-2 border-sand-200 pl-3 font-serif text-[1.05rem] italic leading-relaxed text-stone-600 dark:border-stone-700 dark:text-stone-400"
+                  >
+                    {secondary.byVerse[verse.number] ?? '—'}
+                  </span>
+                )}
+              </span>
+            ))}
+          </VersesContainer>
+          <footer className="mt-16 border-t border-sand-200 pt-6 text-xs text-stone-500 dark:border-stone-700 dark:text-stone-400">
+            <p>{chapter.copyright}</p>
+            {secondary && <p className="mt-1">{secondary.copyright}</p>}
+            <p className="mt-1">
+              {t.rich('geoCredits', {
+                link: (chunks) => (
+                  <a
+                    href="https://www.openbible.info/geo/"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="underline hover:text-stone-700 dark:hover:text-sand-200"
+                  >
+                    {chunks}
+                  </a>
+                ),
+              })}
+            </p>
+          </footer>
+        </article>
+      </div>
 
-    {isAuthed && selected.size > 0 && noteEditorVerse == null && (
-      <VerseActionsBar
-        refLabel={selectionRef}
-        currentColor={selectionColor}
-        currentLabel={selectionLabel}
-        canNote={singleSelected != null}
-        hasNote={singleSelected != null && notes.has(singleSelected)}
-        onSelectColor={(color) =>
-          // Cambiar de color conserva la etiqueta común de la selección.
-          applyHighlight(color, color === null ? null : selectionLabel)
-        }
-        onSaveLabel={(label) => applyHighlight(selectionColor, label)}
-        onOpenNote={() => singleSelected != null && setNoteEditorVerse(singleSelected)}
-        onClose={() => setSelected(new Set())}
-      />
-    )}
+      {isAuthed && selected.size > 0 && noteEditorVerse == null && (
+        <VerseActionsBar
+          refLabel={selectionRef}
+          currentColor={selectionColor}
+          currentLabel={selectionLabel}
+          canNote={singleSelected != null}
+          hasNote={singleSelected != null && notes.has(singleSelected)}
+          onSelectColor={(color) =>
+            // Cambiar de color conserva la etiqueta común de la selección.
+            applyHighlight(color, color === null ? null : selectionLabel)
+          }
+          onSaveLabel={(label) => applyHighlight(selectionColor, label)}
+          onOpenNote={() => singleSelected != null && setNoteEditorVerse(singleSelected)}
+          onClose={() => setSelected(new Set())}
+        />
+      )}
 
-    {/* Anuncio de fallos de guardado para lectores de pantalla (el revert
+      {/* Anuncio de fallos de guardado para lectores de pantalla (el revert
         optimista es solo visual). role="status" = aria-live polite. */}
-    <p role="status" className="sr-only">
-      {saveFailed ? t('saveError') : ''}
-    </p>
+      <p role="status" className="sr-only">
+        {saveFailed ? t('saveError') : ''}
+      </p>
 
-    {isAuthed && noteEditorVerse != null && (
-      <NoteEditor
-        reference={`${chapter.bookName} ${chapter.number}, ${noteEditorVerse}`}
-        verseText={chapter.verses.find((v) => v.number === noteEditorVerse)?.text ?? ''}
-        initialBody={notes.get(noteEditorVerse) ?? ''}
-        onSave={(body) => saveNote(noteEditorVerse, body)}
-        onDelete={() => saveNote(noteEditorVerse, null)}
-        onClose={() => setNoteEditorVerse(null)}
-      />
-    )}
+      {isAuthed && noteEditorVerse != null && (
+        <NoteEditor
+          reference={`${chapter.bookName} ${chapter.number}, ${noteEditorVerse}`}
+          verseText={chapter.verses.find((v) => v.number === noteEditorVerse)?.text ?? ''}
+          initialBody={notes.get(noteEditorVerse) ?? ''}
+          onSave={(body) => saveNote(noteEditorVerse, body)}
+          onDelete={() => saveNote(noteEditorVerse, null)}
+          onClose={() => setNoteEditorVerse(null)}
+        />
+      )}
     </div>
   );
 }

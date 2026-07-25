@@ -20,7 +20,8 @@ export function CompareSelector({ basePath, primaryVersionCode, activeCode }: Pr
   const options = COMPARE_VERSIONS.filter((v) => v.code !== primaryVersionCode);
 
   const pill = (active: boolean) =>
-    `rounded-full border px-2.5 py-0.5 font-sans text-xs transition-colors ${
+    // py-1.5: en móvil la pastilla de 22 px era un objetivo táctil escaso.
+    `inline-flex items-center rounded-full border px-2.5 py-1.5 font-sans text-xs leading-none transition-colors ${
       active
         ? 'border-lapis-500 bg-lapis-500 text-white'
         : 'border-sand-200 text-stone-600 hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:text-sand-200'
@@ -31,7 +32,11 @@ export function CompareSelector({ basePath, primaryVersionCode, activeCode }: Pr
       <span className="font-sans text-xs uppercase tracking-wide text-stone-500 dark:text-stone-400">
         {t('label')}
       </span>
-      <Link href={basePath} className={pill(activeCode === null)} aria-current={activeCode === null ? 'true' : undefined}>
+      <Link
+        href={basePath}
+        className={pill(activeCode === null)}
+        aria-current={activeCode === null ? 'true' : undefined}
+      >
         {t('none')}
       </Link>
       {options.map((option) => (

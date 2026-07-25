@@ -57,7 +57,7 @@ export function UserMenu({ name, email }: Props) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label={tHeader('accountMenu')}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-lapis-500 font-sans text-sm font-semibold text-white transition-colors hover:bg-lapis-600"
+        className="flex h-11 w-11 items-center justify-center rounded-full bg-lapis-500 font-sans text-sm font-semibold text-white transition-colors hover:bg-lapis-600"
       >
         {initial}
       </button>

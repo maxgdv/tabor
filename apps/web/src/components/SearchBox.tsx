@@ -59,10 +59,9 @@ export function SearchBox() {
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(
-          `/api/search?q=${encodeURIComponent(q)}&locale=${locale}`,
-          { signal: controller.signal },
-        );
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&locale=${locale}`, {
+          signal: controller.signal,
+        });
         if (!res.ok) return;
         const body = (await res.json()) as SearchResponse;
         setData(body);
@@ -170,7 +169,7 @@ export function SearchBox() {
           }
           autoComplete="off"
           spellCheck={false}
-          className="w-full rounded-lg border border-sand-200 bg-white/70 py-1.5 pl-8 pr-3 font-sans text-sm text-stone-800 placeholder:text-stone-500 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-700 dark:bg-stone-800/70 dark:text-sand-100 dark:placeholder:text-stone-400"
+          className="min-h-11 w-full rounded-lg border border-sand-200 bg-white/70 py-1.5 pl-8 pr-3 font-sans text-sm text-stone-800 placeholder:text-stone-500 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-700 dark:bg-stone-800/70 dark:text-sand-100 dark:placeholder:text-stone-400"
         />
       </div>
 

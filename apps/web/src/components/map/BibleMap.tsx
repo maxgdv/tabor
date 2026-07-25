@@ -227,8 +227,7 @@ export function BibleMap({ chapter, places, period }: Props) {
 
       // Visibilidad de etiquetas según densidad y zoom (ver constantes).
       const updateLabelVisibility = () => {
-        const showAll =
-          places.length <= DENSE_PLACE_THRESHOLD || map.getZoom() >= LABEL_MIN_ZOOM;
+        const showAll = places.length <= DENSE_PLACE_THRESHOLD || map.getZoom() >= LABEL_MIN_ZOOM;
         markersRef.current.forEach((marker) => {
           const el = marker.getElement();
           const label = el.querySelector<HTMLElement>('.tabor-marker-label');
@@ -272,8 +271,7 @@ export function BibleMap({ chapter, places, period }: Props) {
       frame = requestAnimationFrame(() => mapRef.current?.resize());
     };
 
-    const observer =
-      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(schedule);
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(schedule);
     observer?.observe(el);
     window.addEventListener(MAP_PANEL_EVENT, schedule);
 

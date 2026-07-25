@@ -85,9 +85,12 @@
 }
 
 /* Controles nativos de MapLibre (zoom): 29 px de fábrica se quedan cortos
-   para el dedo cuando el mapa ocupa la pantalla del móvil. */
+   para el dedo cuando el mapa ocupa la pantalla del móvil. El doble selector
+   gana en especificidad a `.maplibregl-ctrl button` de maplibre-gl.css, que
+   se inyecta después de esta hoja. */
 @media (width < 64rem) {
-  .maplibregl-ctrl-group button {
+  .maplibregl-ctrl-group button.maplibregl-ctrl-zoom-in,
+  .maplibregl-ctrl-group button.maplibregl-ctrl-zoom-out {
     width: 44px;
     height: 44px;
   }

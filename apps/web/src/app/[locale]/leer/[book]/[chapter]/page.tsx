@@ -191,9 +191,7 @@ export default async function ReaderPage({
             className={navLinkClass}
           >
             <span aria-hidden="true">←</span>
-            <span>
-              {compact ? prev.chapterNumber : `${prev.bookName} ${prev.chapterNumber}`}
-            </span>
+            <span>{compact ? prev.chapterNumber : `${prev.bookName} ${prev.chapterNumber}`}</span>
           </Link>
         ) : (
           <span aria-hidden="true" className={navDisabledClass}>
@@ -206,9 +204,7 @@ export default async function ReaderPage({
             aria-label={`${tReader('ariaNext')}: ${next.bookName} ${next.chapterNumber}`}
             className={navLinkClass}
           >
-            <span>
-              {compact ? next.chapterNumber : `${next.bookName} ${next.chapterNumber}`}
-            </span>
+            <span>{compact ? next.chapterNumber : `${next.bookName} ${next.chapterNumber}`}</span>
             <span aria-hidden="true">→</span>
           </Link>
         ) : (
@@ -221,11 +217,7 @@ export default async function ReaderPage({
   };
 
   return (
-    // En móvil el lector ocupa la ventana menos la cabecera (el pie queda
-    // debajo, alcanzable con scroll de página): así la barra del pulgar cae
-    // justo en el borde inferior. En escritorio se mantiene el alto de
-    // siempre, con cabecera y pie a la vista.
-    <div className="flex h-[calc(100dvh-3.75rem)] flex-col lg:h-[calc(100dvh-8rem)]">
+    <>
       <script
         type="application/ld+json"
         // JSON.stringify + escape de '<' evita inyección si algún nombre
@@ -234,39 +226,44 @@ export default async function ReaderPage({
           __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, '\\u003c'),
         }}
       />
-      <div className="border-b border-sand-200 bg-sand-50/60 px-4 py-2.5 backdrop-blur sm:px-6 dark:border-stone-700 dark:bg-stone-900/60">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2">
-          <nav aria-label="Breadcrumb" className="font-sans text-xs uppercase tracking-[0.18em] text-stone-500">
-            <ol className="flex items-center gap-2">
-              <li>
-                <Link href="/leer" className="hover:text-stone-800 dark:hover:text-sand-200">
-                  {tBooks('breadcrumbBible')}
-                </Link>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li>
-                <Link
-                  href={`/leer/${book.toLowerCase()}`}
-                  className="hover:text-stone-800 dark:hover:text-sand-200"
-                >
-                  {chapterData.bookName}
-                </Link>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li className="text-stone-700 dark:text-sand-100">{chapterData.number}</li>
-            </ol>
-          </nav>
-
-          {chapterNav('top')}
-        </div>
-      </div>
 
       {/* Escritorio: 50/50 lado a lado, como siempre. Móvil: el texto ocupa
           toda la pantalla y el panel del mapa se convoca desde la barra
           inferior (hoja deslizante). Lo gestiona ReaderShell, que necesita
-          estado de cliente; el contenido de ambos paneles sigue viniendo
-          renderizado desde el servidor. */}
+          estado de cliente; el contenido de los paneles y de las barras sigue
+          viniendo renderizado desde el servidor. */}
       <ReaderShell
+        topBar={
+          <div className="border-b border-sand-200 bg-sand-50/60 px-4 py-2.5 backdrop-blur sm:px-6 dark:border-stone-700 dark:bg-stone-900/60">
+            <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2">
+              <nav
+                aria-label="Breadcrumb"
+                className="font-sans text-xs uppercase tracking-[0.18em] text-stone-500"
+              >
+                <ol className="flex items-center gap-2">
+                  <li>
+                    <Link href="/leer" className="hover:text-stone-800 dark:hover:text-sand-200">
+                      {tBooks('breadcrumbBible')}
+                    </Link>
+                  </li>
+                  <li aria-hidden="true">/</li>
+                  <li>
+                    <Link
+                      href={`/leer/${book.toLowerCase()}`}
+                      className="hover:text-stone-800 dark:hover:text-sand-200"
+                    >
+                      {chapterData.bookName}
+                    </Link>
+                  </li>
+                  <li aria-hidden="true">/</li>
+                  <li className="text-stone-700 dark:text-sand-100">{chapterData.number}</li>
+                </ol>
+              </nav>
+
+              {chapterNav('top')}
+            </div>
+          </div>
+        }
         textLabel={tReader('sectionText')}
         panelLabel={art ? tReader('sectionArt') : tReader('sectionMap')}
         toggleLabel={art ? tReader('panelArt') : tReader('panelMap')}
@@ -316,6 +313,6 @@ export default async function ReaderPage({
           )
         }
       />
-    </div>
+    </>
   );
 }

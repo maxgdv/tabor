@@ -33,7 +33,7 @@ export function LocaleSwitcher({ locales, label }: Props) {
             router.replace(pathname, { locale: nextLocale });
           });
         }}
-        className="rounded-md border border-stone-300 bg-transparent px-2 py-1 font-sans text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lapis-500 dark:border-stone-600"
+        className="h-11 rounded-md border border-stone-300 bg-transparent px-2 font-sans text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lapis-500 dark:border-stone-600"
       >
         {locales.map((loc) => (
           <option key={loc} value={loc}>

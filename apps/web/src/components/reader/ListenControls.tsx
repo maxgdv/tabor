@@ -22,8 +22,11 @@ type Props = {
 type Status = 'idle' | 'playing' | 'paused';
 
 // Snapshot estable de getVoices() para useSyncExternalStore (la API devuelve
-// un array nuevo en cada llamada; sin cache, re-render infinito).
-let voicesSnapshot: SpeechSynthesisVoice[] = [];
+// un array nuevo en cada llamada; sin cache, re-render infinito). El array
+// vacío también es constante: devolver `[]` nuevo en el snapshot de servidor
+// hace que React avise de posible bucle infinito.
+const NO_VOICES: SpeechSynthesisVoice[] = [];
+let voicesSnapshot: SpeechSynthesisVoice[] = NO_VOICES;
 function subscribeVoices(onChange: () => void): () => void {
   const update = () => {
     voicesSnapshot = window.speechSynthesis.getVoices();
@@ -63,7 +66,7 @@ export function ListenControls({ verses }: Props) {
   const voices = useSyncExternalStore(
     supported ? subscribeVoices : () => () => {},
     () => voicesSnapshot,
-    () => [],
+    () => NO_VOICES,
   );
   // Preferencias persistentes; los getters tienen try/catch y devuelven el
   // default en SSR, así el initializer es seguro en ambos lados.
@@ -156,7 +159,9 @@ export function ListenControls({ verses }: Props) {
 
   const localeVoices = voicesForLocale(voices, locale);
   const defaultVoice = pickVoice(voices, locale, voiceName);
-  const mainLabel = t(status === 'playing' ? 'listenPause' : status === 'paused' ? 'listenResume' : 'listen');
+  const mainLabel = t(
+    status === 'playing' ? 'listenPause' : status === 'paused' ? 'listenResume' : 'listen',
+  );
   // 44×44 CSS px mínimos en todos los controles (objetivo táctil cómodo).
   // En móvil el botón principal es solo icono: con la etiqueta ocuparía
   // media cabecera del capítulo.
@@ -167,8 +172,18 @@ export function ListenControls({ verses }: Props) {
 
   return (
     <div className="relative">
-      <div className="flex shrink-0 items-center gap-1.5" role="group" aria-label={t('listenGroup')}>
-        <button type="button" onClick={status === 'playing' ? pause : play} aria-label={mainLabel} title={mainLabel} className={buttonClass}>
+      <div
+        className="flex shrink-0 items-center gap-1.5"
+        role="group"
+        aria-label={t('listenGroup')}
+      >
+        <button
+          type="button"
+          onClick={status === 'playing' ? pause : play}
+          aria-label={mainLabel}
+          title={mainLabel}
+          className={buttonClass}
+        >
           {status === 'playing' ? (
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
@@ -210,8 +225,19 @@ export function ListenControls({ verses }: Props) {
             title={t('listenSettings')}
             className={iconButtonClass}
           >
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 4.06a1.72 1.72 0 013.32 0l.18.72a1.72 1.72 0 002.57 1.06l.64-.38a1.72 1.72 0 012.35 2.35l-.38.64a1.72 1.72 0 001.06 2.57l.72.18a1.72 1.72 0 010 3.32l-.72.18a1.72 1.72 0 00-1.06 2.57l.38.64a1.72 1.72 0 01-2.35 2.35l-.64-.38a1.72 1.72 0 00-2.57 1.06l-.18.72a1.72 1.72 0 01-3.32 0l-.18-.72a1.72 1.72 0 00-2.57-1.06l-.64.38a1.72 1.72 0 01-2.35-2.35l.38-.64a1.72 1.72 0 00-1.06-2.57l-.72-.18a1.72 1.72 0 010-3.32l.72-.18a1.72 1.72 0 001.06-2.57l-.38-.64a1.72 1.72 0 012.35-2.35l.64.38a1.72 1.72 0 002.57-1.06l.18-.72z" />
+            <svg
+              className="h-3.5 w-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M10.34 4.06a1.72 1.72 0 013.32 0l.18.72a1.72 1.72 0 002.57 1.06l.64-.38a1.72 1.72 0 012.35 2.35l-.38.64a1.72 1.72 0 001.06 2.57l.72.18a1.72 1.72 0 010 3.32l-.72.18a1.72 1.72 0 00-1.06 2.57l.38.64a1.72 1.72 0 01-2.35 2.35l-.64-.38a1.72 1.72 0 00-2.57 1.06l-.18.72a1.72 1.72 0 01-3.32 0l-.18-.72a1.72 1.72 0 00-2.57-1.06l-.64.38a1.72 1.72 0 01-2.35-2.35l.38-.64a1.72 1.72 0 00-1.06-2.57l-.72-.18a1.72 1.72 0 010-3.32l.72-.18a1.72 1.72 0 001.06-2.57l-.38-.64a1.72 1.72 0 012.35-2.35l.64.38a1.72 1.72 0 002.57-1.06l.18-.72z"
+              />
               <circle cx="12" cy="12" r="3" />
             </svg>
           </button>

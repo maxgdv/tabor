@@ -151,7 +151,7 @@ export function BookSidebar({ books }: Props) {
             type="button"
             onClick={() => setOpen(false)}
             aria-label={tHeader('closeSidebar')}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-2xl leading-none text-stone-500 transition-colors hover:bg-sand-200 hover:text-stone-700 dark:hover:bg-stone-700 dark:hover:text-sand-100"
+            className="-mr-2 inline-flex h-11 w-11 items-center justify-center rounded-md text-2xl leading-none text-stone-500 transition-colors hover:bg-sand-200 hover:text-stone-700 dark:hover:bg-stone-700 dark:hover:text-sand-100"
           >
             ×
           </button>
@@ -218,7 +218,9 @@ export function BookSidebar({ books }: Props) {
         aria-label={tHeader('openSidebar')}
         aria-expanded={open}
         aria-controls="book-sidebar"
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-stone-700 transition-colors hover:bg-sand-200 dark:text-sand-100 dark:hover:bg-stone-700"
+        // 44x44: mínimo cómodo para el pulgar (el control de navegación
+        // principal en móvil). El icono sigue midiendo 20 px.
+        className="inline-flex h-11 w-11 items-center justify-center rounded-md text-stone-700 transition-colors hover:bg-sand-200 dark:text-sand-100 dark:hover:bg-stone-700"
       >
         <svg
           className="h-5 w-5"

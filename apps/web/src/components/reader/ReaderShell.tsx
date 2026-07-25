@@ -16,6 +16,8 @@ function subscribeDesktop(onChange: () => void): () => void {
 }
 
 type Props = {
+  /** Barra superior: migas de pan y, en escritorio, prev/next de capítulo. */
+  topBar: React.ReactNode;
   /** Panel de texto (ChapterReader + ActiveVerseMarker). */
   text: React.ReactNode;
   /** Panel geográfico: mapa sincronizado, o arte sacro si no hay lugares. */
@@ -57,6 +59,7 @@ type Props = {
  *   recogido; el mapa se convoca, no se esconde.
  */
 export function ReaderShell({
+  topBar,
   text,
   panel,
   chapterNav,
@@ -66,6 +69,7 @@ export function ReaderShell({
   versePlaces,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
 
@@ -86,6 +90,43 @@ export function ReaderShell({
     window.dispatchEvent(new Event(MAP_PANEL_EVENT));
   }, [open, isDesktop]);
 
+  // Alto exacto del lector en móvil: desde donde empieza hasta el borde
+  // inferior de la ventana, para que la barra del pulgar caiga justo ahí sin
+  // tener que desplazar la página. No vale una resta fija en CSS: la
+  // cabecera del sitio cambia de alto al plegarse el buscador en pantallas
+  // estrechas. `innerHeight` además sigue al mostrar/ocultar la barra de
+  // direcciones del navegador móvil, que es justo lo que 100dvh no hace en
+  // todos los motores. En escritorio se devuelve el alto a la clase CSS.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const apply = () => {
+      if (window.matchMedia(DESKTOP_QUERY).matches) {
+        root.style.height = '';
+        return;
+      }
+      const top = root.getBoundingClientRect().top + window.scrollY;
+      root.style.height = `${Math.max(360, window.innerHeight - top)}px`;
+    };
+
+    apply();
+    window.addEventListener('resize', apply);
+    window.addEventListener('orientationchange', apply);
+    // La cabecera del sitio puede cambiar de alto (fuentes, plegado): se
+    // observa solo para volver a medir, nunca se toca.
+    const header = document.querySelector('body > header');
+    const observer =
+      header && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(apply) : null;
+    if (header) observer?.observe(header);
+
+    return () => {
+      window.removeEventListener('resize', apply);
+      window.removeEventListener('orientationchange', apply);
+      observer?.disconnect();
+    };
+  }, [isDesktop]);
+
   // Escape recoge la hoja. Si el foco estaba dentro, vuelve al disparador
   // (WCAG 2.4.3): sin esto el foco quedaría en un contenedor `inert`.
   useEffect(() => {
@@ -101,7 +142,11 @@ export function ReaderShell({
   }, [open, isDesktop]);
 
   return (
-    <>
+    // El alto por CSS (ventana menos cabecera y pie) es el de escritorio y
+    // sirve de reserva hasta que el efecto mide el de móvil.
+    <div ref={rootRef} className="flex h-[calc(100dvh-8rem)] flex-col">
+      {topBar}
+
       <div className="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-1 overflow-hidden lg:grid-cols-2 lg:overflow-visible">
         <section
           aria-label={textLabel}
@@ -178,6 +223,6 @@ export function ReaderShell({
         </button>
         {chapterNav}
       </div>
-    </>
+    </div>
   );
 }
