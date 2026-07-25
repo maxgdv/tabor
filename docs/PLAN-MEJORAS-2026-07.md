@@ -122,19 +122,62 @@ imprecatoria). El pool queda marcado como BORRADOR EDITORIAL.
 - Citar un versículo suelto a veces deja comillas huérfanas (`… su propia
   pena”.`) por venir de un discurso que empieza antes.
 
-### 2. Planes para estados de ánimo y situaciones — PENDIENTE
-- [ ] Modelo: distinguir plan «itinerario» de plan «situación» sin
-      romper `plan_progress` (la clave sigue siendo el slug).
-- [ ] 12 planes cortos (3-7 días) con nota pastoral.
-- [ ] Índice `/planes` reorganizado en secciones.
-- [ ] Tests + SEO + sitemap.
+### 2. Planes para estados de ánimo y situaciones — HECHO
+- [x] Modelo: `ReadingPlan.kind` ('itinerario' | 'situacion') y
+      `PlanReading.verses` opcional. `plan_progress` intacto: la clave
+      sigue siendo el slug.
+- [x] 12 planes (60 días, 63 lecturas): ansiedad-5, duelo-7,
+      enfermedad-5, perdon-5, soledad-5, gratitud-3, decision-5, culpa-5,
+      miedo-5, cansancio-5, esperanza-7, alegria-3.
+- [x] Nota pastoral en el índice y en cada plan de situación, antes de
+      empezar a leer.
+- [x] Índice `/planes` en dos secciones («Itinerarios» y «Para lo que
+      estás viviendo»), con la jerarquía de encabezados corregida.
+- [x] Tests (14 en `plans.test.ts`) + sitemap (automático desde `PLANS`).
 
-### 3. Más planes de lectura clásicos — PENDIENTE
+**Por qué las lecturas señalan versículos y no capítulos**: a quien está
+angustiado se le ofrecen diez versículos, no cuarenta. De ahí el campo
+`verses`, que `readingLabel` convierte en «Mateo 6, 25-34» y `readingHref`
+en un ancla `#v25`.
+
+**Las 63 lecturas verificadas dos veces contra la BD.** Hallazgos de la
+verificación, ambos confirmados de forma independiente:
+
+- **Hechos 7 termina en el versículo 59** en esta edición, y ese versículo
+  ya contiene las dos frases de Esteban («recibe mi espíritu» y «no les
+  imputes este pecado»). La referencia habitual 7,59-60 habría fallado.
+- **Los títulos de los salmos ocupan versículo propio** — dos en el Salmo
+  50 («Al maestro de coro» y «Cuando después que pecó con Betsabee»), así
+  que el Miserere empieza en 50,3. Todos los rangos de salmos arrancan en
+  el v. 2 o posterior.
+
+**Criterio de tono aplicado** (esto es lo que más conviene que revise el
+maintainer): se descartaron pasajes que fuera de contexto hacen daño.
+1 Pe 5,6-11 en ansiedad, por «el diablo ronda como un león rugiente»;
+1 Tes 4,13-18 en duelo, por «que no os contristéis como los demás»;
+Mc 4,35-41 y Mt 14,22-33 en miedo, porque rematan en reproche («¿aún no
+tenéis fe?»); el Salmo 90 en miedo, porque «mil caerán a tu lado y a ti no
+te alcanzará» promete una invulnerabilidad que la vida no siempre cumple;
+Eclo 28 en perdón, por amenazante. En enfermedad se recortó el Salmo 6,2
+(«no me corrijas en tu furor», que enmarca la enfermedad como castigo) y
+se evitaron la hemorroísa y el paralítico, que fuera de contexto se leen
+como «si no sanas, te falta fe».
+
+Dos decisiones conservadas a propósito, comentadas en el fichero: «hombres
+de poca fe» en Mt 6,30 (ahí funciona *a fortiori*, no como acusación) e
+Is 53,4 «le reputamos como herido por Dios» (el sentido del pasaje es
+justamente que ese juicio era falso).
+
+### 3. Más rutas en el mapa — PENDIENTE
+
+Adelantada por delante de los planes clásicos a petición del promotor
+(2026-07-25).
+
+- [ ] De 13 a ~20 rutas, cada `placeSlug` verificado contra la BD.
+
+### 4. Más planes de lectura clásicos — PENDIENTE
 - [ ] Ampliar el catálogo de itinerarios (sabiduría, profetas, cartas,
       Pentateuco…), respetando la numeración greco-latina de los salmos.
-
-### 4. Más rutas en el mapa — PENDIENTE
-- [ ] De 13 a ~20 rutas, cada `placeSlug` verificado contra la BD.
 
 ### 5. Móvil: UX + PWA — PENDIENTE
 - [ ] Lector adaptativo (texto a pantalla completa, mapa plegable).

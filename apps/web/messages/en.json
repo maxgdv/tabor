@@ -35,7 +35,7 @@
     "soon": "Coming soon",
     "now": {
       "title": "What you'll find today",
-      "body": "The 73 books of the Catholic canon in three public-domain versions — Biblia Platense (Straubinger), Catholic Public Domain Version and the Latin Vulgate, with verse-by-verse compared reading. An interactive map with 1,335 places synchronized with the text, historical layers by era, map routes with readings at every stop, global search, reading plans, read-aloud, and with your account: bookmarks, highlights and personal notes."
+      "body": "The 73 books of the Catholic canon in three public-domain versions — Biblia Platense (Straubinger), Catholic Public Domain Version and the Latin Vulgate, with verse-by-verse compared reading. An interactive map with 1,335 places synchronized with the text, historical layers by era, map routes with readings at every stop, global search, reading plans (long journeys, and short ones for what you may be going through), read-aloud, and with your account: bookmarks, highlights and personal notes."
     },
     "principles": {
       "title": "Our principles",
@@ -100,7 +100,18 @@
   },
   "plans": {
     "title": "Reading plans",
-    "lede": "Guided journeys through the Bible: a few chapters each day, at your own pace. Progress is saved on this device.",
+    "lede": "To read the Bible steadily: long journeys through a book or through a season of the Church, and short plans for what you are going through. Progress is saved on this device.",
+    "sections": {
+      "itineraries": {
+        "title": "Journeys",
+        "lede": "Weeks or months at a time: a whole book, a part of the canon, or the course of a liturgical season."
+      },
+      "situations": {
+        "title": "For what you are going through",
+        "lede": "A few days of reading for a particular moment: a wait, a loss, a decision, a rest."
+      }
+    },
+    "pastoralNote": "These plans keep you company as you read; they are no substitute for professional help or for the care of a priest or someone who knows you. If what you are going through is too heavy to carry alone, find someone you trust and tell them.",
     "breadcrumb": "Back to plans",
     "duration": "{count, plural, one {# day} other {# days}}",
     "progress": "{done} of {total} days",

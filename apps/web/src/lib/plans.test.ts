@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CHAPTER_COUNTS } from '@tabor/db/chapter-counts';
-import { PLANS, getPlan, readingHref, readingLabel } from './plans';
+import { PLANS, getPlan, plansOfKind, readingHref, readingLabel } from './plans';
 
 // Integridad del contenido curado: estos tests protegen contra erratas al
 // editar los planes (libro inexistente, "Salmos 151", rangos invertidos…).
@@ -67,6 +67,43 @@ describe('PLANS — integridad', () => {
   });
 });
 
+describe('planes de situación', () => {
+  const situacion = plansOfKind('situacion');
+
+  it('están declarados y no se mezclan con los itinerarios', () => {
+    expect(situacion.length).toBeGreaterThanOrEqual(12);
+    // `kind` por defecto es 'itinerario': los planes antiguos no se movieron.
+    expect(plansOfKind('itinerario').length).toBe(PLANS.length - situacion.length);
+    for (const plan of situacion) expect(plan.kind).toBe('situacion');
+  });
+
+  it('son cortos: nadie en apuros empieza un plan de 40 días', () => {
+    for (const plan of situacion) {
+      expect(plan.days.length, plan.slug).toBeGreaterThanOrEqual(3);
+      expect(plan.days.length, plan.slug).toBeLessThanOrEqual(7);
+    }
+  });
+
+  it('señalan el pasaje exacto, no el capítulo entero', () => {
+    for (const plan of situacion) {
+      for (const day of plan.days) {
+        for (const reading of day.readings) {
+          expect(reading.verses, `${plan.slug}: lectura sin versículos`).toBeDefined();
+          const [from, to] = reading.verses!;
+          expect(from, plan.slug).toBeGreaterThanOrEqual(1);
+          expect(to, `rango invertido en ${plan.slug}`).toBeGreaterThanOrEqual(from);
+          // Un rango de versículos vive dentro de un solo capítulo.
+          expect(reading.chapters[0], plan.slug).toBe(reading.chapters[1]);
+        }
+      }
+    }
+  });
+
+  it('no llevan tiempo litúrgico: no son de temporada', () => {
+    for (const plan of situacion) expect(plan.season, plan.slug).toBeUndefined();
+  });
+});
+
 describe('helpers', () => {
   it('readingLabel localiza el nombre y compacta rangos', () => {
     expect(readingLabel({ book: 'MAT', chapters: [5, 7] }, 'es')).toBe('Mateo 5–7');
@@ -74,8 +111,23 @@ describe('helpers', () => {
     expect(readingLabel({ book: 'PSA', chapters: [23, 23] }, 'es')).toBe('Salmos 23');
   });
 
+  it('readingLabel añade el rango de versículos cuando lo hay', () => {
+    expect(readingLabel({ book: 'MAT', chapters: [6, 6], verses: [25, 34] }, 'es')).toBe(
+      'Mateo 6, 25-34',
+    );
+    expect(readingLabel({ book: 'PSA', chapters: [22, 22], verses: [4, 4] }, 'es')).toBe(
+      'Salmos 22, 4',
+    );
+  });
+
   it('readingHref enlaza al primer capítulo del rango', () => {
     expect(readingHref({ book: 'MRK', chapters: [2, 4] })).toBe('/leer/mrk/2');
+  });
+
+  it('readingHref ancla al primer versículo cuando la lectura lo precisa', () => {
+    expect(readingHref({ book: 'MAT', chapters: [6, 6], verses: [25, 34] })).toBe(
+      '/leer/mat/6#v25',
+    );
   });
 
   it('getPlan devuelve null para slugs desconocidos', () => {

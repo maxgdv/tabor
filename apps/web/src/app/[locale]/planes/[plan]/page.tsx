@@ -7,6 +7,7 @@ import { Link } from '@/i18n/routing';
 import { auth } from '@/lib/auth';
 import { getPlan, readingHref, readingLabel } from '@/lib/plans';
 import { localeAlternates, openGraphFor } from '@/lib/seo';
+import { PastoralNote } from '@/components/plans/PastoralNote';
 import { PlanDetail } from '@/components/plans/PlanDetail';
 import { PlanProgressSync } from '@/components/plans/PlanProgressSync';
 import type { DayItem } from '@/components/plans/PlanDayList';
@@ -65,10 +66,12 @@ export default async function PlanPage({ params }: { params: Params }) {
         <h1 className="mt-2 font-serif text-3xl text-stone-800 sm:text-4xl dark:text-sand-100">
           {plan.name[lang]}
         </h1>
-        <p className="mt-4 max-w-2xl text-stone-600 dark:text-sand-200">
-          {plan.description[lang]}
-        </p>
+        <p className="mt-4 max-w-2xl text-stone-600 dark:text-sand-200">{plan.description[lang]}</p>
       </header>
+
+      {/* Antes de la lista de días, no al pie: quien abre un plan de
+          situación tiene que leer esto antes de empezar. */}
+      {plan.kind === 'situacion' && <PastoralNote />}
 
       {/* key: remonta el componente cuando el server trae progreso nuevo
           (p. ej. tras el merge inicial) — router.refresh() no remonta

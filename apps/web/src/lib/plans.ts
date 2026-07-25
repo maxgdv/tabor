@@ -10,22 +10,42 @@
 // (lib/plan-progress.ts) hasta que exista autenticación.
 
 import { BOOK_META } from '@tabor/db/book-meta';
+import { SITUATION_PLANS } from './data/situation-plans';
 import type { LiturgicalSeason } from './routes';
 
 export type PlanReading = {
   book: string; // canonicalId ('MAT')
   /** Rango de capítulos inclusivo; [5, 5] es un solo capítulo. */
   chapters: [number, number];
+  /**
+   * Rango de versículos inclusivo dentro de un capítulo único. Opcional: los
+   * itinerarios largos se leen por capítulos enteros, pero un plan para una
+   * situación concreta necesita señalar el pasaje exacto — a quien está
+   * angustiado se le ofrecen diez versículos, no un capítulo entero.
+   * Solo tiene sentido cuando `chapters` es un único capítulo.
+   */
+  verses?: [number, number];
 };
 
 export type PlanDay = {
   readings: PlanReading[];
 };
 
+/**
+ * Un plan es un *itinerario* (recorrido largo por un libro o un tiempo
+ * litúrgico) o una *situación* (unos pocos días para lo que alguien está
+ * viviendo: un duelo, una decisión, una enfermedad). La distinción sólo
+ * afecta a cómo se agrupan y se presentan: el progreso se guarda igual, con
+ * el slug como clave, así que `plan_progress` no se entera.
+ */
+export type PlanKind = 'itinerario' | 'situacion';
+
 export type ReadingPlan = {
   slug: string;
   name: { es: string; en: string };
   description: { es: string; en: string };
+  /** Por defecto 'itinerario'. */
+  kind?: PlanKind;
   /** Tiempo litúrgico al que se asocia el plan (badge en las tarjetas). */
   season?: LiturgicalSeason;
   days: PlanDay[];
@@ -79,7 +99,8 @@ function oneChapterDays(entries: Array<[canonicalId: string, chapter: number]>):
 
 // --- Los planes ---------------------------------------------------------
 
-export const PLANS: ReadingPlan[] = [
+/** Recorridos largos: un libro, un tiempo litúrgico, un bloque del canon. */
+export const ITINERARY_PLANS: ReadingPlan[] = [
   {
     slug: 'evangelios-30',
     name: {
@@ -314,8 +335,19 @@ export const PLANS: ReadingPlan[] = [
   },
 ];
 
+/**
+ * Todos los planes: primero los itinerarios, después los de situación.
+ * El orden de este array manda en el sitemap; el índice los agrupa aparte.
+ */
+export const PLANS: ReadingPlan[] = [...ITINERARY_PLANS, ...SITUATION_PLANS];
+
 export function getPlan(slug: string): ReadingPlan | null {
   return PLANS.find((p) => p.slug === slug) ?? null;
+}
+
+/** Los planes de un tipo, en el orden en que se declararon. */
+export function plansOfKind(kind: PlanKind): ReadingPlan[] {
+  return PLANS.filter((p) => (p.kind ?? 'itinerario') === kind);
 }
 
 // --- Etiquetas ----------------------------------------------------------
@@ -324,15 +356,22 @@ const BOOK_NAME = new Map(
   BOOK_META.map((m) => [m.canonicalId, { es: m.es.name, en: m.en.name }]),
 );
 
-/** "Mateo 5–7" / "Salmos 23" — nombre localizado + rango de capítulos. */
+/** "Mateo 5–7" / "Salmos 23" / "Mateo 6, 25-34" — nombre localizado. */
 export function readingLabel(reading: PlanReading, locale: string): string {
   const names = BOOK_NAME.get(reading.book);
   const name = (locale === 'en' ? names?.en : names?.es) ?? reading.book;
   const [from, to] = reading.chapters;
-  return from === to ? `${name} ${from}` : `${name} ${from}–${to}`;
+  const chapters = from === to ? `${from}` : `${from}–${to}`;
+  if (!reading.verses) return `${name} ${chapters}`;
+  const [vFrom, vTo] = reading.verses;
+  return `${name} ${chapters}, ${vFrom === vTo ? vFrom : `${vFrom}-${vTo}`}`;
 }
 
-/** URL del lector para el primer capítulo de una lectura. */
+/**
+ * URL del lector para una lectura. Con rango de versículos se ancla al
+ * primero (`#v25`), igual que hacen la búsqueda y el versículo del día.
+ */
 export function readingHref(reading: PlanReading): string {
-  return `/leer/${reading.book.toLowerCase()}/${reading.chapters[0]}`;
+  const base = `/leer/${reading.book.toLowerCase()}/${reading.chapters[0]}`;
+  return reading.verses ? `${base}#v${reading.verses[0]}` : base;
 }

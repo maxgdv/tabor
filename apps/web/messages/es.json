@@ -35,7 +35,7 @@
     "soon": "Próximamente",
     "now": {
       "title": "Qué encontrarás hoy",
-      "body": "Los 73 libros del canon católico en tres versiones de dominio público — Biblia Platense (Straubinger), Catholic Public Domain Version y la Vulgata latina, con lectura comparada versículo a versículo. Un mapa interactivo con 1.335 lugares sincronizado con la lectura, capas históricas por época, rutas con lecturas en cada parada, búsqueda global, planes de lectura, lectura en voz alta, y con tu cuenta: marcadores, resaltados y notas personales."
+      "body": "Los 73 libros del canon católico en tres versiones de dominio público — Biblia Platense (Straubinger), Catholic Public Domain Version y la Vulgata latina, con lectura comparada versículo a versículo. Un mapa interactivo con 1.335 lugares sincronizado con la lectura, capas históricas por época, rutas con lecturas en cada parada, búsqueda global, planes de lectura —itinerarios largos y también planes breves para lo que uno está viviendo—, lectura en voz alta, y con tu cuenta: marcadores, resaltados y notas personales."
     },
     "principles": {
       "title": "Nuestros principios",
@@ -100,7 +100,18 @@
   },
   "plans": {
     "title": "Planes de lectura",
-    "lede": "Itinerarios para leer la Biblia con constancia: unos capítulos cada día, a tu ritmo. El progreso se guarda en este dispositivo.",
+    "lede": "Para leer la Biblia con constancia: itinerarios largos por un libro o por un tiempo de la Iglesia, y planes breves para lo que estás viviendo. El progreso se guarda en este dispositivo.",
+    "sections": {
+      "itineraries": {
+        "title": "Itinerarios",
+        "lede": "Recorridos de semanas o meses: un libro entero, un bloque del canon o el paso de un tiempo litúrgico."
+      },
+      "situations": {
+        "title": "Para lo que estás viviendo",
+        "lede": "Unos pocos días de lectura para un momento concreto: una espera, una pérdida, una decisión, un descanso."
+      }
+    },
+    "pastoralNote": "Estos planes acompañan la lectura; no sustituyen la ayuda profesional ni el acompañamiento de un sacerdote o de alguien que te conozca. Si lo que estás viviendo pesa demasiado para llevarlo solo, busca a alguien de confianza y cuéntaselo.",
     "breadcrumb": "Volver a planes",
     "duration": "{count, plural, one {# día} other {# días}}",
     "progress": "{done} de {total} días",
