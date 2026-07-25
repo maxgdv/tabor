@@ -168,12 +168,31 @@ de poca fe» en Mt 6,30 (ahí funciona *a fortiori*, no como acusación) e
 Is 53,4 «le reputamos como herido por Dios» (el sentido del pasaje es
 justamente que ese juicio era falso).
 
-### 3. Más rutas en el mapa — PENDIENTE
+### 3. Más rutas en el mapa — HECHO
 
 Adelantada por delante de los planes clásicos a petición del promotor
 (2026-07-25).
 
-- [ ] De 13 a ~20 rutas, cada `placeSlug` verificado contra la BD.
+- [x] De 13 a **20 rutas**. Nuevas: Jacob (9 paradas), José (7), Rut (5),
+      Salomón y el Templo (8), Jonás (5, cuaresma), Daniel en Babilonia
+      (6) y las siete iglesias del Apocalipsis (8) — esta última dibuja
+      un circuito cerrado por Asia Menor, muy vistoso en el mapa.
+- [x] **137 placeSlugs (105 únicos) verificados dos veces**: todos existen
+      en `place` y **todos tienen coordenadas**, que es lo que de verdad
+      rompe el mapa si falla. 162 lecturas dentro de rango.
+- [x] Comprobado además, vía `verse_location`, que cada lugar está
+      realmente vinculado al pasaje que se cita.
+- [x] Renderizado real verificado en local (las siete iglesias resuelven
+      sus nombres en español desde la BD).
+
+**Bug preexistente corregido de paso**: la parada de Derbe del primer
+viaje de Pablo apuntaba a `ACT 14,20-28`, pero Hechos 14 termina en el
+versículo 27 en esta edición. Confirmado contra la BD.
+
+Pendiente para la próxima tanda, recomendado por el agente: **Pedro y los
+primeros pasos fuera de Jerusalén** (Hechos 8-12) — es el hueco narrativo
+que queda entre los Evangelios y los viajes de Pablo, y todos sus lugares
+existen ya con coordenadas.
 
 ### 4. Más planes de lectura clásicos — PENDIENTE
 - [ ] Ampliar el catálogo de itinerarios (sabiduría, profetas, cartas,

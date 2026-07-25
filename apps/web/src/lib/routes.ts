@@ -59,7 +59,10 @@ const CORE_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'bethphage',
-        title: { es: 'Betfagé — la entrada en Jerusalén', en: 'Bethphage — the entry into Jerusalem' },
+        title: {
+          es: 'Betfagé — la entrada en Jerusalén',
+          en: 'Bethphage — the entry into Jerusalem',
+        },
         note: {
           es: 'Desde la ladera del Monte de los Olivos, Jesús entra en la ciudad montado en un pollino, aclamado con ramos y hosannas.',
           en: 'From the slope of the Mount of Olives, Jesus enters the city riding a colt, acclaimed with branches and hosannas.',
@@ -68,7 +71,10 @@ const CORE_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'jerusalem',
-        title: { es: 'Jerusalén — el Templo y el Cenáculo', en: 'Jerusalem — the Temple and the Upper Room' },
+        title: {
+          es: 'Jerusalén — el Templo y el Cenáculo',
+          en: 'Jerusalem — the Temple and the Upper Room',
+        },
         note: {
           es: 'Jesús purifica el Templo y enseña en él cada día; el jueves, en una sala alta de la ciudad, instituye la Eucaristía.',
           en: 'Jesus cleanses the Temple and teaches there daily; on Thursday, in an upper room in the city, he institutes the Eucharist.',
@@ -80,7 +86,10 @@ const CORE_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'gethsemane',
-        title: { es: 'Getsemaní — la oración y el arresto', en: 'Gethsemane — the prayer and the arrest' },
+        title: {
+          es: 'Getsemaní — la oración y el arresto',
+          en: 'Gethsemane — the prayer and the arrest',
+        },
         note: {
           es: 'En el huerto de los olivos, al pie del monte, Jesús ora con sudor de sangre y es entregado con un beso.',
           en: 'In the olive grove at the foot of the mount, Jesus prays in agony and is betrayed with a kiss.',
@@ -101,7 +110,10 @@ const CORE_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'emmaus',
-        title: { es: 'Emaús — el Resucitado en el camino', en: 'Emmaus — the Risen One on the road' },
+        title: {
+          es: 'Emaús — el Resucitado en el camino',
+          en: 'Emmaus — the Risen One on the road',
+        },
         note: {
           es: 'Dos discípulos reconocen al Señor resucitado al partir el pan, después de que les abriera las Escrituras por el camino.',
           en: 'Two disciples recognise the risen Lord in the breaking of the bread, after he opened the Scriptures to them on the way.',
@@ -226,7 +238,10 @@ const CORE_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'salamis',
-        title: { es: 'Salamina de Chipre — primeras sinagogas', en: 'Salamis, Cyprus — first synagogues' },
+        title: {
+          es: 'Salamina de Chipre — primeras sinagogas',
+          en: 'Salamis, Cyprus — first synagogues',
+        },
         note: {
           es: 'Desembarcan en la isla de Bernabé y anuncian la Palabra en las sinagogas, con Juan Marcos como ayudante.',
           en: 'They land on Barnabas’s home island and proclaim the Word in the synagogues, with John Mark as their helper.',
@@ -253,7 +268,10 @@ const CORE_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'antioch-2',
-        title: { es: 'Antioquía de Pisidia — el gran discurso', en: 'Antioch in Pisidia — the great sermon' },
+        title: {
+          es: 'Antioquía de Pisidia — el gran discurso',
+          en: 'Antioch in Pisidia — the great sermon',
+        },
         note: {
           es: 'En la sinagoga, Pablo recorre la historia de Israel hasta Jesús. Muchos creen; la oposición los empuja más adentro.',
           en: 'In the synagogue Paul traces the history of Israel up to Jesus. Many believe; opposition pushes them further inland.',
@@ -262,7 +280,10 @@ const CORE_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'iconium',
-        title: { es: 'Iconio — entre la fe y las piedras', en: 'Iconium — between faith and stones' },
+        title: {
+          es: 'Iconio — entre la fe y las piedras',
+          en: 'Iconium — between faith and stones',
+        },
         note: {
           es: 'Hablan con tal libertad que la ciudad se divide. Al saber que quieren apedrearlos, parten hacia Licaonia.',
           en: 'They speak so boldly that the city divides. Learning of a plot to stone them, they leave for Lycaonia.',
@@ -285,7 +306,8 @@ const CORE_ROUTES: BibleRoute[] = [
           es: 'Tras evangelizar Derbe, rehacen el camino confirmando a los discípulos y nombrando presbíteros, hasta rendir cuentas en Antioquía.',
           en: 'After evangelising Derbe they retrace their steps, strengthening the disciples and appointing elders, and report back at Antioch.',
         },
-        readings: [{ book: 'ACT', chapter: 14, verses: [20, 28] }],
+        // La STRA sigue la numeración de la Vulgata: Hch 14 acaba en el v. 27.
+        readings: [{ book: 'ACT', chapter: 14, verses: [20, 27] }],
       },
     ],
   },
@@ -382,7 +404,10 @@ const MORE_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'shechem',
-        title: { es: 'Siquem — la primera promesa en Canaán', en: 'Shechem — the first promise in Canaan' },
+        title: {
+          es: 'Siquem — la primera promesa en Canaán',
+          en: 'Shechem — the first promise in Canaan',
+        },
         note: {
           es: 'Junto a la encina de Moré, el Señor se aparece: «A tu descendencia daré esta tierra». Abrán levanta su primer altar.',
           en: 'By the oak of Moreh the Lord appears: "To your offspring I will give this land". Abram builds his first altar.',
@@ -601,7 +626,10 @@ const HEROES_ROUTES: BibleRoute[] = [
     stops: [
       {
         placeSlug: 'cherith',
-        title: { es: 'El arroyo Querit — alimentado por cuervos', en: 'The Brook Cherith — fed by ravens' },
+        title: {
+          es: 'El arroyo Querit — alimentado por cuervos',
+          en: 'The Brook Cherith — fed by ravens',
+        },
         note: {
           es: 'Anunciada la sequía a Ajab, Elías se esconde junto al torrente: agua del arroyo y pan que traen los cuervos, mañana y tarde.',
           en: 'Having announced the drought to Ahab, Elijah hides by the brook: water from the stream and bread brought by ravens, morning and evening.',
@@ -692,7 +720,10 @@ const HEROES_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'adullam',
-        title: { es: 'La cueva de Adulam — los descartados', en: 'The Cave of Adullam — the outcasts' },
+        title: {
+          es: 'La cueva de Adulam — los descartados',
+          en: 'The Cave of Adullam — the outcasts',
+        },
         note: {
           es: 'Huyendo de Saúl, David se refugia en la cueva. Se le unen los apurados, los endeudados y los amargados: cuatrocientos hombres — el germen de un reino.',
           en: 'Fleeing Saul, David shelters in the cave. The distressed, the indebted and the bitter gather to him: four hundred men — the seed of a kingdom.',
@@ -753,7 +784,10 @@ const HEROES_ROUTES: BibleRoute[] = [
     stops: [
       {
         placeSlug: 'ephesus',
-        title: { es: 'Éfeso — tres años que cambian Asia', en: 'Ephesus — three years that change Asia' },
+        title: {
+          es: 'Éfeso — tres años que cambian Asia',
+          en: 'Ephesus — three years that change Asia',
+        },
         note: {
           es: 'La escuela de Tiranno, los libros de magia ardiendo, y un tumulto de plateros al grito de «¡Grande es Artemisa!»: la Palabra crecía con fuerza.',
           en: 'The hall of Tyrannus, the magic books burning, and a silversmiths’ riot shouting "Great is Artemis!": the Word grew mightily.',
@@ -780,7 +814,10 @@ const HEROES_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'miletus',
-        title: { es: 'Mileto — el adiós a los presbíteros', en: 'Miletus — farewell to the elders' },
+        title: {
+          es: 'Mileto — el adiós a los presbíteros',
+          en: 'Miletus — farewell to the elders',
+        },
         note: {
           es: 'Los ancianos de Éfeso bajan al puerto. «Hay más dicha en dar que en recibir» — y lloran abrazados, sabiendo que no volverán a verle.',
           en: 'The elders of Ephesus come down to the harbour. "It is more blessed to give than to receive" — and they weep and embrace him, knowing they will not see his face again.',
@@ -789,7 +826,10 @@ const HEROES_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'tyre',
-        title: { es: 'Tiro — siete días con los discípulos', en: 'Tyre — seven days with the disciples' },
+        title: {
+          es: 'Tiro — siete días con los discípulos',
+          en: 'Tyre — seven days with the disciples',
+        },
         note: {
           es: 'Mientras descargan la nave, los discípulos le repiten por el Espíritu que no suba a Jerusalén. Toda la comunidad lo despide de rodillas en la playa.',
           en: 'While the ship unloads, the disciples urge him through the Spirit not to go up to Jerusalem. The whole community kneels on the beach to bid him farewell.',
@@ -807,7 +847,10 @@ const HEROES_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'jerusalem',
-        title: { es: 'Jerusalén — el final del camino libre', en: 'Jerusalem — the end of the free road' },
+        title: {
+          es: 'Jerusalén — el final del camino libre',
+          en: 'Jerusalem — the end of the free road',
+        },
         note: {
           es: 'Los hermanos lo reciben con alegría; días después, el arresto en el Templo. Empieza el camino de cadenas que lo llevará a Roma.',
           en: 'The brethren receive him gladly; days later, the arrest in the Temple. The road in chains that will lead him to Rome begins.',
@@ -829,7 +872,10 @@ const CONQUEST_ROUTES: BibleRoute[] = [
     stops: [
       {
         placeSlug: 'shittim',
-        title: { es: 'Sitim — el relevo y los espías', en: 'Shittim — the succession and the spies' },
+        title: {
+          es: 'Sitim — el relevo y los espías',
+          en: 'Shittim — the succession and the spies',
+        },
         note: {
           es: 'Muerto Moisés, el Señor habla a Josué: «Sé fuerte y valiente». Del campamento parten dos espías hacia Jericó, donde Rajab los esconde.',
           en: 'After Moses’ death the Lord speaks to Joshua: "Be strong and courageous". From the camp two spies set out for Jericho, where Rahab hides them.',
@@ -841,7 +887,10 @@ const CONQUEST_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'jordan',
-        title: { es: 'El Jordán — el paso a pie enjuto', en: 'The Jordan — crossing on dry ground' },
+        title: {
+          es: 'El Jordán — el paso a pie enjuto',
+          en: 'The Jordan — crossing on dry ground',
+        },
         note: {
           es: 'El Arca entra en el río y las aguas se detienen. Doce piedras del cauce guardarán la memoria: «¿Qué significan estas piedras?».',
           en: 'The Ark enters the river and the waters stand still. Twelve stones from the riverbed will keep the memory: "What do these stones mean?".',
@@ -853,7 +902,10 @@ const CONQUEST_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'gilgal-1',
-        title: { es: 'Guilgal — la primera Pascua en la tierra', en: 'Gilgal — the first Passover in the land' },
+        title: {
+          es: 'Guilgal — la primera Pascua en la tierra',
+          en: 'Gilgal — the first Passover in the land',
+        },
         note: {
           es: 'Cesa el maná: el pueblo come ya del fruto de la tierra. Y ante Josué, un guerrero con la espada desenvainada: «Descálzate».',
           en: 'The manna ceases: the people now eat the produce of the land. And before Joshua, a warrior with drawn sword: "Take off your sandals".',
@@ -895,7 +947,10 @@ const CONQUEST_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'shechem',
-        title: { es: 'Siquem — «yo y mi casa serviremos al Señor»', en: 'Shechem — "as for me and my house"' },
+        title: {
+          es: 'Siquem — «yo y mi casa serviremos al Señor»',
+          en: 'Shechem — "as for me and my house"',
+        },
         note: {
           es: 'Anciano ya, Josué reúne a las tribus donde Abraham levantó su primer altar y les hace elegir: «Escoged hoy a quién queréis servir».',
           en: 'Now old, Joshua gathers the tribes where Abraham built his first altar and makes them choose: "Choose this day whom you will serve".',
@@ -914,7 +969,10 @@ const CONQUEST_ROUTES: BibleRoute[] = [
     stops: [
       {
         placeSlug: 'nazareth',
-        title: { es: 'Nazaret — «hoy se cumple esta Escritura»', en: 'Nazareth — "today this Scripture is fulfilled"' },
+        title: {
+          es: 'Nazaret — «hoy se cumple esta Escritura»',
+          en: 'Nazareth — "today this Scripture is fulfilled"',
+        },
         note: {
           es: 'En la sinagoga de su pueblo, Jesús lee a Isaías y anuncia su programa. La admiración se vuelve furia: nadie es profeta en su tierra.',
           en: 'In his hometown synagogue Jesus reads Isaiah and announces his mission. Wonder turns to fury: no prophet is accepted in his own country.',
@@ -935,7 +993,10 @@ const CONQUEST_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'sea-of-galilee',
-        title: { es: 'El mar de Galilea — pescadores de hombres', en: 'The Sea of Galilee — fishers of men' },
+        title: {
+          es: 'El mar de Galilea — pescadores de hombres',
+          en: 'The Sea of Galilee — fishers of men',
+        },
         note: {
           es: 'La pesca milagrosa dobla las rodillas de Pedro: «Apártate de mí, que soy pecador». Dejan las barcas en la orilla y lo siguen.',
           en: 'The miraculous catch brings Peter to his knees: "Depart from me, for I am a sinful man". They leave the boats on the shore and follow him.',
@@ -962,7 +1023,10 @@ const CONQUEST_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'caesarea-philippi',
-        title: { es: 'Cesarea de Filipo — «¿quién decís que soy yo?»', en: 'Caesarea Philippi — "who do you say that I am?"' },
+        title: {
+          es: 'Cesarea de Filipo — «¿quién decís que soy yo?»',
+          en: 'Caesarea Philippi — "who do you say that I am?"',
+        },
         note: {
           es: 'Lejos, al pie del Hermón, la pregunta decisiva y la confesión de Pedro: «Tú eres el Cristo». Y el primer anuncio de la cruz.',
           en: 'Far north, at the foot of Hermon, the decisive question and Peter’s confession: "You are the Christ". And the first announcement of the cross.',
@@ -971,7 +1035,10 @@ const CONQUEST_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'mount-tabor',
-        title: { es: 'El monte Tabor — la Transfiguración', en: 'Mount Tabor — the Transfiguration' },
+        title: {
+          es: 'El monte Tabor — la Transfiguración',
+          en: 'Mount Tabor — the Transfiguration',
+        },
         note: {
           es: 'En el monte alto su rostro se vuelve luz, con Moisés y Elías a los lados: «Este es mi Hijo amado; escuchadle». El monte que da nombre a este proyecto.',
           en: 'On the high mountain his face becomes light, with Moses and Elijah beside him: "This is my beloved Son; listen to him". The mountain that gives this project its name.',
@@ -1002,7 +1069,10 @@ const CONQUEST_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'ahava',
-        title: { es: 'El río Ahavá — el ayuno del camino', en: 'The river Ahava — the fast of the road' },
+        title: {
+          es: 'El río Ahavá — el ayuno del camino',
+          en: 'The river Ahava — the fast of the road',
+        },
         note: {
           es: 'Antes de cruzar el desierto sin escolta, Esdras proclama un ayuno: «La mano de nuestro Dios protege a los que le buscan».',
           en: 'Before crossing the desert without an escort, Ezra proclaims a fast: "The hand of our God is upon all who seek him".',
@@ -1011,7 +1081,10 @@ const CONQUEST_ROUTES: BibleRoute[] = [
       },
       {
         placeSlug: 'jerusalem',
-        title: { es: 'Jerusalén — los cimientos del Templo', en: 'Jerusalem — the Temple foundations' },
+        title: {
+          es: 'Jerusalén — los cimientos del Templo',
+          en: 'Jerusalem — the Temple foundations',
+        },
         note: {
           es: 'Al poner los cimientos, los jóvenes gritan de alegría y los ancianos, que conocieron el primer Templo, lloran: nadie distingue un clamor del otro.',
           en: 'As the foundations are laid, the young shout for joy and the elders, who knew the first Temple, weep: no one can tell one sound from the other.',
@@ -1037,11 +1110,596 @@ const CONQUEST_ROUTES: BibleRoute[] = [
   },
 ];
 
+const PATRIARCHS_ROUTES: BibleRoute[] = [
+  {
+    slug: 'jacob',
+    name: { es: 'Jacob, la escalera y la lucha', en: 'Jacob, the Ladder and the Wrestling' },
+    description: {
+      es: 'De la huida de Berseba al descenso a Egipto: el patriarca que sale con un cayado y vuelve hecho pueblo, cojo de una cadera y con un nombre nuevo.',
+      en: 'From the flight out of Beersheba to the descent into Egypt: the patriarch who leaves with a staff and returns a people, limping on one hip and bearing a new name.',
+    },
+    stops: [
+      {
+        placeSlug: 'beersheba-2',
+        title: { es: 'Berseba — la huida', en: 'Beersheba — the flight' },
+        note: {
+          es: 'Con la bendición arrebatada a cuestas y Esaú buscándole, Jacob sale de Berseba hacia la casa de Labán. Isaac lo despide, sin saberlo, con la promesa de Abraham.',
+          en: 'Carrying the blessing he snatched and with Esau after him, Jacob leaves Beersheba for Laban’s house. Isaac sends him off, unwittingly, with Abraham’s promise.',
+        },
+        readings: [{ book: 'GEN', chapter: 28, verses: [1, 9] }],
+      },
+      {
+        placeSlug: 'bethel-1',
+        title: { es: 'Betel — la escalera', en: 'Bethel — the ladder' },
+        note: {
+          es: 'A campo raso, con una piedra por almohada, sueña una escalera por la que suben y bajan los ángeles de Dios. Al despertar: «Realmente el Señor está en este lugar, y yo no lo sabía».',
+          en: 'In the open country, a stone for a pillow, he dreams of a ladder with the angels of God ascending and descending. Waking: "Surely the Lord is in this place, and I did not know it".',
+        },
+        readings: [{ book: 'GEN', chapter: 28, verses: [10, 22] }],
+      },
+      {
+        placeSlug: 'haran',
+        title: { es: 'Harán — siete años por Raquel', en: 'Haran — seven years for Rachel' },
+        note: {
+          es: 'Siete años de servicio «que le parecieron unos pocos días», y a la mañana siguiente de la boda era Lía. Otros siete: en casa del tío, el que engañó aprende lo que es ser engañado.',
+          en: 'Seven years of service "that seemed to him but a few days", and the morning after the wedding it was Leah. Seven more: in his uncle’s house the deceiver learns what being deceived is.',
+        },
+        readings: [{ book: 'GEN', chapter: 29, verses: [1, 30] }],
+      },
+      {
+        placeSlug: 'mahanaim',
+        title: { es: 'Majanaim — el campamento de Dios', en: 'Mahanaim — the camp of God' },
+        note: {
+          es: 'De vuelta a casa, los ángeles de Dios le salen al encuentro: «Este es el campamento de Dios». Y aun así reza con miedo, porque Esaú viene con cuatrocientos hombres.',
+          en: 'On his way home the angels of God meet him: "This is God’s camp". And still he prays in fear, because Esau is coming with four hundred men.',
+        },
+        readings: [{ book: 'GEN', chapter: 32, verses: [1, 12] }],
+      },
+      {
+        placeSlug: 'penuel',
+        title: { es: 'Penuel — la lucha hasta el alba', en: 'Penuel — wrestling until dawn' },
+        note: {
+          es: 'Solo, de noche, junto al vado del Yaboc, lucha con un desconocido hasta rayar el alba. Sale cojo y bendecido, y ya no se llama Jacob: se llama Israel.',
+          en: 'Alone, by night, at the ford of the Jabbok, he wrestles with a stranger until daybreak. He leaves limping and blessed, and no longer named Jacob: his name is Israel.',
+        },
+        readings: [{ book: 'GEN', chapter: 32, verses: [22, 32] }],
+      },
+      {
+        placeSlug: 'shechem',
+        title: { es: 'Siquem — el abrazo y el altar', en: 'Shechem — the embrace and the altar' },
+        note: {
+          es: 'Lo que temía era una batalla y fue un abrazo: Esaú corre a su encuentro y los dos lloran. Jacob acampa a la vista de la ciudad, compra el terreno y levanta un altar.',
+          en: 'He feared a battle and found an embrace: Esau runs to meet him and both weep. Jacob camps within sight of the city, buys the ground and raises an altar.',
+        },
+        readings: [{ book: 'GEN', chapter: 33 }],
+      },
+      {
+        placeSlug: 'el-bethel',
+        title: { es: 'El-Betel — el voto cumplido', en: 'El-bethel — the vow fulfilled' },
+        note: {
+          es: 'Vuelve al lugar del sueño con toda su casa, entierra los ídolos bajo la encina y erige por fin el altar prometido. Allí Dios le repite el nombre nuevo y la promesa.',
+          en: 'He returns to the place of the dream with his whole household, buries the idols under the oak and at last builds the altar he vowed. There God repeats the new name and the promise.',
+        },
+        readings: [{ book: 'GEN', chapter: 35, verses: [1, 15] }],
+      },
+      {
+        placeSlug: 'mamre',
+        title: { es: 'Mambré — el adiós a Isaac', en: 'Mamre — farewell to Isaac' },
+        note: {
+          es: 'Después de veinte años, Jacob llega a la tienda de su padre. Isaac muere anciano y colmado de días, y los dos hermanos que se disputaron su bendición lo entierran juntos.',
+          en: 'After twenty years Jacob reaches his father’s tent. Isaac dies old and full of days, and the two brothers who fought over his blessing bury him together.',
+        },
+        readings: [{ book: 'GEN', chapter: 35, verses: [27, 29] }],
+      },
+      {
+        placeSlug: 'goshen-1',
+        title: { es: 'Gosén — el reencuentro en Egipto', en: 'Goshen — the reunion in Egypt' },
+        note: {
+          es: 'Camino de Egipto, Dios le habla de noche: «No temas bajar allá, porque allí te haré una gran nación». José engancha su carro, y llora largo rato sobre el cuello de su padre.',
+          en: 'On the road to Egypt God speaks by night: "Do not fear to go down, for there I will make of you a great nation". Joseph harnesses his chariot and weeps a long while on his father’s neck.',
+        },
+        readings: [
+          { book: 'GEN', chapter: 46, verses: [1, 7] },
+          { book: 'GEN', chapter: 46, verses: [28, 34] },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'jose',
+    name: {
+      es: 'José, de la cisterna al gobierno de Egipto',
+      en: 'Joseph, from the Cistern to the Rule of Egypt',
+    },
+    description: {
+      es: 'Vendido por sus hermanos y levantado por Dios: de la túnica rota al carro del faraón, y de la venganza posible al perdón.',
+      en: 'Sold by his brothers and raised up by God: from the torn tunic to Pharaoh’s chariot, and from possible revenge to forgiveness.',
+    },
+    stops: [
+      {
+        placeSlug: 'valley-of-hebron',
+        title: { es: 'El valle de Hebrón — el envío', en: 'The valley of Hebron — the errand' },
+        note: {
+          es: 'La túnica de mangas largas, los sueños de las gavillas y el odio callado de los hermanos. Israel manda al pequeño a ver cómo están, y él responde: «Aquí estoy».',
+          en: 'The long-sleeved tunic, the dreams of the sheaves and the brothers’ silent hatred. Israel sends the youngest to see how they are, and he answers: "Here I am".',
+        },
+        readings: [{ book: 'GEN', chapter: 37, verses: [1, 14] }],
+      },
+      {
+        placeSlug: 'dothan',
+        title: { es: 'Dotán — la cisterna', en: 'Dothan — the cistern' },
+        note: {
+          es: 'Lo ven venir de lejos y lo despojan; la cisterna está seca. Pasa una caravana de ismaelitas camino de Egipto y veinte monedas de plata cambian una vida.',
+          en: 'They see him coming from afar and strip him; the cistern is dry. An Ishmaelite caravan passes on its way to Egypt and twenty pieces of silver change a life.',
+        },
+        readings: [{ book: 'GEN', chapter: 37, verses: [15, 36] }],
+      },
+      {
+        placeSlug: 'egypt',
+        title: {
+          es: 'Egipto — la casa de Putifar y la cárcel',
+          en: 'Egypt — Potiphar’s house and the prison',
+        },
+        note: {
+          es: 'Esclavo y enseguida administrador; calumniado y enseguida preso. «El Señor estaba con José»: la frase se repite igual en lo alto y en lo más bajo.',
+          en: 'A slave and at once a steward; slandered and at once a prisoner. "The Lord was with Joseph": the same sentence repeats at the top and at the very bottom.',
+        },
+        readings: [{ book: 'GEN', chapter: 39 }],
+      },
+      {
+        placeSlug: 'nile',
+        title: { es: 'El Nilo — las siete vacas', en: 'The Nile — the seven cows' },
+        note: {
+          es: 'Del río suben siete vacas hermosas y siete escuálidas que se las comen. Nadie sabe leer el sueño, hasta que el copero se acuerda del muchacho de la cárcel.',
+          en: 'Out of the river come seven fine cows and seven gaunt ones that devour them. No one can read the dream, until the cupbearer remembers the young man in the prison.',
+        },
+        readings: [{ book: 'GEN', chapter: 41, verses: [1, 36] }],
+      },
+      {
+        placeSlug: 'heliopolis',
+        title: { es: 'On — el segundo del reino', en: 'On — second in the kingdom' },
+        note: {
+          es: 'El faraón le da su anillo, un carro y un nombre egipcio, y por esposa a Asenat, hija del sacerdote de On. Siete años de espigas llenas para los siete de hambre.',
+          en: 'Pharaoh gives him his ring, a chariot and an Egyptian name, and Asenath, daughter of the priest of On, as wife. Seven years of full ears against the seven of famine.',
+        },
+        readings: [{ book: 'GEN', chapter: 41, verses: [37, 57] }],
+      },
+      {
+        placeSlug: 'goshen-1',
+        title: { es: 'Gosén — «yo soy José»', en: 'Goshen — "I am Joseph"' },
+        note: {
+          es: 'No aguanta más y despide a los egipcios: «Yo soy José, vuestro hermano, el que vendisteis». No los acusa — «Dios me envió delante de vosotros» — y les da lo mejor del país.',
+          en: 'He can bear it no longer and sends the Egyptians out: "I am Joseph your brother, whom you sold". He does not accuse them — "God sent me before you" — and gives them the best of the land.',
+        },
+        readings: [
+          { book: 'GEN', chapter: 45, verses: [1, 15] },
+          { book: 'GEN', chapter: 47, verses: [1, 12] },
+        ],
+      },
+      {
+        placeSlug: 'machpelah',
+        title: {
+          es: 'Macpelá — el entierro y el perdón',
+          en: 'Machpelah — the burial and the pardon',
+        },
+        note: {
+          es: 'Una comitiva de carros egipcios sube a Canaán y sepulta a Jacob en la cueva de Abraham. De vuelta, los hermanos temen la revancha: «¿Estoy yo acaso en el lugar de Dios?».',
+          en: 'A train of Egyptian chariots goes up to Canaan and lays Jacob in Abraham’s cave. Back home the brothers fear revenge: "Am I in the place of God?".',
+        },
+        readings: [{ book: 'GEN', chapter: 50 }],
+      },
+    ],
+  },
+];
+
+const KINGDOM_ROUTES: BibleRoute[] = [
+  {
+    slug: 'rut',
+    name: { es: 'Rut, la espigadora de Belén', en: 'Ruth, the Gleaner of Bethlehem' },
+    description: {
+      es: 'De la hambruna que vacía Belén a la puerta de la ciudad: el camino corto de una extranjera que eligió quedarse, y que acabó siendo bisabuela de David.',
+      en: 'From the famine that empties Bethlehem to the city gate: the short road of a foreigner who chose to stay, and who became David’s great-grandmother.',
+    },
+    stops: [
+      {
+        placeSlug: 'bethlehem-1',
+        title: { es: 'Belén — el hambre y la marcha', en: 'Bethlehem — famine and departure' },
+        note: {
+          es: 'La «casa del pan» se queda sin pan y una familia emigra a los campos de Moab. Allí mueren el padre y los dos hijos, y Noemí queda sin marido, sin hijos y sin tierra.',
+          en: 'The "house of bread" runs out of bread and a family emigrates to the fields of Moab. There the father and both sons die, and Naomi is left without husband, sons or land.',
+        },
+        readings: [{ book: 'RUT', chapter: 1, verses: [1, 5] }],
+      },
+      {
+        placeSlug: 'moab-1',
+        title: {
+          es: 'Moab — «tu pueblo será mi pueblo»',
+          en: 'Moab — "your people shall be my people"',
+        },
+        note: {
+          es: 'Noemí despide a sus nueras y Orfá se vuelve, con razón y con lágrimas. Rut se agarra a ella: «Adonde tú vayas, iré yo; donde tú mueras, moriré yo».',
+          en: 'Naomi sends her daughters-in-law away and Orpah turns back, rightly and in tears. Ruth clings to her: "Where you go I will go; where you die I will die".',
+        },
+        readings: [{ book: 'RUT', chapter: 1, verses: [6, 18] }],
+      },
+      {
+        placeSlug: 'bethlehem-1',
+        title: { es: 'Belén — la vuelta amarga', en: 'Bethlehem — the bitter return' },
+        note: {
+          es: 'Toda la aldea se conmueve al verlas llegar. «No me llaméis Noemí, dulzura; llamadme Mará, amargura». Es el comienzo de la siega de la cebada.',
+          en: 'The whole village stirs at the sight of them. "Do not call me Naomi, sweetness; call me Mara, bitterness". It is the beginning of the barley harvest.',
+        },
+        readings: [{ book: 'RUT', chapter: 1, verses: [19, 22] }],
+      },
+      {
+        placeSlug: 'bethlehem-1',
+        title: {
+          es: 'Los campos de Booz — espigar y la era',
+          en: 'The fields of Boaz — gleaning and the threshing floor',
+        },
+        note: {
+          es: 'Rut sale a espigar detrás de los segadores y da, «por casualidad», con la parcela de un pariente. Aquella noche, en la era, le pide amparo: «Extiende tu manto sobre tu sierva».',
+          en: 'Ruth goes out to glean behind the reapers and lights, "by chance", on the plot of a kinsman. That night, on the threshing floor, she asks for shelter: "Spread your cloak over your servant".',
+        },
+        readings: [
+          { book: 'RUT', chapter: 2 },
+          { book: 'RUT', chapter: 3 },
+        ],
+      },
+      {
+        placeSlug: 'ephrathah',
+        title: { es: 'Efrata — la puerta de la ciudad', en: 'Ephrathah — the city gate' },
+        note: {
+          es: 'Diez ancianos, una sandalia que cambia de mano y un rescate cumplido. De aquella boda nace Obed, y de Obed, Jesé; y de Jesé, David.',
+          en: 'Ten elders, a sandal passed from hand to hand and a redemption completed. From that marriage Obed is born, and from Obed Jesse; and from Jesse, David.',
+        },
+        readings: [{ book: 'RUT', chapter: 4 }],
+      },
+    ],
+  },
+  {
+    slug: 'salomon-y-el-templo',
+    name: { es: 'Salomón y el Templo', en: 'Solomon and the Temple' },
+    description: {
+      es: 'Del sueño de Gabaón a las flotas que vuelven de Ofir: los cedros del Líbano, el oro del sur y la piedra con que Israel levantó la casa del Nombre.',
+      en: 'From the dream at Gibeon to the fleets returning from Ophir: the cedars of Lebanon, the gold of the south and the stone with which Israel raised the house of the Name.',
+    },
+    stops: [
+      {
+        placeSlug: 'gibeon',
+        title: { es: 'Gabaón — «un corazón que escuche»', en: 'Gibeon — "a listening heart"' },
+        note: {
+          es: 'Mil holocaustos en el santuario del alto, y de noche la pregunta de Dios: «Pide lo que quieras». No pide años, ni riquezas, ni la vida de sus enemigos: pide saber gobernar.',
+          en: 'A thousand burnt offerings at the high place, and by night God’s question: "Ask what you wish". He asks neither long life, nor riches, nor the life of his enemies: he asks to know how to govern.',
+        },
+        readings: [{ book: '1KI', chapter: 3, verses: [4, 15] }],
+      },
+      {
+        placeSlug: 'tyre',
+        title: { es: 'Tiro — los cedros de Hiram', en: 'Tyre — the cedars of Hiram' },
+        note: {
+          es: 'El rey de Tiro, que siempre había querido a David, manda decir a su hijo que sí. Los troncos bajarán del monte y viajarán en balsas por el mar hasta la costa.',
+          en: 'The king of Tyre, who had always loved David, sends word to his son that he agrees. The logs will come down from the mountain and travel by sea in rafts to the coast.',
+        },
+        readings: [{ book: '1KI', chapter: 5, verses: [1, 12] }],
+      },
+      {
+        placeSlug: 'lebanon',
+        title: {
+          es: 'El Líbano — treinta mil taladores',
+          en: 'Lebanon — thirty thousand woodcutters',
+        },
+        note: {
+          es: 'Turnos de diez mil hombres al mes en la montaña, ochenta mil canteros y setenta mil porteadores. Una nación entera trabajando durante años en una sola casa.',
+          en: 'Shifts of ten thousand men a month in the mountains, eighty thousand stonecutters and seventy thousand carriers. A whole nation working for years on a single house.',
+        },
+        readings: [{ book: '1KI', chapter: 5, verses: [13, 18] }],
+      },
+      {
+        placeSlug: 'mount-moriah',
+        title: { es: 'El monte Moria — los cimientos', en: 'Mount Moriah — the foundations' },
+        note: {
+          es: 'Sobre la era que David compró, en el monte donde Abraham había cargado la leña, empieza la obra. Siete años, y en el recinto no se oyó ni un golpe de martillo.',
+          en: 'On the threshing floor David bought, on the mount where Abraham had carried the wood, the work begins. Seven years, and in the precinct not one hammer blow was heard.',
+        },
+        readings: [
+          { book: '2CH', chapter: 3, verses: [1, 7] },
+          { book: 'PSA', chapter: 126 },
+        ],
+      },
+      {
+        placeSlug: 'jerusalem',
+        title: { es: 'Jerusalén — la dedicación', en: 'Jerusalem — the dedication' },
+        note: {
+          es: 'Sube el Arca al Santísimo y la nube llena la casa. Salomón abre los brazos: «¿Es que Dios va a habitar sobre la tierra? Ni los cielos te abarcan, cuánto menos esta casa».',
+          en: 'The Ark goes up into the Holy of Holies and the cloud fills the house. Solomon spreads out his hands: "Will God indeed dwell on earth? The heavens cannot contain you, much less this house".',
+        },
+        readings: [
+          { book: '1KI', chapter: 8, verses: [1, 13] },
+          { book: '1KI', chapter: 8, verses: [22, 30] },
+        ],
+      },
+      {
+        placeSlug: 'ezion-geber',
+        title: {
+          es: 'Esión-Guéber — la flota del mar Rojo',
+          en: 'Ezion-geber — the Red Sea fleet',
+        },
+        note: {
+          es: 'En el fondo del golfo, junto a Elat, Salomón arma naves; Hiram le presta marineros que conocen el mar. Zarpan hacia el sur y tardan años en volver.',
+          en: 'At the head of the gulf, next to Elath, Solomon builds ships; Hiram lends him seamen who know the sea. They sail south and take years to return.',
+        },
+        readings: [{ book: '1KI', chapter: 9, verses: [26, 28] }],
+      },
+      {
+        placeSlug: 'ophir',
+        title: { es: 'Ofir — el oro que vuelve', en: 'Ophir — the gold that returns' },
+        note: {
+          es: 'De aquel puerto remoto, cuya posición nadie sabe hoy, traen cuatrocientos veinte talentos de oro y una madera de sándalo como no se había visto nunca en Jerusalén.',
+          en: 'From that far-off port, whose position no one knows today, they bring four hundred and twenty talents of gold and sandalwood such as Jerusalem had never seen.',
+        },
+        readings: [{ book: '1KI', chapter: 10, verses: [11, 12] }],
+      },
+      {
+        placeSlug: 'sheba-1',
+        title: { es: 'Sabá — la reina que vino a ver', en: 'Sheba — the queen who came to see' },
+        note: {
+          es: 'Llega del extremo sur con especias, oro y preguntas difíciles. Cuando lo ha visto todo se queda sin aliento: «No me habían contado ni la mitad».',
+          en: 'She comes from the far south with spices, gold and hard questions. When she has seen it all there is no more breath in her: "They did not tell me the half of it".',
+        },
+        readings: [{ book: '1KI', chapter: 10, verses: [1, 13] }],
+      },
+    ],
+  },
+];
+
+const PROPHETS_ROUTES: BibleRoute[] = [
+  {
+    slug: 'jonas',
+    season: 'cuaresma',
+    name: {
+      es: 'Jonás, la huida y la ciudad convertida',
+      en: 'Jonah, the Flight and the Converted City',
+    },
+    description: {
+      es: 'De un pueblecito de Galilea al confín de occidente, y de vuelta hasta Nínive: la ruta más torcida de la Biblia, y la misericordia que la endereza.',
+      en: 'From a small Galilean village to the western edge of the world, and back to Nineveh: the most crooked route in the Bible, and the mercy that straightens it.',
+    },
+    stops: [
+      {
+        placeSlug: 'gath-hepher',
+        title: {
+          es: 'Gat-Héfer — el profeta de Galilea',
+          en: 'Gath-hepher — the prophet from Galilee',
+        },
+        note: {
+          es: 'Un profeta de carne y hueso, de una aldea a un paso de Nazaret, que anunció a Jeroboam la restauración de las fronteras. Siglos después dirán que de Galilea no sale ningún profeta.',
+          en: 'A flesh-and-blood prophet from a village a step away from Nazareth, who announced to Jeroboam the restoring of the borders. Centuries later they will say no prophet comes from Galilee.',
+        },
+        readings: [{ book: '2KI', chapter: 14, verses: [23, 27] }],
+      },
+      {
+        placeSlug: 'joppa',
+        title: { es: 'Jafa — el pasaje a Tarsis', en: 'Joppa — passage to Tarshish' },
+        note: {
+          es: 'Dios dice «levántate y ve a Nínive», al oriente. Jonás baja a Jafa, paga el pasaje y se embarca al occidente. En hebreo, todos los verbos de su huida son descensos.',
+          en: 'God says "arise and go to Nineveh", to the east. Jonah goes down to Joppa, pays the fare and sails west. In Hebrew, every verb of his flight is a going down.',
+        },
+        readings: [{ book: 'JON', chapter: 1, verses: [1, 3] }],
+      },
+      {
+        placeSlug: 'tarshish-1',
+        title: { es: 'Tarsis — el rumbo contrario', en: 'Tarshish — the opposite course' },
+        note: {
+          es: 'Rumbo al último puerto conocido, Dios lanza un viento y el barco cruje. Los marineros paganos rezan, echan suertes y se resisten a tirarlo al agua; el profeta dormía en la bodega.',
+          en: 'Bound for the last known port, God hurls a wind and the ship groans. The pagan sailors pray, cast lots and are loath to throw him overboard; the prophet was asleep in the hold.',
+        },
+        readings: [{ book: 'JON', chapter: 1, verses: [4, 16] }],
+      },
+      {
+        placeSlug: 'great-sea',
+        title: {
+          es: 'El mar — tres días en el vientre del pez',
+          en: 'The sea — three days in the belly of the fish',
+        },
+        note: {
+          es: 'Desde las entrañas del abismo, un salmo: «Invoqué al Señor en mi angustia y me respondió». Es el signo que Jesús dará a los que le pidan señales.',
+          en: 'From the depths of the abyss, a psalm: "I called to the Lord out of my distress and he answered me". This is the sign Jesus will give to those who ask him for signs.',
+        },
+        readings: [{ book: 'JON', chapter: 2 }],
+      },
+      {
+        placeSlug: 'nineveh',
+        title: { es: 'Nínive — la ciudad convertida', en: 'Nineveh — the converted city' },
+        note: {
+          es: 'Bastan cinco palabras y la ciudad entera se cubre de saco, del rey al ganado. Jonás se enfada, se le seca el ricino, y Dios se queda con la última palabra: «¿Y no me voy a compadecer yo?».',
+          en: 'Five words are enough and the whole city puts on sackcloth, from the king to the cattle. Jonah is angry, his gourd withers, and God keeps the last word: "And should I not have pity?".',
+        },
+        readings: [
+          { book: 'JON', chapter: 3 },
+          { book: 'JON', chapter: 4 },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'daniel-en-babilonia',
+    name: { es: 'Daniel y los desterrados de Babilonia', en: 'Daniel and the Exiles in Babylon' },
+    description: {
+      es: 'De la deportación de unos muchachos de Judá a las visiones junto al Tigris: la fe que se mantiene entera dentro de la corte del imperio.',
+      en: 'From the deportation of a few young men of Judah to the visions by the Tigris: faith kept whole inside the court of empire.',
+    },
+    stops: [
+      {
+        placeSlug: 'jerusalem',
+        title: {
+          es: 'Jerusalén — la primera deportación',
+          en: 'Jerusalem — the first deportation',
+        },
+        note: {
+          es: 'Nabucodonosor se lleva los vasos del Templo y a unos jóvenes de sangre real, «sin defecto y hábiles en toda sabiduría». Les cambian hasta el nombre: Daniel será Baltasar.',
+          en: 'Nebuchadnezzar carries off the vessels of the Temple and some young men of royal blood, "without blemish and skilful in all wisdom". Even their names are changed: Daniel becomes Belteshazzar.',
+        },
+        readings: [{ book: 'DAN', chapter: 1, verses: [1, 7] }],
+      },
+      {
+        placeSlug: 'babylon-1',
+        title: {
+          es: 'Babilonia — la mesa del rey y la estatua',
+          en: 'Babylon — the king’s table and the statue',
+        },
+        note: {
+          es: 'Legumbres y agua en lugar de los manjares reales: a los diez días tienen mejor aspecto que todos. Y cuando nadie acierta el sueño del rey, Daniel ve la estatua y la piedra que la derriba.',
+          en: 'Vegetables and water instead of the royal fare: after ten days they look better than all the rest. And when no one can tell the king his dream, Daniel sees the statue and the stone that shatters it.',
+        },
+        readings: [
+          { book: 'DAN', chapter: 1, verses: [8, 21] },
+          { book: 'DAN', chapter: 2, verses: [31, 49] },
+        ],
+      },
+      {
+        placeSlug: 'dura',
+        title: { es: 'La llanura de Dura — el horno', en: 'The plain of Dura — the furnace' },
+        note: {
+          es: 'Una estatua de oro, una orquesta y la orden de postrarse. Tres jóvenes se niegan: «Y si no nos libra, sábelo, oh rey: no adoraremos tu estatua». Dentro del horno pasean cuatro.',
+          en: 'A golden statue, an orchestra and the order to bow down. Three young men refuse: "And if he does not deliver us, know, O king: we will not worship your statue". Inside the furnace, four are walking.',
+        },
+        readings: [{ book: 'DAN', chapter: 3 }],
+      },
+      {
+        placeSlug: 'babylon-1',
+        title: {
+          es: 'Babilonia — la escritura y el foso',
+          en: 'Babylon — the writing and the den',
+        },
+        note: {
+          es: 'Mane, Técel, Fares: los dedos escriben en la pared del banquete y aquella misma noche cae Baltasar. Bajo el rey siguiente, la envidia lleva a Daniel al foso de los leones.',
+          en: 'Mene, Tekel, Peres: fingers write on the banquet wall and that very night Belshazzar falls. Under the next king, envy sends Daniel down to the lions’ den.',
+        },
+        readings: [
+          { book: 'DAN', chapter: 5 },
+          { book: 'DAN', chapter: 6 },
+        ],
+      },
+      {
+        placeSlug: 'susa',
+        title: { es: 'Susa — la visión junto al Ulai', en: 'Susa — the vision by the Ulai' },
+        note: {
+          es: 'Llevado en visión a la ciudadela de Elam, ve el carnero y el macho cabrío: los imperios que vendrán y se irán. Daniel se desmaya y queda enfermo varios días.',
+          en: 'Carried in vision to the citadel of Elam, he sees the ram and the he-goat: the empires that will come and go. Daniel faints and lies ill for several days.',
+        },
+        readings: [{ book: 'DAN', chapter: 8 }],
+      },
+      {
+        placeSlug: 'tigris',
+        title: {
+          es: 'El Tigris — el hombre vestido de lino',
+          en: 'The Tigris — the man clothed in linen',
+        },
+        note: {
+          es: 'Tres semanas de ayuno a la orilla del gran río, y entonces la aparición: lino, oro de Ufaz, ojos como antorchas. «No temas, hombre predilecto: la paz sea contigo, ten ánimo».',
+          en: 'Three weeks of fasting on the bank of the great river, and then the apparition: linen, gold of Uphaz, eyes like torches. "Fear not, greatly beloved: peace be with you, be strong".',
+        },
+        readings: [{ book: 'DAN', chapter: 10 }],
+      },
+    ],
+  },
+];
+
+const APOCALYPSE_ROUTES: BibleRoute[] = [
+  {
+    slug: 'siete-iglesias-del-apocalipsis',
+    name: { es: 'Las siete iglesias del Apocalipsis', en: 'The Seven Churches of Revelation' },
+    description: {
+      es: 'Desde el destierro de Patmos, siete cartas siguen la ruta postal de Asia Menor: un círculo de ciudades muy reales, con sus virtudes y sus heridas.',
+      en: 'From exile on Patmos, seven letters follow the postal road of Asia Minor: a circle of very real cities, each with its virtues and its wounds.',
+    },
+    stops: [
+      {
+        placeSlug: 'patmos',
+        title: { es: 'Patmos — el Día del Señor', en: 'Patmos — the Lord’s Day' },
+        note: {
+          es: 'Desterrado en una isla pequeña «por causa de la Palabra de Dios», Juan oye a su espalda una voz como de trompeta y se vuelve: el que camina entre los siete candeleros de oro.',
+          en: 'Exiled on a small island "because of the word of God", John hears behind him a voice like a trumpet and turns: the one who walks among the seven golden lampstands.',
+        },
+        readings: [{ book: 'REV', chapter: 1, verses: [9, 20] }],
+      },
+      {
+        placeSlug: 'ephesus',
+        title: { es: 'Éfeso — el primer amor', en: 'Ephesus — the first love' },
+        note: {
+          es: 'La gran capital de Asia: trabajo, constancia y doctrina sana. Y un solo reproche, el más triste de los siete: «has dejado tu amor primero».',
+          en: 'The great capital of Asia: toil, endurance and sound doctrine. And a single reproach, the saddest of the seven: "you have abandoned the love you had at first".',
+        },
+        readings: [{ book: 'REV', chapter: 2, verses: [1, 7] }],
+      },
+      {
+        placeSlug: 'smyrna',
+        title: { es: 'Esmirna — pobre y rica', en: 'Smyrna — poor and rich' },
+        note: {
+          es: 'Ni un solo reproche a esta comunidad perseguida: «Conozco tu tribulación y tu pobreza — pero eres rica». Solo se le pide fidelidad durante diez días.',
+          en: 'Not one reproach to this persecuted community: "I know your tribulation and your poverty — but you are rich". All that is asked is faithfulness for ten days.',
+        },
+        readings: [{ book: 'REV', chapter: 2, verses: [8, 11] }],
+      },
+      {
+        placeSlug: 'pergamum',
+        title: { es: 'Pérgamo — donde está el trono', en: 'Pergamum — where the throne is' },
+        note: {
+          es: 'Ciudad de templos y del gran altar sobre la acrópolis: allí la fe vive bajo presión y allí murió Antipas, el testigo fiel. Al vencedor, el maná escondido y una piedra blanca.',
+          en: 'A city of temples and of the great altar on the acropolis: there the faith lives under pressure and there Antipas, the faithful witness, died. To the victor, hidden manna and a white stone.',
+        },
+        readings: [{ book: 'REV', chapter: 2, verses: [12, 17] }],
+      },
+      {
+        placeSlug: 'thyatira',
+        title: { es: 'Tiatira — los gremios', en: 'Thyatira — the guilds' },
+        note: {
+          es: 'La ciudad de los tintoreros de púrpura, de donde venía Lidia. Se le alaba lo raro — «tus últimas obras son mejores que las primeras» — y se le reprocha tolerar a «Jezabel».',
+          en: 'The city of the purple dyers, where Lydia came from. It is praised for something rare — "your last works are greater than the first" — and reproached for tolerating "Jezebel".',
+        },
+        readings: [{ book: 'REV', chapter: 2, verses: [18, 29] }],
+      },
+      {
+        placeSlug: 'sardis',
+        title: { es: 'Sardes — nombre de vivo', en: 'Sardis — a name of being alive' },
+        note: {
+          es: 'La vieja capital de Creso, tomada dos veces por descuidar la vigilancia de noche. «Tienes nombre de que vives, y estás muerto. Sé vigilante».',
+          en: 'The old capital of Croesus, twice taken because the night watch slackened. "You have the name of being alive, and you are dead. Be watchful".',
+        },
+        readings: [{ book: 'REV', chapter: 3, verses: [1, 6] }],
+      },
+      {
+        placeSlug: 'philadelphia',
+        title: { es: 'Filadelfia — la puerta abierta', en: 'Philadelphia — the open door' },
+        note: {
+          es: 'La más joven de las siete, con poca fuerza y la palabra bien guardada. «He puesto delante de ti una puerta abierta que nadie puede cerrar».',
+          en: 'The youngest of the seven, with little power and the word well kept. "I have set before you an open door which no one can shut".',
+        },
+        readings: [{ book: 'REV', chapter: 3, verses: [7, 13] }],
+      },
+      {
+        placeSlug: 'laodicea',
+        title: { es: 'Laodicea — ni fría ni caliente', en: 'Laodicea — neither cold nor hot' },
+        note: {
+          es: 'Rica, banquera, famosa por su colirio y su lana negra — y sin embargo ciega, pobre y desnuda. Al final, la imagen más doméstica del libro: «Estoy a la puerta y llamo».',
+          en: 'Rich, a banking city, famous for its eye-salve and its black wool — and yet blind, poor and naked. At the end, the most domestic image in the book: "I stand at the door and knock".',
+        },
+        readings: [{ book: 'REV', chapter: 3, verses: [14, 22] }],
+      },
+    ],
+  },
+];
+
 export const ROUTES: BibleRoute[] = [
   ...CORE_ROUTES,
   ...MORE_ROUTES,
   ...HEROES_ROUTES,
   ...CONQUEST_ROUTES,
+  ...PATRIARCHS_ROUTES,
+  ...KINGDOM_ROUTES,
+  ...PROPHETS_ROUTES,
+  ...APOCALYPSE_ROUTES,
 ];
 
 export function getRoute(slug: string): BibleRoute | null {
