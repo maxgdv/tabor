@@ -222,20 +222,49 @@ export const ITINERARY_PLANS: ReadingPlan[] = [
     },
     days: oneChapterDays([
       // La liberación: de la esclavitud a la Alianza (Ex 1-17).
-      ['EXO', 1], ['EXO', 2], ['EXO', 3], ['EXO', 4], ['EXO', 5], ['EXO', 6],
-      ['EXO', 7], ['EXO', 8], ['EXO', 9], ['EXO', 10], ['EXO', 11], ['EXO', 12],
-      ['EXO', 13], ['EXO', 14], ['EXO', 15], ['EXO', 16], ['EXO', 17],
+      ['EXO', 1],
+      ['EXO', 2],
+      ['EXO', 3],
+      ['EXO', 4],
+      ['EXO', 5],
+      ['EXO', 6],
+      ['EXO', 7],
+      ['EXO', 8],
+      ['EXO', 9],
+      ['EXO', 10],
+      ['EXO', 11],
+      ['EXO', 12],
+      ['EXO', 13],
+      ['EXO', 14],
+      ['EXO', 15],
+      ['EXO', 16],
+      ['EXO', 17],
       ['DEU', 8], // la memoria del desierto
       // Los siete salmos penitenciales (numeración greco-latina).
-      ['PSA', 6], ['PSA', 31], ['PSA', 37], ['PSA', 50], ['PSA', 101],
-      ['PSA', 129], ['PSA', 142],
+      ['PSA', 6],
+      ['PSA', 31],
+      ['PSA', 37],
+      ['PSA', 50],
+      ['PSA', 101],
+      ['PSA', 129],
+      ['PSA', 142],
       // Los profetas de la conversión.
-      ['ISA', 53], ['ISA', 55], ['ISA', 58], ['JOL', 2], ['JON', 3],
+      ['ISA', 53],
+      ['ISA', 55],
+      ['ISA', 58],
+      ['JOL', 2],
+      ['JON', 3],
       // La subida a Jerusalén y la Pasión.
-      ['MRK', 8], ['MRK', 9], ['MRK', 10], ['MRK', 14], ['MRK', 15],
-      ['JHN', 18], ['JHN', 19],
+      ['MRK', 8],
+      ['MRK', 9],
+      ['MRK', 10],
+      ['MRK', 14],
+      ['MRK', 15],
+      ['JHN', 18],
+      ['JHN', 19],
       ['LAM', 3], // la esperanza en la aflicción
-      ['HEB', 4], ['HEB', 5], // el sumo sacerdote que se compadece
+      ['HEB', 4],
+      ['HEB', 5], // el sumo sacerdote que se compadece
     ]),
   },
   {
@@ -333,6 +362,197 @@ export const ITINERARY_PLANS: ReadingPlan[] = [
     },
     days: sequentialDays([['PRO', 31]], 1),
   },
+
+  // --- BORRADOR EDITORIAL: pendiente de revisión del maintainer -----------
+  // Ampliación del catálogo de itinerarios (bloques del canon todavía sin
+  // recorrido propio: Génesis, históricos, sapienciales, profetas mayores,
+  // corpus paulino, cartas católicas y Apocalipsis) más una puerta de entrada
+  // para quien nunca ha leído la Biblia. Selección y textos propuestos por el
+  // asistente: revisar antes de darlos por definitivos.
+  {
+    slug: 'primeros-pasos-21',
+    name: {
+      es: 'Si nunca has leído la Biblia (21 días)',
+      en: 'If You Have Never Read the Bible (21 Days)',
+    },
+    description: {
+      es: 'Para quien empieza de cero y no sabe por dónde entrar: veintiún capítulos clave que cuentan de un extremo a otro la historia de la salvación. Un capítulo al día, sin prisa, en tres semanas.',
+      en: 'For anyone starting from scratch and unsure where to begin: twenty-one key chapters telling the story of salvation from end to end. One chapter a day, unhurried, over three weeks.',
+    },
+    days: oneChapterDays([
+      ['GEN', 1], // la creación
+      ['GEN', 3], // la caída y la primera promesa
+      ['GEN', 12], // la llamada de Abrahán
+      ['EXO', 3], // la zarza: el Nombre de Dios
+      ['EXO', 20], // los diez mandamientos
+      ['DEU', 6], // escucha, Israel
+      ['PSA', 22], // «El Señor es mi pastor» (23 hebreo)
+      ['PSA', 50], // el Miserere (51 hebreo)
+      ['ISA', 53], // el siervo que carga con el dolor
+      ['LUK', 2], // el nacimiento en Belén
+      ['MAT', 5], // las bienaventuranzas
+      ['MAT', 6], // el Padrenuestro
+      ['LUK', 10], // el buen samaritano
+      ['LUK', 15], // el hijo pródigo
+      ['JHN', 1], // el Verbo hecho carne
+      ['JHN', 3], // nacer de nuevo
+      ['JHN', 19], // la cruz
+      ['LUK', 24], // Emaús y la Resurrección
+      ['ACT', 2], // Pentecostés
+      ['ROM', 8], // nada podrá separarnos
+      ['REV', 21], // un cielo nuevo y una tierra nueva
+    ]),
+  },
+  {
+    slug: 'genesis-25',
+    name: {
+      es: 'El Génesis en 25 días',
+      en: 'Genesis in 25 Days',
+    },
+    description: {
+      es: 'El libro de los orígenes entero, para quien quiera saber de dónde arranca todo: la creación, el diluvio, los patriarcas y la historia de José. Dos capítulos al día durante veinticinco días.',
+      en: 'The whole book of origins, for anyone wanting to see where it all begins: creation, the flood, the patriarchs and the story of Joseph. Two chapters a day for twenty-five days.',
+    },
+    days: sequentialDays([['GEN', 50]], 2),
+  },
+  {
+    slug: 'samuel-reyes-34',
+    name: {
+      es: 'Samuel y Reyes en 34 días',
+      en: 'Samuel and Kings in 34 Days',
+    },
+    description: {
+      es: 'La gran historia de la monarquía para lectores de relato largo: Samuel, Saúl, David y Salomón, el reino dividido, Elías y Eliseo, hasta el destierro de Babilonia. Tres capítulos al día durante algo más de un mes.',
+      en: 'The great history of the monarchy for readers of long narrative: Samuel, Saul, David and Solomon, the divided kingdom, Elijah and Elisha, down to the exile in Babylon. Three chapters a day for a little over a month.',
+    },
+    days: sequentialDays(
+      [
+        ['1SA', 31],
+        ['2SA', 24],
+        ['1KI', 22],
+        ['2KI', 25],
+      ],
+      3,
+    ),
+  },
+  {
+    slug: 'salmos-30',
+    name: {
+      es: 'Los Salmos en 30 días',
+      en: 'The Psalms in 30 Days',
+    },
+    description: {
+      es: 'El salterio completo en un mes, a la manera de la vieja costumbre monástica: para quien ya reza los salmos y quiere recorrerlos de un tirón. Cinco salmos al día durante treinta días.',
+      en: 'The whole psalter in a month, after the old monastic custom: for those who already pray the psalms and want to cover them in one sweep. Five psalms a day for thirty days.',
+    },
+    days: sequentialDays([['PSA', 150]], 5),
+  },
+  {
+    slug: 'sapienciales-44',
+    name: {
+      es: 'Los libros sapienciales en 44 días',
+      en: 'The Wisdom Books in 44 Days',
+    },
+    description: {
+      es: 'Job, Eclesiastés, el Cantar, Sabiduría y Eclesiástico, para quien busca hondura más que relato: el sufrimiento del justo, el arte de vivir y el amor. Tres capítulos al día durante seis semanas y media.',
+      en: 'Job, Ecclesiastes, the Song of Songs, Wisdom and Sirach, for readers after depth rather than narrative: the suffering of the just, the art of living, and love. Three chapters a day over six and a half weeks.',
+    },
+    days: sequentialDays(
+      [
+        ['JOB', 42],
+        ['ECC', 12],
+        ['SNG', 8],
+        ['WIS', 19],
+        ['SIR', 51],
+      ],
+      3,
+    ),
+  },
+  {
+    slug: 'isaias-33',
+    name: {
+      es: 'Isaías en 33 días',
+      en: 'Isaiah in 33 Days',
+    },
+    description: {
+      es: 'El profeta que más lee la Iglesia, entero y en orden: el juicio sobre Jerusalén, el libro de la consolación y los cantos del Siervo. Dos capítulos al día durante poco más de un mes.',
+      en: 'The prophet the Church reads most, complete and in order: the judgement on Jerusalem, the book of consolation, and the Servant songs. Two chapters a day for just over a month.',
+    },
+    days: sequentialDays([['ISA', 66]], 2),
+  },
+  {
+    slug: 'jeremias-lamentaciones-29',
+    name: {
+      es: 'Jeremías y Lamentaciones en 29 días',
+      en: 'Jeremiah and Lamentations in 29 Days',
+    },
+    description: {
+      es: 'El profeta de la ruina y de la alianza nueva, seguido del llanto por la ciudad destruida: para quien atraviesa un tiempo duro y quiere palabras a su altura. Dos capítulos al día durante cuatro semanas.',
+      en: 'The prophet of ruin and of the new covenant, followed by the lament over the ruined city: for anyone in a hard season who wants words equal to it. Two chapters a day for four weeks.',
+    },
+    days: sequentialDays(
+      [
+        ['JER', 52],
+        ['LAM', 5],
+      ],
+      2,
+    ),
+  },
+  {
+    slug: 'cartas-pablo-50',
+    name: {
+      es: 'Las cartas de san Pablo en 50 días',
+      en: 'The Letters of Saint Paul in 50 Days',
+    },
+    description: {
+      es: 'El corpus paulino completo, de Romanos a Hebreos, para quien ya conoce los Evangelios y quiere la doctrina cristiana en estado naciente. Dos capítulos al día durante cincuenta días.',
+      en: 'The complete Pauline corpus, from Romans to Hebrews, for those who know the Gospels and want Christian doctrine in its nascent state. Two chapters a day for fifty days.',
+    },
+    days: sequentialDays(
+      [
+        ['ROM', 16],
+        ['1CO', 16],
+        ['2CO', 13],
+        ['GAL', 6],
+        ['EPH', 6],
+        ['PHP', 4],
+        ['COL', 4],
+        ['1TH', 5],
+        ['2TH', 3],
+        ['1TI', 6],
+        ['2TI', 4],
+        ['TIT', 3],
+        ['PHM', 1],
+        ['HEB', 13],
+      ],
+      2,
+    ),
+  },
+  {
+    slug: 'cartas-catolicas-apocalipsis-43',
+    name: {
+      es: 'Cartas católicas y Apocalipsis en 43 días',
+      en: 'The Catholic Letters and Revelation in 43 Days',
+    },
+    description: {
+      es: 'El final del Nuevo Testamento, para quien quiera cerrar el círculo: Santiago, Pedro, Juan y Judas escribiendo a toda la Iglesia, y la visión que cierra la Biblia. Un capítulo al día durante seis semanas.',
+      en: 'The close of the New Testament, for those who want to complete the circle: James, Peter, John and Jude writing to the whole Church, and the vision that ends the Bible. One chapter a day for six weeks.',
+    },
+    days: sequentialDays(
+      [
+        ['JAS', 5],
+        ['1PE', 5],
+        ['2PE', 3],
+        ['1JN', 5],
+        ['2JN', 1],
+        ['3JN', 1],
+        ['JUD', 1],
+        ['REV', 22],
+      ],
+      1,
+    ),
+  },
+  // --- fin del borrador editorial ----------------------------------------
 ];
 
 /**
@@ -352,9 +572,7 @@ export function plansOfKind(kind: PlanKind): ReadingPlan[] {
 
 // --- Etiquetas ----------------------------------------------------------
 
-const BOOK_NAME = new Map(
-  BOOK_META.map((m) => [m.canonicalId, { es: m.es.name, en: m.en.name }]),
-);
+const BOOK_NAME = new Map(BOOK_META.map((m) => [m.canonicalId, { es: m.es.name, en: m.en.name }]));
 
 /** "Mateo 5–7" / "Salmos 23" / "Mateo 6, 25-34" — nombre localizado. */
 export function readingLabel(reading: PlanReading, locale: string): string {
