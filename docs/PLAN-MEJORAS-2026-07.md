@@ -248,11 +248,21 @@ proyecto no tenía logo): la silueta del monte con un arco de luz encima,
 sobre azul profundo. A tamaño pequeño puede leerse de más de una forma;
 es tu marca, decide tú.
 
-### 6. Cierre — PENDIENTE
-- [ ] `/security-review` sobre el diff acumulado.
-- [ ] Resumen al promotor y **espera de luz verde** para push.
+### 6. Cierre — ESPERANDO LUZ VERDE
+- [x] `/security-review` sobre el diff acumulado: **cero hallazgos**.
+      Ningún route handler, server action, comprobación de autenticación,
+      redirección ni construcción de SQL nuevos; el único valor dinámico
+      es un `locale` validado contra una lista de dos elementos. Se
+      verificó además que la migración RLS cubre las 25 tablas existentes
+      y que las 52 entradas nuevas del lockfile vienen del registro
+      oficial con hash de integridad.
+- [ ] **Espera de luz verde del promotor para el push.**
 - [ ] Tras el OK: push, verificar deploy, ping IndexNow con las URLs
       nuevas (`api.indexnow.org` + `bing.com`; Google no lo usa).
+
+URLs nuevas para el ping de IndexNow tras desplegar: `/es` y `/en` de
+`versiculo-del-dia`, de las 7 rutas nuevas y de los 21 planes nuevos
+(12 de situación + 9 itinerarios) — 2 × (1 + 7 + 21) = **58 URLs**.
 
 ## Revisiones editoriales pendientes del maintainer
 
