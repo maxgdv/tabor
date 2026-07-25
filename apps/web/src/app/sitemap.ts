@@ -34,6 +34,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [
     ...perLocale('', 'monthly', 1),
     ...perLocale('leer', 'monthly', 0.9),
+    // Cambia de pasaje cada día: es la URL que más merece recrawl frecuente.
+    ...perLocale('versiculo-del-dia', 'daily', 0.9),
     ...perLocale('planes', 'monthly', 0.8),
     ...PLANS.flatMap((plan) => perLocale(`planes/${plan.slug}`, 'monthly', 0.7)),
     ...perLocale('rutas', 'monthly', 0.8),

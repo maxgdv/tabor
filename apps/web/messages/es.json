@@ -109,9 +109,22 @@
     "markDay": "Marcar el día {day} como leído",
     "unmarkDay": "Desmarcar el día {day}"
   },
+  "verseOfDay": {
+    "title": "Versículo del día",
+    "lede": "Un pasaje breve para hoy, el mismo para todos. Léelo con calma y, si te llama, sigue por el capítulo entero.",
+    "readChapter": "Leer el capítulo completo",
+    "readChapterAria": "Leer {reference} en el lector, junto al mapa",
+    "notLectionary": "No es la lectura litúrgica del día: es un versículo escogido para acompañar la jornada.",
+    "continueTitle": "Seguir leyendo",
+    "continuePlans": "Planes de lectura",
+    "continueRoutes": "Rutas por el mapa",
+    "cardLink": "Ver el versículo del día",
+    "metaDescription": "«{snippet}» — {reference}. El versículo de hoy en Tabor, con enlace al capítulo entero y su mapa."
+  },
   "footer": {
     "copy": "© {year} Proyecto Tabor — código abierto bajo licencia Apache 2.0.",
-    "spec": "Código fuente en GitHub"
+    "spec": "Código fuente en GitHub",
+    "navLabel": "Enlaces del pie"
   },
   "reader": {
     "geoCredits": "Datos geográficos: <link>OpenBible.info Bible Geocoding Data</link> (CC-BY 4.0).",

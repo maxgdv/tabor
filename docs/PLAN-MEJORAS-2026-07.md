@@ -76,15 +76,51 @@ upstream; `npm audit fix --force` sólo propone bajar a `next@9.3.3` y
 - `better-auth`: la única corrección ofrecida es bajar de 1.6.23 a 1.4.6.
   No se toca sin leer el aviso concreto.
 
-### 1. Versículo del día — PENDIENTE
-- [ ] `apps/web/src/lib/verse-of-day.ts`: pool curado (366) + selección
-      determinista por fecha + override por tiempo litúrgico
-      (reutiliza `lib/liturgical.ts`).
-- [ ] Página `/[locale]/versiculo-del-dia` con SEO propio y OG.
-- [ ] Tarjeta en la portada enlazando al lector en el pasaje exacto.
-- [ ] Tests: determinismo, cobertura del pool, refs válidas contra
-      `BOOK_META`, override litúrgico.
-- [ ] Sitemap.
+### 1. Versículo del día — HECHO
+- [x] `apps/web/src/lib/verse-of-day.ts`: selección determinista + override
+      por tiempo litúrgico. El día de referencia se calcula en
+      **Europe/Madrid**: Vercel corre en UTC y el versículo cambiaría a la
+      01:00 o 02:00 peninsular.
+- [x] `apps/web/src/lib/data/verse-pool.ts`: **382 versículos** curados
+      (270 general, 22 adviento, 22 navidad, 28 cuaresma, 12 semana santa,
+      28 pascua). Equilibrio AT/NT 44/56.
+- [x] `apps/web/src/lib/verse-of-day-content.ts`: capa compartida que
+      resuelve el pasaje a texto (memoizada con `React.cache`), para que
+      portada y página no dupliquen ni el cálculo ni la query.
+- [x] Página `/[locale]/versiculo-del-dia` con SEO propio y OG.
+- [x] Tarjeta en la portada + enlace en el pie.
+- [x] Tests (163 en total) + sitemap (`daily`, 0.9).
+
+**Referencias verificadas dos veces contra la BD** (una por el agente que
+curó el pool, otra independiente): 382/382 existen. Errores de numeración
+cazados en esa verificación, que es justo para lo que servía:
+
+- `MAL 3,20` («nacerá el Sol de justicia») **no existe**: Malaquías 3
+  termina en el v. 18 en esta edición. El texto está en `MAL 4,2`.
+- `JOL 3,1` no es «derramaré mi Espíritu» en STRA (habla de la
+  repatriación de los cautivos); el de Pentecostés es `JOL 2,28`.
+- Isaías sigue el corte hebreo, no el de la Vulgata: «el pueblo que
+  andaba en tinieblas» es `9,2` y «un Niño nos ha nacido», `9,6`.
+- Salmos: numeración greco-latina confirmada leyendo el texto real
+  (Miserere 50, De profundis 129, «El Señor es mi pastor» 22).
+
+También se descartaron pasajes que fuera de contexto resultan duros o
+engañosos (`EZK 34,16` acaba «a las gordas y fuertes las destruiré`;
+`JHN 10,10` arranca por el ladrón que viene a degollar; `JDT 9,11` es
+imprecatoria). El pool queda marcado como BORRADOR EDITORIAL.
+
+**Para revisión del promotor:**
+- El bloque va en portada **encima** del destacado de tiempo litúrgico
+  (el versículo cambia a diario; la temporada dura semanas). Intercambiarlos
+  es mover dos líneas.
+- La página dice explícitamente que **no es la lectura litúrgica del día**.
+  Es texto visible, no nota al pie: revisar si el tono encaja.
+- Algunos salmos arrastran su encabezado dentro del versículo 1
+  («Cántico gradual. De David. Me llené de gozo…»). Es fiel al texto, pero
+  en una tarjeta devocional suena a ruido; se puede empezar el rango en el
+  versículo siguiente si molesta.
+- Citar un versículo suelto a veces deja comillas huérfanas (`… su propia
+  pena”.`) por venir de un discurso que empieza antes.
 
 ### 2. Planes para estados de ánimo y situaciones — PENDIENTE
 - [ ] Modelo: distinguir plan «itinerario» de plan «situación» sin
@@ -121,4 +157,15 @@ Se acumulan; el loop no las resuelve, sólo las anota.
 - 18 obras de arte sacro
 - asignación de épocas por libro
 - 13 rutas previas + las nuevas
-- pool del versículo del día
+- pool del versículo del día (382 entradas)
+
+## Deuda técnica detectada de paso
+
+- **Formato**: 53 ficheros ya comiteados no cumplen la config de prettier
+  actual (`prettier-plugin-tailwindcss` reordena clases con criterio v4).
+  No se toca dentro de commits de funcionalidad porque enterraría el diff
+  real; merece un commit de formato propio. CI no lo comprueba.
+- **`revalidate` inerte**: `[locale]/layout.tsx` declara `force-dynamic`
+  por el `listBooks()` del header, y eso arrastra todo el árbol. Envolver
+  ese query en `unstable_cache` haría cacheables las páginas que no
+  dependen de la sesión.

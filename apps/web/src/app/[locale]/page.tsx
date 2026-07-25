@@ -2,7 +2,9 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { getLiturgicalSeason } from '@/lib/liturgical';
 import type { LiturgicalSeason } from '@/lib/routes';
+import { getVerseOfDayContent } from '@/lib/verse-of-day-content';
 import { SeasonHighlight } from '@/components/SeasonHighlight';
+import { VerseOfDayCard } from '@/components/VerseOfDayCard';
 
 const SEASONS: readonly LiturgicalSeason[] = [
   'adviento',
@@ -31,6 +33,10 @@ export default async function HomePage({
     : getLiturgicalSeason(new Date());
 
   const principles = ['rigor', 'calm', 'privacy', 'access'] as const;
+
+  // Contenido fresco del día. Si el pasaje no estuviera disponible en la
+  // versión de este idioma, la portada simplemente no muestra el bloque.
+  const verse = await getVerseOfDayContent(locale);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-24">
@@ -71,12 +77,15 @@ export default async function HomePage({
         </div>
       </section>
 
+      {/* Justo bajo el héroe: es lo único que cambia cada día, y quien vuelve
+          a la portada viene a buscarlo. El destacado de temporada, que dura
+          semanas, queda debajo. */}
+      {verse && <VerseOfDayCard content={verse} locale={locale} />}
+
       {season && <SeasonHighlight season={season} locale={locale} />}
 
       <section className="mt-20 rounded-lg border border-sand-200 bg-white/60 p-8 dark:border-stone-700 dark:bg-stone-800/60">
-        <h2 className="font-serif text-xl text-stone-800 dark:text-sand-100">
-          {t('now.title')}
-        </h2>
+        <h2 className="font-serif text-xl text-stone-800 dark:text-sand-100">{t('now.title')}</h2>
         <p className="mt-3 text-stone-600 dark:text-sand-200">{t('now.body')}</p>
       </section>
 
