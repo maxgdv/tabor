@@ -36,6 +36,19 @@ function VersesContainer({ compare, children }: { compare: boolean; children: Re
   );
 }
 
+/**
+ * Centra un versículo dentro del panel de texto moviendo SOLO ese panel.
+ * `scrollIntoView` desplazaría además la página entera y en móvil se llevaría
+ * la barra inferior fuera de la pantalla; con rects relativos el documento se
+ * queda quieto.
+ */
+function scrollVerseIntoView(container: HTMLElement, verse: HTMLElement, behavior: ScrollBehavior) {
+  const box = container.getBoundingClientRect();
+  const target = verse.getBoundingClientRect();
+  const delta = target.top + target.height / 2 - (box.top + box.height / 2);
+  container.scrollBy({ top: delta, behavior });
+}
+
 /** Valor común de todos los elementos, o `null` si difieren o no hay ninguno. */
 function uniformValue<T>(values: Array<T | null>): T | null {
   if (values.length === 0) return null;
@@ -266,8 +279,8 @@ export function ChapterReader({
     if (!match) return;
     const number = Number(match[1]);
     const el = verseRefs.current.get(number);
-    if (el) {
-      el.scrollIntoView({ block: 'center' });
+    if (el && containerRef.current) {
+      scrollVerseIntoView(containerRef.current, el, 'auto');
       setActiveVerse(number);
     }
   }, [chapter, setActiveVerse]);
@@ -277,9 +290,9 @@ export function ChapterReader({
   useEffect(() => {
     if (scrollTarget == null) return;
     const el = verseRefs.current.get(scrollTarget);
-    if (el) {
+    if (el && containerRef.current) {
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+      scrollVerseIntoView(containerRef.current, el, reduced ? 'auto' : 'smooth');
     }
     clearScrollTarget();
   }, [scrollTarget, clearScrollTarget]);
