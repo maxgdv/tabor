@@ -14,6 +14,7 @@ import {
 } from '@/lib/bible';
 import { SITE_URL, localeAlternates, openGraphFor, verseSnippet } from '@/lib/seo';
 import { ChapterReader } from '@/components/reader/ChapterReader';
+import { ReaderShell } from '@/components/reader/ReaderShell';
 import { ActiveVerseMarker } from '@/components/reader/ActiveVerseMarker';
 import { ChapterArt } from '@/components/reader/ChapterArt';
 import { CompareSelector } from '@/components/reader/CompareSelector';
@@ -120,6 +121,16 @@ export default async function ReaderPage({
     : [null, null];
 
   const places = getPlacesForChapter(chapterData);
+  // Nombre del primer lugar de cada versículo: la barra inferior del móvil lo
+  // muestra junto al disparador del mapa, para que la sincronización
+  // pasaje↔mapa se note también con la hoja recogida.
+  const versePlaces: Record<number, string> = {};
+  for (const verse of chapterData.verses) {
+    const first = verse.placeSlugs
+      .map((slug) => places.find((p) => p.slug === slug))
+      .find((p) => p !== undefined);
+    if (first) versePlaces[verse.number] = first.name;
+  }
   // Sin geografía, el panel muestra arte sacro del pasaje si lo hay curado;
   // si no, cae al mapa panorámico con badge (comportamiento de siempre).
   const art =
@@ -152,8 +163,69 @@ export default async function ReaderPage({
     ],
   };
 
+  // Prev/next de capítulo. Se renderiza dos veces con distinta presentación
+  // —arriba en escritorio, en la barra del pulgar en móvil— pero cada copia
+  // vive tras un `display:none` del breakpoint contrario, así que en el árbol
+  // de accesibilidad solo existe una: ni landmarks duplicados ni paradas de
+  // tabulación de más. El aria-label repite el texto visible (WCAG 2.5.3).
+  const navLinkClass =
+    'inline-flex min-h-11 items-center gap-1.5 rounded-md border border-sand-200 bg-white/60 px-3 font-sans text-sm text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-700 dark:bg-stone-800/60 dark:text-sand-100';
+  const navDisabledClass =
+    'inline-flex min-h-11 items-center gap-1.5 rounded-md border border-transparent px-3 font-sans text-sm text-stone-300 dark:text-stone-600';
+
+  const chapterNav = (variant: 'top' | 'thumb') => {
+    const compact = variant === 'thumb';
+    return (
+      <nav
+        aria-label={tReader('sectionNav')}
+        className={
+          compact
+            ? 'flex shrink-0 items-center gap-1.5 lg:hidden'
+            : 'hidden items-center gap-1.5 lg:flex'
+        }
+      >
+        {prev ? (
+          <Link
+            href={`/leer/${prev.bookUrlSegment}/${prev.chapterNumber}${vsSuffix}`}
+            aria-label={`${tReader('ariaPrev')}: ${prev.bookName} ${prev.chapterNumber}`}
+            className={navLinkClass}
+          >
+            <span aria-hidden="true">←</span>
+            <span>
+              {compact ? prev.chapterNumber : `${prev.bookName} ${prev.chapterNumber}`}
+            </span>
+          </Link>
+        ) : (
+          <span aria-hidden="true" className={navDisabledClass}>
+            ←
+          </span>
+        )}
+        {next ? (
+          <Link
+            href={`/leer/${next.bookUrlSegment}/${next.chapterNumber}${vsSuffix}`}
+            aria-label={`${tReader('ariaNext')}: ${next.bookName} ${next.chapterNumber}`}
+            className={navLinkClass}
+          >
+            <span>
+              {compact ? next.chapterNumber : `${next.bookName} ${next.chapterNumber}`}
+            </span>
+            <span aria-hidden="true">→</span>
+          </Link>
+        ) : (
+          <span aria-hidden="true" className={navDisabledClass}>
+            →
+          </span>
+        )}
+      </nav>
+    );
+  };
+
   return (
-    <div className="flex h-[calc(100dvh-8rem)] flex-col">
+    // En móvil el lector ocupa la ventana menos la cabecera (el pie queda
+    // debajo, alcanzable con scroll de página): así la barra del pulgar cae
+    // justo en el borde inferior. En escritorio se mantiene el alto de
+    // siempre, con cabecera y pie a la vista.
+    <div className="flex h-[calc(100dvh-3.75rem)] flex-col lg:h-[calc(100dvh-8rem)]">
       <script
         type="application/ld+json"
         // JSON.stringify + escape de '<' evita inyección si algún nombre
@@ -185,101 +257,65 @@ export default async function ReaderPage({
             </ol>
           </nav>
 
-          <nav aria-label={tReader('sectionNav')} className="flex items-center gap-1.5 font-sans text-sm">
-            {prev ? (
-              <Link
-                href={`/leer/${prev.bookUrlSegment}/${prev.chapterNumber}${vsSuffix}`}
-                aria-label={tReader('ariaPrev')}
-                className="inline-flex items-center gap-1.5 rounded-md border border-sand-200 bg-white/60 px-3 py-1.5 text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-700 dark:bg-stone-800/60 dark:text-sand-100"
-              >
-                <span aria-hidden="true">←</span>
-                <span>
-                  {prev.bookName} {prev.chapterNumber}
-                </span>
-              </Link>
-            ) : (
-              <span
-                aria-hidden="true"
-                className="inline-flex items-center gap-1.5 rounded-md border border-transparent px-3 py-1.5 text-stone-300 dark:text-stone-600"
-              >
-                ←
-              </span>
-            )}
-            {next ? (
-              <Link
-                href={`/leer/${next.bookUrlSegment}/${next.chapterNumber}${vsSuffix}`}
-                aria-label={tReader('ariaNext')}
-                className="inline-flex items-center gap-1.5 rounded-md border border-sand-200 bg-white/60 px-3 py-1.5 text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-700 dark:bg-stone-800/60 dark:text-sand-100"
-              >
-                <span>
-                  {next.bookName} {next.chapterNumber}
-                </span>
-                <span aria-hidden="true">→</span>
-              </Link>
-            ) : (
-              <span
-                aria-hidden="true"
-                className="inline-flex items-center gap-1.5 rounded-md border border-transparent px-3 py-1.5 text-stone-300 dark:text-stone-600"
-              >
-                →
-              </span>
-            )}
-          </nav>
+          {chapterNav('top')}
         </div>
       </div>
 
-      {/* min-h-0 + grid-rows explícitas: necesario para que el ChapterReader
-          (con h-full overflow-y-auto) pueda hacer scroll vertical en vez de
-          empujar el mapa fuera del viewport en móvil o ignorar overflow en
-          desktop. En móvil: texto 2fr y mapa 1fr (texto 2× el alto del
-          mapa), adapta mejor a pantallas pequeñas que un mapa con altura
-          fija en vh. En desktop: una sola fila a 50/50 lado a lado. */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[2fr_1fr] lg:grid-cols-2 lg:grid-rows-1">
-        <section
-          aria-label={tReader('sectionText')}
-          className="min-h-0 overflow-hidden border-b border-sand-200 lg:border-b-0 lg:border-r dark:border-stone-700"
-        >
-          {/* key: al navegar entre capítulos el componente se remonta y el
-              estado local de marcadores arranca limpio desde el server. */}
-          <ChapterReader
-            key={`${chapterData.bookCanonicalId}-${chapterData.number}-${secondary?.versionCode ?? ''}`}
-            chapter={chapterData}
-            initialBookmarks={initialBookmarks}
-            initialAnnotations={initialAnnotations}
-            secondary={
-              secondary
-                ? {
-                    versionFullName: secondary.versionFullName,
-                    copyright: secondary.copyright,
-                    lang: secondary.lang,
-                    byVerse: secondary.byVerse,
-                  }
-                : null
-            }
-            headerExtra={
-              <CompareSelector
-                basePath={`/leer/${book.toLowerCase()}/${chapterNumber}`}
-                primaryVersionCode={versionForLocale(locale)}
-                activeCode={secondary?.versionCode ?? null}
-              />
-            }
-          />
-          <ActiveVerseMarker />
-        </section>
-        <section aria-label={tReader('sectionMap')} className="relative min-h-0">
-          {/* Con lugares: mapa sincronizado. Sin lugares: arte sacro del
-              pasaje si está curado; si no, la vista panorámica con badge
-              explicativo (gestionado en BibleMap). */}
-          {art ? (
+      {/* Escritorio: 50/50 lado a lado, como siempre. Móvil: el texto ocupa
+          toda la pantalla y el panel del mapa se convoca desde la barra
+          inferior (hoja deslizante). Lo gestiona ReaderShell, que necesita
+          estado de cliente; el contenido de ambos paneles sigue viniendo
+          renderizado desde el servidor. */}
+      <ReaderShell
+        textLabel={tReader('sectionText')}
+        panelLabel={art ? tReader('sectionArt') : tReader('sectionMap')}
+        toggleLabel={art ? tReader('panelArt') : tReader('panelMap')}
+        versePlaces={versePlaces}
+        chapterNav={chapterNav('thumb')}
+        text={
+          <>
+            {/* key: al navegar entre capítulos el componente se remonta y el
+                estado local de marcadores arranca limpio desde el server. */}
+            <ChapterReader
+              key={`${chapterData.bookCanonicalId}-${chapterData.number}-${secondary?.versionCode ?? ''}`}
+              chapter={chapterData}
+              initialBookmarks={initialBookmarks}
+              initialAnnotations={initialAnnotations}
+              secondary={
+                secondary
+                  ? {
+                      versionFullName: secondary.versionFullName,
+                      copyright: secondary.copyright,
+                      lang: secondary.lang,
+                      byVerse: secondary.byVerse,
+                    }
+                  : null
+              }
+              headerExtra={
+                <CompareSelector
+                  basePath={`/leer/${book.toLowerCase()}/${chapterNumber}`}
+                  primaryVersionCode={versionForLocale(locale)}
+                  activeCode={secondary?.versionCode ?? null}
+                />
+              }
+            />
+            <ActiveVerseMarker />
+          </>
+        }
+        panel={
+          // Con lugares: mapa sincronizado. Sin lugares: arte sacro del
+          // pasaje si está curado; si no, la vista panorámica con badge
+          // explicativo (gestionado en BibleMap).
+          art ? (
             <ChapterArt art={art} />
           ) : (
             <>
               <BibleMapClient chapter={chapterData} places={places} period={period} />
               {period && <PeriodTimeline period={period} />}
             </>
-          )}
-        </section>
-      </div>
+          )
+        }
+      />
     </div>
   );
 }

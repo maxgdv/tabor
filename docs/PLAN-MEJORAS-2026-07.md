@@ -194,16 +194,59 @@ primeros pasos fuera de Jerusalén** (Hechos 8-12) — es el hueco narrativo
 que queda entre los Evangelios y los viajes de Pablo, y todos sus lugares
 existen ya con coordenadas.
 
-### 4. Más planes de lectura clásicos — PENDIENTE
-- [ ] Ampliar el catálogo de itinerarios (sabiduría, profetas, cartas,
-      Pentateuco…), respetando la numeración greco-latina de los salmos.
+### 4. Más planes de lectura clásicos — HECHO
+- [x] De 12 a **21 itinerarios**. Nuevos: `primeros-pasos-21` (para quien
+      nunca ha leído la Biblia), `genesis-25`, `samuel-reyes-34`,
+      `salmos-30` (ritmo más vivo que el de 60), `sapienciales-44`,
+      `isaias-33`, `jeremias-lamentaciones-29`, `cartas-pablo-50` y
+      `cartas-catolicas-apocalipsis-43`.
+- [x] **33 planes en total** (21 itinerarios + 12 de situación).
 
-### 5. Móvil: UX + PWA — PENDIENTE
-- [ ] Lector adaptativo (texto a pantalla completa, mapa plegable).
-- [ ] Áreas táctiles ≥44 px, `safe-area-inset`, tipografía móvil.
-- [ ] Navegación de capítulo cómoda con el pulgar.
-- [ ] `viewport` + `themeColor` (hoy no existen), `manifest.ts`, iconos.
-- [ ] Verificación real en viewport móvil.
+### 5. Móvil: UX + PWA — HECHO (con una verificación pendiente)
+
+El problema de partida: el lector partía la pantalla en 2/3 texto y 1/3
+mapa de forma fija, así que en un teléfono **ninguno de los dos usos
+quedaba bien** — se leía por una rendija y el mapa era demasiado pequeño
+para servir de nada.
+
+- [x] `components/reader/ReaderShell.tsx`: en móvil el texto ocupa la
+      pantalla y el mapa es una **hoja deslizante** que sube desde abajo
+      (70% del alto, con el texto aún visible arriba, para que el vuelo
+      del mapa al versículo activo se siga viendo). En `lg:` el 50/50
+      lado a lado no cambia.
+- [x] La hoja se oculta con `translate`, **nunca con `display:none`**:
+      así el contenedor de MapLibre conserva su tamaño y el canvas no se
+      mide a 0 px. Además se avisa al mapa en cada cambio
+      (`map/panel-events.ts`) y el mapa observa su contenedor.
+- [x] Es un *disclosure*, no un modal: sin scrim ni trampa de foco,
+      `aria-expanded` + `aria-controls`, `inert` al estar recogida, y
+      Escape devuelve el foco al disparador.
+- [x] La barra inferior **nombra el lugar del versículo que se está
+      leyendo**, para que la sincronización pasaje↔mapa se perciba aunque
+      el mapa esté recogido.
+- [x] Áreas táctiles de 44 px (9 controles), `safe-area-inset-bottom`,
+      y los botones de zoom de MapLibre agrandados en móvil.
+- [x] Prev/next de capítulo también abajo en móvil, al alcance del pulgar,
+      sin duplicar landmarks (arriba en escritorio, abajo en móvil).
+- [x] `prefers-reduced-motion` respetado en las transiciones nuevas.
+- [x] `viewport` + `themeColor` (claro y oscuro), `manifest.ts`, iconos
+      192/512/maskable/apple-touch + favicons. **Sin service worker.**
+      `start_url: '/es'` para evitar el 307 del proxy de i18n en cada
+      apertura de la app instalada; `scope: '/'` para que cambiar a /en
+      no se salga de la app.
+- [x] Zoom NO bloqueado (`maximumScale`/`userScalable` deliberadamente
+      ausentes): impedirlo viola WCAG 1.4.4.
+- [ ] **PENDIENTE: verificación visual en un viewport móvil real.** La
+      extensión de Chrome no estaba conectada. Verificado por HTML/CSS
+      servido (atributos ARIA, zona segura, áreas táctiles, reduced
+      motion) y con typecheck/lint/tests/build en verde, pero **nadie ha
+      mirado la pantalla todavía**. Conviene abrirlo en un teléfono antes
+      de desplegar, sobre todo `jos/15`, que tiene 163 lugares.
+
+**Para revisión del promotor:** el icono es una marca creada de cero (el
+proyecto no tenía logo): la silueta del monte con un arco de luz encima,
+sobre azul profundo. A tamaño pequeño puede leerse de más de una forma;
+es tu marca, decide tú.
 
 ### 6. Cierre — PENDIENTE
 - [ ] `/security-review` sobre el diff acumulado.

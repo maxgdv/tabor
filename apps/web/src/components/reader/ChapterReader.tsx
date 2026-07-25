@@ -24,7 +24,11 @@ type VerseHighlight = { color: HighlightColor; label: string | null };
 
 /** Contenedor de versículos: texto corrido o bloques comparados. */
 function VersesContainer({ compare, children }: { compare: boolean; children: React.ReactNode }) {
-  const className = 'font-serif text-lg leading-loose text-stone-800 dark:text-sand-100';
+  // Interlineado 1.75 en móvil (leading-loose = 2 dejaba las líneas sueltas
+  // en una columna de ~35 caracteres y obligaba a desplazar de más); en
+  // pantallas anchas, donde la línea es larga, se mantiene el aire de antes.
+  const className =
+    'font-serif text-lg leading-[1.75] text-stone-800 sm:leading-loose dark:text-sand-100';
   return compare ? (
     <div className={`${className} space-y-4`}>{children}</div>
   ) : (
@@ -294,20 +298,24 @@ export function ChapterReader({
     <div className="relative h-full">
     {/* Fijo al panel (no al texto): los controles siguen a mano mientras la
         lectura en voz alta desplaza el capítulo. */}
-    <div className="absolute right-4 top-3 z-10">
+    <div className="absolute right-3 top-3 z-10 sm:right-4">
       <ListenControls verses={chapter.verses} />
     </div>
     <div
       ref={containerRef}
       // El pb extra con selección activa evita que la barra de acciones
       // fija al fondo tape el versículo enfocado (WCAG 2.4.11).
-      className={`h-full overflow-y-auto px-6 py-10 sm:px-10 sm:py-14 ${
+      // overscroll-contain: al llegar al final del capítulo, el gesto no
+      // arrastra la página entera (en móvil se llevaría por delante la barra
+      // inferior del pulgar).
+      className={`h-full overflow-y-auto overscroll-contain px-5 py-8 sm:px-10 sm:py-14 ${
         isAuthed && selected.size > 0 ? 'pb-28 sm:pb-28' : ''
       }`}
     >
       <article className="mx-auto max-w-reader">
-        <header className="mb-10">
-          <p className="text-xs uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400">
+        <header className="mb-8 sm:mb-10">
+          {/* pr en móvil: los controles de escucha flotan en esta esquina. */}
+          <p className="pr-24 text-xs uppercase tracking-[0.2em] text-stone-500 sm:pr-0 dark:text-stone-400">
             {chapter.versionFullName}
             {secondary && (
               <span className="normal-case tracking-normal"> · {secondary.versionFullName}</span>

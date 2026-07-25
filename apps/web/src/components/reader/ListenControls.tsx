@@ -157,8 +157,13 @@ export function ListenControls({ verses }: Props) {
   const localeVoices = voicesForLocale(voices, locale);
   const defaultVoice = pickVoice(voices, locale, voiceName);
   const mainLabel = t(status === 'playing' ? 'listenPause' : status === 'paused' ? 'listenResume' : 'listen');
+  // 44×44 CSS px mínimos en todos los controles (objetivo táctil cómodo).
+  // En móvil el botón principal es solo icono: con la etiqueta ocuparía
+  // media cabecera del capítulo.
   const buttonClass =
-    'inline-flex items-center gap-1.5 rounded-md border border-sand-200 bg-sand-50/90 px-2.5 py-1.5 font-sans text-xs text-stone-600 backdrop-blur transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:bg-stone-900/80 dark:text-sand-200';
+    'inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-md border border-sand-200 bg-sand-50/90 px-2.5 font-sans text-xs text-stone-600 backdrop-blur transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:bg-stone-900/80 dark:text-sand-200';
+  const iconButtonClass =
+    'inline-flex h-11 w-11 items-center justify-center rounded-md border border-sand-200 bg-sand-50/90 text-stone-600 backdrop-blur transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:bg-stone-900/80 dark:text-sand-200';
 
   return (
     <div className="relative">
@@ -173,7 +178,15 @@ export function ListenControls({ verses }: Props) {
               <path d="M7 4.5v15l13-7.5z" />
             </svg>
           )}
-          {t(status === 'playing' ? 'listenPauseShort' : status === 'paused' ? 'listenResumeShort' : 'listenShort')}
+          <span className="hidden sm:inline">
+            {t(
+              status === 'playing'
+                ? 'listenPauseShort'
+                : status === 'paused'
+                  ? 'listenResumeShort'
+                  : 'listenShort',
+            )}
+          </span>
         </button>
         {status !== 'idle' && (
           <button
@@ -181,9 +194,9 @@ export function ListenControls({ verses }: Props) {
             onClick={stop}
             aria-label={t('listenStop')}
             title={t('listenStop')}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-sand-200 bg-sand-50/90 text-stone-600 backdrop-blur transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:bg-stone-900/80 dark:text-sand-200"
+            className={iconButtonClass}
           >
-            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M6 6h12v12H6z" />
             </svg>
           </button>
@@ -195,7 +208,7 @@ export function ListenControls({ verses }: Props) {
             aria-expanded={settingsOpen}
             aria-label={t('listenSettings')}
             title={t('listenSettings')}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-sand-200 bg-sand-50/90 text-stone-600 backdrop-blur transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:bg-stone-900/80 dark:text-sand-200"
+            className={iconButtonClass}
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 4.06a1.72 1.72 0 013.32 0l.18.72a1.72 1.72 0 002.57 1.06l.64-.38a1.72 1.72 0 012.35 2.35l-.38.64a1.72 1.72 0 001.06 2.57l.72.18a1.72 1.72 0 010 3.32l-.72.18a1.72 1.72 0 00-1.06 2.57l.38.64a1.72 1.72 0 01-2.35 2.35l-.64-.38a1.72 1.72 0 00-2.57 1.06l-.18.72a1.72 1.72 0 01-3.32 0l-.18-.72a1.72 1.72 0 00-2.57-1.06l-.64.38a1.72 1.72 0 01-2.35-2.35l.38-.64a1.72 1.72 0 00-1.06-2.57l-.72-.18a1.72 1.72 0 010-3.32l.72-.18a1.72 1.72 0 001.06-2.57l-.38-.64a1.72 1.72 0 012.35-2.35l.64.38a1.72 1.72 0 002.57-1.06l.18-.72z" />
@@ -214,7 +227,7 @@ export function ListenControls({ verses }: Props) {
             <select
               value={defaultVoice?.name ?? ''}
               onChange={(e) => chooseVoice(e.target.value)}
-              className="w-full rounded-md border border-sand-200 bg-white/70 px-2 py-1.5 font-sans text-xs text-stone-800 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100"
+              className="w-full min-h-11 rounded-md border border-sand-200 bg-white/70 px-2 font-sans text-xs text-stone-800 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100"
             >
               {localeVoices.map((v) => (
                 <option key={v.name} value={v.name}>
@@ -230,7 +243,7 @@ export function ListenControls({ verses }: Props) {
             <select
               value={rate}
               onChange={(e) => chooseRate(Number(e.target.value))}
-              className="w-full rounded-md border border-sand-200 bg-white/70 px-2 py-1.5 font-sans text-xs text-stone-800 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100"
+              className="w-full min-h-11 rounded-md border border-sand-200 bg-white/70 px-2 font-sans text-xs text-stone-800 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100"
             >
               {TTS_RATES.map((r) => (
                 <option key={r} value={r}>

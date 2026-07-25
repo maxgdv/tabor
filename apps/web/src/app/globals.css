@@ -73,6 +73,26 @@
   }
 }
 
+/* Transiciones del lector (hoja del mapa, chevron, muestras de color).
+   El proyecto ya respeta prefers-reduced-motion en el scroll y en el flyTo
+   del mapa; aquí se cubre el CSS. Se marca con una clase en vez de con la
+   variante `motion-reduce:` de Tailwind porque así la anulación es
+   inequívoca, sin depender del orden en que se emitan las utilidades. */
+@media (prefers-reduced-motion: reduce) {
+  .reader-motion {
+    transition: none !important;
+  }
+}
+
+/* Controles nativos de MapLibre (zoom): 29 px de fábrica se quedan cortos
+   para el dedo cuando el mapa ocupa la pantalla del móvil. */
+@media (width < 64rem) {
+  .maplibregl-ctrl-group button {
+    width: 44px;
+    height: 44px;
+  }
+}
+
 /* Etiquetas de marcador del mapa: en capítulos densos BibleMap las oculta
    según el zoom, pero pasar el ratón por el marcador siempre muestra la suya
    (el display inline que pone BibleMap se anula aquí con !important). */

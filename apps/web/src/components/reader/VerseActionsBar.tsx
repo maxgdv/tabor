@@ -74,7 +74,10 @@ export function VerseActionsBar({
     <div
       role="toolbar"
       aria-label={refLabel}
-      className="absolute inset-x-0 bottom-0 z-10 flex items-center gap-3 border-t border-sand-200 bg-sand-50/95 px-4 py-2.5 backdrop-blur dark:border-stone-700 dark:bg-stone-900/95"
+      // flex-wrap: con objetivos táctiles de 44 px los cinco colores más los
+      // botones no caben en una fila de teléfono; en pantalla ancha sigue
+      // siendo una sola línea.
+      className="absolute inset-x-0 bottom-0 z-10 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-sand-200 bg-sand-50/95 px-3 py-1.5 backdrop-blur sm:gap-x-3 sm:px-4 dark:border-stone-700 dark:bg-stone-900/95"
     >
       {labelMode ? (
         <>
@@ -95,19 +98,19 @@ export function VerseActionsBar({
             }}
             maxLength={HIGHLIGHT_LABEL_MAX}
             placeholder={t('labelPlaceholder')}
-            className="min-w-0 flex-1 rounded-md border border-sand-200 bg-white/70 px-2.5 py-1 font-sans text-sm text-stone-800 placeholder:text-stone-500 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100 dark:placeholder:text-stone-400"
+            className="min-h-11 min-w-0 flex-1 rounded-md border border-sand-200 bg-white/70 px-2.5 font-sans text-sm text-stone-800 placeholder:text-stone-500 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100 dark:placeholder:text-stone-400"
           />
           <button
             type="button"
             onClick={saveLabel}
-            className="shrink-0 rounded-md bg-lapis-500 px-2.5 py-1 font-sans text-xs font-medium text-white transition-colors hover:bg-lapis-600"
+            className="inline-flex min-h-11 shrink-0 items-center rounded-md bg-lapis-500 px-3 font-sans text-xs font-medium text-white transition-colors hover:bg-lapis-600"
           >
             {t('labelSave')}
           </button>
           <button
             type="button"
             onClick={() => setLabelMode(false)}
-            className="shrink-0 rounded-md px-2 py-1 font-sans text-xs text-stone-600 transition-colors hover:bg-sand-200 dark:text-sand-200 dark:hover:bg-stone-700"
+            className="inline-flex min-h-11 shrink-0 items-center rounded-md px-3 font-sans text-xs text-stone-600 transition-colors hover:bg-sand-200 dark:text-sand-200 dark:hover:bg-stone-700"
           >
             {t('labelCancel')}
           </button>
@@ -118,10 +121,12 @@ export function VerseActionsBar({
             {refLabel}
           </span>
 
-          <div className="flex items-center gap-1.5" role="group" aria-label={t('highlightGroup')}>
+          <div className="flex items-center" role="group" aria-label={t('highlightGroup')}>
             {HIGHLIGHT_COLORS.map((color) => {
               const isActive = currentColor === color;
               return (
+                // El botón mide 44×44 (área táctil); la muestra de color
+                // sigue siendo el círculo de 24 px de dentro.
                 <button
                   key={color}
                   type="button"
@@ -129,12 +134,17 @@ export function VerseActionsBar({
                   aria-pressed={isActive}
                   aria-label={t(isActive ? 'highlightRemove' : `color.${color}`)}
                   title={t(isActive ? 'highlightRemove' : `color.${color}`)}
-                  className={`h-6 w-6 rounded-full ${SWATCH_CLASSES[color]} transition-transform hover:scale-110 ${
-                    isActive
-                      ? 'ring-2 ring-stone-700 ring-offset-1 ring-offset-sand-50 dark:ring-sand-100 dark:ring-offset-stone-900'
-                      : 'opacity-80 hover:opacity-100'
-                  }`}
-                />
+                  className="group inline-flex h-11 w-11 items-center justify-center rounded-md"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`reader-motion h-6 w-6 rounded-full ${SWATCH_CLASSES[color]} transition-transform group-hover:scale-110 ${
+                      isActive
+                        ? 'ring-2 ring-stone-700 ring-offset-1 ring-offset-sand-50 dark:ring-sand-100 dark:ring-offset-stone-900'
+                        : 'opacity-80 group-hover:opacity-100'
+                    }`}
+                  />
+                </button>
               );
             })}
           </div>
@@ -144,7 +154,7 @@ export function VerseActionsBar({
               type="button"
               onClick={openLabelMode}
               title={t(currentLabel ? 'labelEdit' : 'labelAdd')}
-              className="max-w-32 truncate rounded-md border border-sand-200 px-2.5 py-1 font-sans text-xs text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:text-sand-100"
+              className="inline-flex min-h-11 max-w-32 items-center truncate rounded-md border border-sand-200 px-3 font-sans text-xs text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:text-sand-100"
             >
               {currentLabel ?? t('labelAdd')}
             </button>
@@ -154,7 +164,7 @@ export function VerseActionsBar({
             <button
               type="button"
               onClick={onOpenNote}
-              className="rounded-md border border-sand-200 px-2.5 py-1 font-sans text-xs text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:text-sand-100"
+              className="inline-flex min-h-11 items-center rounded-md border border-sand-200 px-3 font-sans text-xs text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:text-sand-100"
             >
               {t(hasNote ? 'noteEdit' : 'noteAdd')}
             </button>
@@ -164,7 +174,7 @@ export function VerseActionsBar({
             type="button"
             onClick={onClose}
             aria-label={t('close')}
-            className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-lg leading-none text-stone-500 transition-colors hover:bg-sand-200 dark:hover:bg-stone-700"
+            className="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-md text-lg leading-none text-stone-500 transition-colors hover:bg-sand-200 dark:hover:bg-stone-700"
           >
             ×
           </button>

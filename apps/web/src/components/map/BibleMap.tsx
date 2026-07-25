@@ -9,6 +9,7 @@ import type { Chapter, Place } from '@/lib/bible';
 import { HISTORICAL_OVERLAYS } from '@/lib/historical-overlays';
 import type { PeriodId } from '@/lib/periods';
 import { SATELLITE_STYLE, VECTOR_STYLE } from './styles';
+import { MAP_PANEL_EVENT } from './panel-events';
 
 type Props = {
   chapter: Chapter;
@@ -253,6 +254,36 @@ export function BibleMap({ chapter, places, period }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chapter, places, requestScrollTo, isOverview]);
 
+  // El canvas de MapLibre conserva el tamaño con el que se midió: si el
+  // contenedor cambia de alto/ancho (hoja del mapa en móvil, cruce del
+  // breakpoint, rotación del teléfono, aparición del panel) hay que llamar a
+  // `map.resize()` o el mapa sale estirado. Dos vigilantes complementarios:
+  // el ResizeObserver del contenedor —que cubre cualquier cambio real de
+  // caja— y el aviso explícito de la hoja, por si abre/cierra sin que el
+  // contenedor cambie de tamaño (se oculta con transform, no con height).
+  // rAF: agrupa ráfagas de cambios en un único resize por frame.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    let frame = 0;
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => mapRef.current?.resize());
+    };
+
+    const observer =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(schedule);
+    observer?.observe(el);
+    window.addEventListener(MAP_PANEL_EVENT, schedule);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer?.disconnect();
+      window.removeEventListener(MAP_PANEL_EVENT, schedule);
+    };
+  }, []);
+
   // Cambio de estilo en caliente (no recrea el mapa, conserva marcadores).
   // Las capas propias (regiones) sí se pierden con el estilo: re-añadir.
   useEffect(() => {
@@ -325,7 +356,7 @@ export function BibleMap({ chapter, places, period }: Props) {
           type="button"
           onClick={() => setStoredStyle('vector')}
           aria-pressed={mapStyle === 'vector'}
-          className={`px-2.5 py-1.5 font-sans text-xs font-medium transition-colors ${
+          className={`inline-flex min-h-11 items-center px-3 font-sans text-xs font-medium transition-colors ${
             mapStyle === 'vector'
               ? 'bg-lapis-500 text-white'
               : 'text-stone-700 hover:bg-sand-100 dark:text-sand-100 dark:hover:bg-stone-700'
@@ -337,7 +368,7 @@ export function BibleMap({ chapter, places, period }: Props) {
           type="button"
           onClick={() => setStoredStyle('satellite')}
           aria-pressed={mapStyle === 'satellite'}
-          className={`px-2.5 py-1.5 font-sans text-xs font-medium transition-colors ${
+          className={`inline-flex min-h-11 items-center px-3 font-sans text-xs font-medium transition-colors ${
             mapStyle === 'satellite'
               ? 'bg-lapis-500 text-white'
               : 'text-stone-700 hover:bg-sand-100 dark:text-sand-100 dark:hover:bg-stone-700'
