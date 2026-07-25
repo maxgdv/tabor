@@ -236,12 +236,39 @@ para servir de nada.
       no se salga de la app.
 - [x] Zoom NO bloqueado (`maximumScale`/`userScalable` deliberadamente
       ausentes): impedirlo viola WCAG 1.4.4.
-- [ ] **PENDIENTE: verificación visual en un viewport móvil real.** La
-      extensión de Chrome no estaba conectada. Verificado por HTML/CSS
-      servido (atributos ARIA, zona segura, áreas táctiles, reduced
-      motion) y con typecheck/lint/tests/build en verde, pero **nadie ha
-      mirado la pantalla todavía**. Conviene abrirlo en un teléfono antes
-      de desplegar, sobre todo `jos/15`, que tiene 163 lugares.
+- [x] **Verificado en navegador** con Juan 3 y Josué 15 (163 marcadores):
+      la barra inferior cae exactamente en el borde de la ventana, el mapa
+      se convoca sin deformación (canvas 485×362 CSS con buffer 606×452 a
+      dpr 1,25 — desviación de proporción < 0,002 al abrir, al pasar a
+      escritorio y al volver), Escape recoge y devuelve el foco, `inert`
+      impide enfocar dentro cuando está recogida, y el escritorio queda
+      intacto. **axe-core** (WCAG 2.0/2.1/2.2 AA + best-practice) con la
+      hoja abierta y cerrada: sólo la violación **preexistente**
+      `aria-allowed-role` en `#book-sidebar`, ajena a este trabajo.
+- [ ] **Matiz de la verificación**: Chrome impone un ancho mínimo de
+      ventana de ~500 px y no había emulación de dispositivo, así que se
+      probó a 502 px y no a 390. Todos los breakpoints en juego son
+      `< 640`, o sea el mismo camino de código, pero **un teléfono real
+      sigue sin haberlo visto**. Tampoco se pudo emular
+      `prefers-reduced-motion` (la regla CSS sí se sirve).
+
+**Hallazgo de bulto durante la verificación**: la cabecera del sitio mide
+~109 px en móvil, no los 64 que suponía la resta fija en CSS, así que la
+barra del pulgar quedaba 48 px por debajo del pliegue. `ReaderShell` mide
+ahora el alto disponible en cliente y reobserva la cabecera y los eventos
+`resize`/`orientationchange`, con la clase CSS de siempre como reserva —
+lo que además sigue a la barra de direcciones del móvil mejor que `100dvh`.
+
+**Limitaciones conocidas que quedan** (menores, ninguna bloqueante):
+
+- El enlace profundo `#v13` aún desplaza la página unos 89 px: no corta
+  nada (la barra sigue visible), pero no es limpio. Se arreglaría
+  quitando los `id="v{n}"`, que ya sólo sirven de ancla.
+- Con la hoja abierta, la barra de acciones del versículo queda tapada
+  por ella. Sólo aparece con sesión iniciada, así que no se pudo probar
+  en vivo.
+- Las pastillas de «Comparar» quedaron en 26 px y no en 44: a 44 la
+  cabecera del capítulo se comía dos filas. Pasan el `target-size` de axe.
 
 **Bugs reales de móvil encontrados y corregidos** (no estaban en el plan):
 
