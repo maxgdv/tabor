@@ -243,10 +243,38 @@ para servir de nada.
       mirado la pantalla todavía**. Conviene abrirlo en un teléfono antes
       de desplegar, sobre todo `jos/15`, que tiene 163 lugares.
 
-**Para revisión del promotor:** el icono es una marca creada de cero (el
-proyecto no tenía logo): la silueta del monte con un arco de luz encima,
-sobre azul profundo. A tamaño pequeño puede leerse de más de una forma;
-es tu marca, decide tú.
+**Bugs reales de móvil encontrados y corregidos** (no estaban en el plan):
+
+- La cabecera se **desbordaba** entre 320 y 375 px: los tres grupos no
+  caben en una fila, el contenedor central quedaba en 0 px y el buscador
+  se salía por encima del selector de idioma, tapándolo (medido:
+  `input.right = 179` vs `select.left = 146`).
+- **Ninguna** área táctil de la cabecera llegaba a 44×44: hamburguesa
+  36×36, rótulo 58×28, selector de idioma 86×30, «Entrar» 53×32.
+- Los botones de zoom de MapLibre necesitaban doble selector:
+  `maplibre-gl.css` se inyecta después de nuestra hoja y ganaba.
+- `ListenControls` devolvía un `[]` nuevo en cada llamada del snapshot de
+  servidor de `useSyncExternalStore`, lo que dispara el aviso de posible
+  bucle infinito de React.
+
+**Para revisión del promotor:**
+
+- El **icono** es una marca creada de cero (el proyecto no tenía logo):
+  la cúpula del Tabor sobre la línea del llano, con una aureola que pasa
+  sobre la cima, en el degradado lapislázuli que ya usaba la imagen OG.
+  A tamaño pequeño puede leerse de más de una forma; es tu marca.
+- **Chrome en Android no mostrará el aviso automático de instalación**:
+  `beforeinstallprompt` no dispara sin service worker. La instalación
+  sigue disponible desde el menú → «Instalar aplicación», y arranca en
+  standalone con icono y tema correctos. En iOS («Añadir a inicio») y en
+  escritorio funciona igual. Es el precio de no cachear, que era la
+  decisión tomada.
+- **Quien instale desde `/en` arrancará en `/es`** y tendrá que cambiar
+  el idioma una vez: el manifiesto no se puede localizar.
+
+**Limpieza**: un agente dejó `apps/web/public/__axe.js` (550 kB de
+axe-core) al verificar accesibilidad. Estaba sin versionar y sin ignorar,
+así que un `git add -A` lo habría publicado en el dominio. Borrado.
 
 ### 6. Cierre — ESPERANDO LUZ VERDE
 - [x] `/security-review` sobre el diff acumulado: **cero hallazgos**.
