@@ -58,6 +58,26 @@ export function pickVoice<T extends SpeechVoiceLike>(
   return candidates.reduce((best, v) => (score(v) > score(best) ? v : best));
 }
 
+/**
+ * Al volver a la página, ¿hay que retomar la lectura por nuestra cuenta?
+ *
+ * Si el móvil se bloquea (o el usuario se va a otra app), el navegador puede
+ * dejar la síntesis muerta sin avisar: nuestro estado sigue diciendo
+ * «reproduciendo» pero no suena nada ni queda nada en cola. En ese caso hay
+ * que relanzar desde el versículo activo.
+ *
+ * No se retoma si el usuario pausó a mano (`paused`), ni si el navegador
+ * simplemente conserva la cola (`speaking`), donde basta con `resume()`.
+ */
+export function shouldRestartSpeech(opts: {
+  status: 'idle' | 'playing' | 'paused';
+  speaking: boolean;
+  pending: boolean;
+  paused: boolean;
+}): boolean {
+  return opts.status === 'playing' && !opts.speaking && !opts.pending && !opts.paused;
+}
+
 // --- Preferencias de lectura (voz y velocidad), persistentes ---------------
 
 const VOICE_KEY = 'tabor.tts.voice';

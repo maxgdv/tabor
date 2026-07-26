@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { TTS_RATES, pickVoice, ttsLangFor, voicesForLocale, type SpeechVoiceLike } from './speech';
+import {
+  TTS_RATES,
+  pickVoice,
+  shouldRestartSpeech,
+  ttsLangFor,
+  voicesForLocale,
+  type SpeechVoiceLike,
+} from './speech';
 
 const voice = (lang: string, name: string, extra: Partial<SpeechVoiceLike> = {}): SpeechVoiceLike => ({
   lang,
@@ -71,5 +78,35 @@ describe('pickVoice', () => {
   it('sin voces del idioma → null (el navegador decide)', () => {
     expect(pickVoice([voice('fr-FR', 'Thomas')], 'es')).toBeNull();
     expect(pickVoice([], 'es')).toBeNull();
+  });
+});
+
+describe('shouldRestartSpeech — recuperar la lectura tras volver a la página', () => {
+  const base = { status: 'playing' as const, speaking: false, pending: false, paused: false };
+
+  it('retoma si creíamos leer y la síntesis se quedó muda', () => {
+    // El caso del móvil que se bloquea: el navegador mata la cola sin avisar.
+    expect(shouldRestartSpeech(base)).toBe(true);
+  });
+
+  it('no retoma si el usuario había pausado a mano', () => {
+    expect(shouldRestartSpeech({ ...base, status: 'paused', paused: true })).toBe(false);
+  });
+
+  it('no retoma si no estábamos leyendo', () => {
+    expect(shouldRestartSpeech({ ...base, status: 'idle' })).toBe(false);
+  });
+
+  it('no retoma si el navegador conservó la lectura', () => {
+    expect(shouldRestartSpeech({ ...base, speaking: true })).toBe(false);
+  });
+
+  it('no retoma si queda algo en cola', () => {
+    // Relanzar aquí duplicaría la voz sobre lo que aún va a sonar.
+    expect(shouldRestartSpeech({ ...base, pending: true })).toBe(false);
+  });
+
+  it('no retoma si la síntesis está pausada por el navegador', () => {
+    expect(shouldRestartSpeech({ ...base, paused: true })).toBe(false);
   });
 });

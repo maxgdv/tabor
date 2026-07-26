@@ -10,9 +10,11 @@ import {
   pickVoice,
   setStoredRate,
   setStoredVoiceName,
+  shouldRestartSpeech,
   ttsLangFor,
   voicesForLocale,
 } from '@/lib/speech';
+import { keepScreenAwake } from '@/lib/wake-lock';
 
 type Props = {
   /** Versículos del capítulo, en orden. */
@@ -78,20 +80,67 @@ export function ListenControls({ verses }: Props) {
   const sessionRef = useRef(0);
   const voiceNameRef = useRef<string | null>(getStoredVoiceName());
   const rateRef = useRef(getStoredRate());
+  // Suelta el bloqueo de pantalla; null cuando no se está reteniendo.
+  const releaseWakeRef = useRef<(() => void) | null>(null);
+  // `speakFrom` se recrea en cada render; el efecto de reanudación necesita
+  // la última versión sin volver a suscribirse.
+  const speakFromRef = useRef<(index: number, session: number) => void>(() => {});
+  const statusRef = useRef<Status>('idle');
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
 
-  // Al desmontar (incluido el remontaje por cambio de capítulo), silencio.
+  const releaseScreen = () => {
+    releaseWakeRef.current?.();
+    releaseWakeRef.current = null;
+  };
+
+  // Al desmontar (incluido el remontaje por cambio de capítulo), silencio —
+  // y se devuelve la pantalla a su comportamiento normal.
   useEffect(
     () => () => {
       sessionRef.current += 1;
+      releaseWakeRef.current?.();
+      releaseWakeRef.current = null;
       if (typeof window !== 'undefined') window.speechSynthesis?.cancel();
     },
     [],
   );
 
+  // Red de seguridad para cuando el bloqueo de pantalla no llega a tiempo o
+  // el usuario bloquea el teléfono a mano: al volver a la página, si creíamos
+  // estar leyendo pero la síntesis se quedó muda, se retoma desde el
+  // versículo activo en vez de dejar el botón mintiendo.
+  useEffect(() => {
+    if (!supported) return;
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return;
+      const synth = window.speechSynthesis;
+      if (
+        !shouldRestartSpeech({
+          status: statusRef.current,
+          speaking: synth.speaking,
+          pending: synth.pending,
+          paused: synth.paused,
+        })
+      ) {
+        return;
+      }
+      const active = useReaderStore.getState().activeVerseNumber;
+      const index = active != null ? verses.findIndex((v) => v.number === active) : -1;
+      const session = ++sessionRef.current;
+      speakFromRef.current(index === -1 ? 0 : index, session);
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, [supported, verses]);
+
   const speakFrom = (index: number, session: number) => {
     if (session !== sessionRef.current) return;
     const verse = verses[index];
     if (!verse) {
+      // Fin del capítulo: se deja de retener la pantalla.
+      releaseScreen();
       setStatus('idle');
       return;
     }
@@ -107,13 +156,25 @@ export function ListenControls({ verses }: Props) {
     };
     utterance.onend = () => speakFrom(index + 1, session);
     utterance.onerror = () => {
-      if (session === sessionRef.current) setStatus('idle');
+      if (session !== sessionRef.current) return;
+      releaseScreen();
+      setStatus('idle');
     };
     window.speechSynthesis.speak(utterance);
   };
 
+  // «Última versión» de speakFrom para el efecto de reanudación, que no debe
+  // resuscribirse en cada render. Se asigna en efecto: escribir refs durante
+  // el render rompe las reglas de React.
+  useEffect(() => {
+    speakFromRef.current = speakFrom;
+  });
+
   const play = () => {
     const synth = window.speechSynthesis;
+    // Se pide aquí, dentro del gesto del usuario, que es cuando el navegador
+    // concede el bloqueo de pantalla.
+    releaseWakeRef.current ??= keepScreenAwake();
     if (status === 'paused') {
       synth.resume();
       setStatus('playing');
@@ -132,6 +193,8 @@ export function ListenControls({ verses }: Props) {
 
   const pause = () => {
     window.speechSynthesis.pause();
+    // En pausa no hay razón para retener la pantalla del usuario.
+    releaseScreen();
     setStatus('paused');
   };
 
@@ -139,6 +202,7 @@ export function ListenControls({ verses }: Props) {
     sessionRef.current += 1;
     window.speechSynthesis.cancel();
     window.speechSynthesis.resume();
+    releaseScreen();
     setStatus('idle');
   };
 
