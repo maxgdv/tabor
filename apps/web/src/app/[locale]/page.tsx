@@ -24,7 +24,7 @@ export default async function HomePage({
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
-  const t = await getTranslations('home');
+  const [t, tPlaces] = await Promise.all([getTranslations('home'), getTranslations('places')]);
 
   // Tiempo litúrgico actual; ?season= permite previsualizar cualquiera
   // fuera de fecha (útil para revisar el diseño en Tiempo Ordinario).
@@ -74,6 +74,12 @@ export default async function HomePage({
             className="inline-flex items-center gap-2 rounded-md border border-stone-300 px-5 py-3 font-sans text-sm font-medium text-stone-700 hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:text-sand-100 dark:hover:border-lapis-500"
           >
             {t('ctaRoutes')}
+          </Link>
+          <Link
+            href="/lugares"
+            className="inline-flex items-center gap-2 rounded-md border border-stone-300 px-5 py-3 font-sans text-sm font-medium text-stone-700 hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:text-sand-100 dark:hover:border-lapis-500"
+          >
+            {tPlaces('title')}
           </Link>
         </div>
       </section>

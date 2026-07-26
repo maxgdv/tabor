@@ -9,7 +9,8 @@
     ".": "./src/index.ts",
     "./schema": "./src/schema/index.ts",
     "./book-meta": "./src/book-meta.ts",
-    "./chapter-counts": "./src/chapter-counts.ts"
+    "./chapter-counts": "./src/chapter-counts.ts",
+    "./place-names-es": "./src/data/place-names-es.ts"
   },
   "scripts": {
     "generate": "drizzle-kit generate",

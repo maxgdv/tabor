@@ -1062,3 +1062,162 @@ export async function listNotes(opts: {
     updatedAt: r.updatedAt,
   }));
 }
+
+// --- Lugares como páginas propias ------------------------------------------
+//
+// El dataset geográfico (1.277 lugares con menciones, nombres curados en
+// español y coordenadas) es lo único de TABOR que no está en cualquier otro
+// sitio bíblico. Estas consultas lo exponen como contenido propio en vez de
+// dejarlo sólo como capa del lector.
+
+export type DbPlaceSummary = {
+  slug: string;
+  /** Nombre visible: traducción si existe, canónico sin sufijo si no. */
+  name: string;
+  canonicalName: string;
+  modernName: string | null;
+  modernCountry: string | null;
+  description: string | null;
+  lng: number;
+  lat: number;
+  /** Versículos que lo mencionan. */
+  mentionCount: number;
+};
+
+type PlaceRow = {
+  slug: string;
+  canonical_name: string;
+  localized_name: string | null;
+  modern_name: string | null;
+  modern_country: string | null;
+  description: string | null;
+  lng: number | null;
+  lat: number | null;
+  mention_count: number;
+};
+
+function toPlaceSummary(r: PlaceRow): DbPlaceSummary {
+  return {
+    slug: r.slug,
+    name: r.localized_name ?? stripDisambiguation(r.canonical_name),
+    canonicalName: r.canonical_name,
+    modernName: r.modern_name,
+    modernCountry: r.modern_country,
+    description: r.description,
+    lng: Number(r.lng),
+    lat: Number(r.lat),
+    mentionCount: Number(r.mention_count),
+  };
+}
+
+/**
+ * Lugares con al menos `minMentions` versículos que los mencionan, de más a
+ * menos mencionados. Sin coordenadas no entran: la página no tendría mapa,
+ * que es justamente lo que la hace valer.
+ *
+ * El nombre localizado se resuelve con un LATERAL en vez de un LEFT JOIN
+ * normal porque un lugar puede tener varios nombres alternativos en el mismo
+ * idioma, y el join multiplicaría filas (y con ello el conteo).
+ */
+export async function listPlacesWithMentions(opts: {
+  language?: string;
+  minMentions?: number;
+}): Promise<DbPlaceSummary[]> {
+  const language = opts.language ?? '__none__';
+  const min = opts.minMentions ?? 5;
+  const rows = await db.execute<PlaceRow>(sql`
+    SELECT p.slug, p.canonical_name, p.modern_name, p.modern_country, p.description,
+           ST_X(p.geom::geometry) AS lng, ST_Y(p.geom::geometry) AS lat,
+           pan.name AS localized_name, m.cnt AS mention_count
+    FROM place p
+    JOIN (
+      SELECT place_id, COUNT(*)::int AS cnt FROM verse_location GROUP BY place_id
+    ) m ON m.place_id = p.id
+    LEFT JOIN LATERAL (
+      SELECT name FROM place_alternate_name
+      WHERE place_id = p.id AND language = ${language} LIMIT 1
+    ) pan ON TRUE
+    WHERE p.geom IS NOT NULL AND m.cnt >= ${min}
+    ORDER BY m.cnt DESC, p.slug ASC
+  `);
+  return Array.from(rows).map(toPlaceSummary);
+}
+
+/** Un lugar por su slug, o `null` si no existe o no tiene coordenadas. */
+export async function getPlace(opts: {
+  slug: string;
+  language?: string;
+}): Promise<DbPlaceSummary | null> {
+  const language = opts.language ?? '__none__';
+  const rows = await db.execute<PlaceRow>(sql`
+    SELECT p.slug, p.canonical_name, p.modern_name, p.modern_country, p.description,
+           ST_X(p.geom::geometry) AS lng, ST_Y(p.geom::geometry) AS lat,
+           pan.name AS localized_name,
+           COALESCE(m.cnt, 0) AS mention_count
+    FROM place p
+    LEFT JOIN (
+      SELECT place_id, COUNT(*)::int AS cnt FROM verse_location GROUP BY place_id
+    ) m ON m.place_id = p.id
+    LEFT JOIN LATERAL (
+      SELECT name FROM place_alternate_name
+      WHERE place_id = p.id AND language = ${language} LIMIT 1
+    ) pan ON TRUE
+    WHERE p.slug = ${opts.slug} AND p.geom IS NOT NULL
+    LIMIT 1
+  `);
+  const row = Array.from(rows)[0];
+  return row ? toPlaceSummary(row) : null;
+}
+
+export type DbPlaceMention = {
+  bookCanonicalId: string;
+  bookUrlSegment: string;
+  bookName: string;
+  chapterNumber: number;
+  verseNumber: number;
+  text: string;
+};
+
+/**
+ * Versículos que mencionan un lugar, en orden canónico, con su texto.
+ *
+ * `limit` existe porque el reparto es muy desigual: Jerusalén aparece en 948
+ * versículos y volcarlos todos daría una página inmanejable. La cuenta total
+ * viene de `mentionCount`, así que la interfaz puede decir cuántos quedan.
+ */
+export async function listPlaceMentions(opts: {
+  slug: string;
+  versionCode: string;
+  limit?: number;
+}): Promise<DbPlaceMention[]> {
+  const limit = opts.limit ?? 120;
+  const rows = await db.execute<{
+    canonical_id: string;
+    book_name: string | null;
+    chapter_number: number;
+    verse_number: number;
+    text: string;
+  }>(sql`
+    SELECT b.canonical_id, bt.name AS book_name,
+           ch.number AS chapter_number, v.number AS verse_number, vt.text
+    FROM verse_location vl
+    JOIN place p ON p.id = vl.place_id
+    JOIN verse v ON v.id = vl.verse_id
+    JOIN chapter ch ON ch.id = v.chapter_id
+    JOIN book b ON b.id = ch.book_id
+    JOIN version ver ON ver.code = ${opts.versionCode}
+    JOIN verse_text vt ON vt.verse_id = v.id AND vt.version_id = ver.id
+    LEFT JOIN book_translation bt ON bt.book_id = b.id AND bt.version_id = ver.id
+    WHERE p.slug = ${opts.slug}
+    ORDER BY b.order_index ASC, ch.number ASC, v.number ASC
+    LIMIT ${limit}
+  `);
+  return Array.from(rows).map((r) => ({
+    bookCanonicalId: r.canonical_id,
+    bookUrlSegment: r.canonical_id.toLowerCase(),
+    bookName: r.book_name ?? r.canonical_id,
+    chapterNumber: Number(r.chapter_number),
+    verseNumber: Number(r.verse_number),
+    text: r.text,
+  }));
+}

@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useSyncExternalStore } from 'react';
+// Se importa el dato en crudo, no los helpers de `lib/places`: aquéllos
+// arrastran el catálogo de rutas y esto es un componente de cliente.
+import { REGION_PLACE_SLUGS } from '@/lib/data/place-regions';
 import maplibregl, { Marker, Popup, type Map as MapLibreMap } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useLocale, useTranslations } from 'next-intl';
@@ -187,7 +190,7 @@ export function BibleMap({ chapter, places, period }: Props) {
         const popup = new Popup({ offset: 18, closeButton: false }).setHTML(
           `<div class="font-serif">
              <div class="text-sm font-semibold">${escapeHtml(place.name)}</div>
-             ${place.modernName ? `<div class="text-xs text-stone-500">${escapeHtml(place.modernName)}</div>` : ''}
+             ${place.modernName && !REGION_PLACE_SLUGS.has(place.slug) ? `<div class="text-xs text-stone-500">${escapeHtml(place.modernName)}</div>` : ''}
              ${place.description ? `<div class="mt-1 text-xs">${escapeHtml(place.description)}</div>` : ''}
            </div>`,
         );

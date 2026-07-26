@@ -104,6 +104,18 @@ export function RouteExplorer({ progressSlug, stops, serverProgress }: Props) {
           ))}
         </ul>
 
+        {/* De la parada a la ficha del lugar: quien va siguiendo la ruta
+            suele querer saber más de dónde está pisando, y de paso es el
+            enlace que lleva a las páginas de lugares desde las rutas. */}
+        <p className="mt-4">
+          <Link
+            href={`/lugares/${stop.slug}`}
+            className="inline-flex min-h-11 items-center font-sans text-sm text-lapis-600 underline-offset-2 hover:underline dark:text-lapis-300"
+          >
+            {t('stopPlace', { name: stop.name })}
+          </Link>
+        </p>
+
         <div className="mt-6 flex flex-wrap items-center gap-2">
           <button
             type="button"

@@ -2,7 +2,11 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 
 export async function SiteFooter() {
-  const [t, tVerse] = await Promise.all([getTranslations('footer'), getTranslations('verseOfDay')]);
+  const [t, tVerse, tPlaces] = await Promise.all([
+    getTranslations('footer'),
+    getTranslations('verseOfDay'),
+    getTranslations('places'),
+  ]);
   const year = new Date().getFullYear();
 
   return (
@@ -15,6 +19,15 @@ export async function SiteFooter() {
             className="underline-offset-2 hover:text-stone-700 hover:underline dark:hover:text-sand-200"
           >
             {tVerse('title')}
+          </Link>
+          {/* El índice de lugares vive aquí para que cada página del sitio
+              enlace al contenido propio del proyecto: es la vía por la que
+              Google alcanza las fichas de los lugares. */}
+          <Link
+            href="/lugares"
+            className="underline-offset-2 hover:text-stone-700 hover:underline dark:hover:text-sand-200"
+          >
+            {tPlaces('title')}
           </Link>
           <a
             href="https://github.com/maxgdv/tabor"
