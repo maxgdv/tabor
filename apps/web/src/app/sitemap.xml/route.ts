@@ -108,11 +108,24 @@ async function buildEntries(): Promise<Entry[]> {
     ...places.flatMap((place) => perLocale(`lugares/${place.slug}`, 'monthly', 0.8)),
   ];
 
+  // Los índices de libro sí entran: son 73 por idioma y sirven de camino de
+  // rastreo hacia sus capítulos.
+  //
+  // Los capítulos NO entran, y es deliberado. Eran 2.668 URLs de las 3.560,
+  // y la evidencia dice que no rinden: de 859 páginas indexadas salen 121
+  // impresiones en 28 días. Su texto es de dominio público y está en decenas
+  // de sitios con veinte años de antigüedad, así que Google las indexa y
+  // luego no las muestra nunca. Lo único que consiguen es consumir
+  // presupuesto de rastreo —y con él CPU del plan, que en Hobby son 4 horas
+  // al mes y al agotarse pausa el proyecto— compitiendo por la atención del
+  // buscador con las fichas de lugar, que sí son contenido propio.
+  //
+  // Esto no las desindexa ni las esconde: siguen existiendo, enlazadas desde
+  // /leer y desde el índice de cada libro, y las que ya están indexadas
+  // siguen estándolo. Simplemente se deja de invitar al rastreador. Si el
+  // criterio cambia, basta con volver a añadir el bucle.
   for (const book of books) {
     entries.push(...perLocale(`leer/${book.urlSegment}`, 'monthly', 0.7));
-    for (let n = 1; n <= book.chapterCount; n++) {
-      entries.push(...perLocale(`leer/${book.urlSegment}/${n}`, 'yearly', 0.6));
-    }
   }
 
   return entries;
