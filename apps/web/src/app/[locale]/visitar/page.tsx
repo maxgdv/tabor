@@ -49,7 +49,9 @@ export default async function VisitIndexPage({ params }: { params: Params }) {
         <p className="mt-4 text-lg leading-relaxed text-stone-700 dark:text-sand-200">
           {t('lede')}
         </p>
-        <p className="mt-4 leading-relaxed text-stone-600 dark:text-sand-200">{t('criterion')}</p>
+        {/* Retirado el párrafo de criterio editorial, por lo mismo que en la
+            guía de Tierra Santa: explicar aquí qué no incluimos es hablar de
+            nosotros a quien viene a mirar un viaje. Vive en `lib/visitable.ts`. */}
       </header>
 
       <ul className="space-y-4">

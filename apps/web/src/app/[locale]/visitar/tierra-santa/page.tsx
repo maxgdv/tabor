@@ -147,9 +147,13 @@ export default async function HolyLandGuidePage({ params }: { params: Params }) 
           <p className="mt-4 text-lg leading-relaxed text-stone-700 dark:text-sand-200">
             {t('holyLand.lede')}
           </p>
-          <p className="mt-4 leading-relaxed text-stone-600 dark:text-sand-200">
-            {t('holyLand.criterion')}
-          </p>
+          {/* Aquí hubo un párrafo explicando el criterio editorial (sin
+              horarios ni precios; sólo topónimos bíblicos, de ahí que falten
+              Masada o Qumrán). Se retiró: quien llega a esta página está
+              preparando un viaje y no viene a leer nuestras reglas de
+              inclusión, y nombrar lo que no está sólo servía para despedir a
+              quien buscaba justamente eso. El criterio sigue documentado
+              donde corresponde, en la cabecera de `lib/visitable.ts`. */}
         </header>
 
         {points.length > 0 && (
