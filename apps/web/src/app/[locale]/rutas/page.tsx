@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function RoutesIndexPage({ params }: { params: Params }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations('routes');
+  const [t, tVisit] = await Promise.all([getTranslations('routes'), getTranslations('visit')]);
   const lang = locale === 'en' ? 'en' : 'es';
 
   return (
@@ -56,6 +56,22 @@ export default async function RoutesIndexPage({ params }: { params: Params }) {
           </li>
         ))}
       </ul>
+
+      {/* El enlace a la guía va en el índice y no dentro de cada ruta: la
+          página de una ruta es un explorador a pantalla completa —mapa arriba,
+          panel de parada abajo, sin margen para más— y meterle un aviso ahí
+          rompería lo único que esa pantalla hace bien. Aquí, en cambio, es
+          donde alguien está eligiendo, y varias de estas rutas son justamente
+          las de Tierra Santa. */}
+      <p className="mt-10 border-t border-sand-200 pt-6 text-sm leading-relaxed text-stone-600 dark:border-stone-700 dark:text-sand-200">
+        {tVisit('promo.routesBody')}{' '}
+        <Link
+          href="/visitar/tierra-santa"
+          className="inline-flex min-h-11 items-center font-medium text-lapis-600 underline-offset-2 hover:underline dark:text-lapis-300"
+        >
+          {tVisit('promo.routesCta')}
+        </Link>
+      </p>
     </div>
   );
 }

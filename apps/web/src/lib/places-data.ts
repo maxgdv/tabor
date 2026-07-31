@@ -18,7 +18,7 @@ import { PLACE_MENTION_LIMIT, isListedPlace } from '@/lib/places';
 
 /** Lugares con página propia, con el nombre en el idioma pedido. */
 export const listedPlaces = cache(async (locale: string): Promise<DbPlaceSummary[]> => {
-  const all = await listPlacesWithMentions({ language: locale, minMentions: 1 });
+  const all = await listPlacesWithMentions({ language: locale, minMentions: 0 });
   return all.filter(isListedPlace);
 });
 

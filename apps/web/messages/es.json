@@ -273,6 +273,86 @@
     "backToIndex": "Ver todos los lugares bíblicos",
     "sourceNote": "Las coordenadas y la identificación moderna proceden del atlas abierto de OpenBible.info. En regiones, pueblos y accidentes extensos no hay una identificación: el punto marcado sólo sitúa la zona en el mapa, y no señala ni un lugar concreto ni sus límites."
   },
+  "visit": {
+    "title": "Lugares que se pueden visitar",
+    "metaTitle": "Lugares bíblicos que hoy se pueden visitar",
+    "metaDescription": "Guías de los lugares que la Biblia nombra y todavía se pueden ver: qué se conserva, dónde está y qué pasaje leer allí. Tierra Santa, y Pablo en camino.",
+    "lede": "Buena parte de los lugares que la Biblia nombra siguen ahí. Estas guías reúnen los que se pueden ver hoy: qué se conserva de cada uno, dónde está y el pasaje para leer estando allí.",
+    "criterion": "No son guías de viaje: no hay horarios, ni precios, ni recomendaciones de agencias. Sólo lo que no caduca. Y sólo lugares que la Biblia nombra, que es lo que este atlas puede sostener.",
+    "sites": "{count, plural, one {# lugar} other {# lugares}}",
+    "soon": "Próximamente",
+    "breadcrumbLabel": "Volver a las guías",
+    "sourceNote": "Las coordenadas proceden del atlas abierto de OpenBible.info. Lo que se conserva en cada sitio y el pasaje para leer allí son una propuesta editorial de Tabor, revisable: si encuentras un error, se agradece el aviso.",
+    "regions": {
+      "tierra-santa": {
+        "name": "Tierra Santa",
+        "lede": "De Jerusalén a Galilea: los lugares del Evangelio y del Antiguo Testamento que siguen en pie, zona por zona.",
+        "guideLink": "Ver los lugares de Tierra Santa que se pueden visitar"
+      },
+      "viajes-de-pablo": {
+        "name": "Los viajes de san Pablo",
+        "lede": "Grecia, Turquía, Malta y Roma: las ciudades de los Hechos y de las cartas. En preparación.",
+        "guideLink": "Ver los lugares de los viajes de Pablo que se pueden visitar"
+      }
+    },
+    "areas": {
+      "jerusalen": {
+        "name": "Jerusalén y sus alrededores",
+        "lede": "La ciudad y lo que se recorre desde ella en una mañana: el monte de los Olivos, los valles que la ciñen y los pueblos del otro lado de la loma."
+      },
+      "judea": {
+        "name": "Belén y las montañas de Judá",
+        "lede": "El sur: Belén a ocho kilómetros de Jerusalén y, más allá, Hebrón y la montaña que va bajando hacia el desierto."
+      },
+      "jordan": {
+        "name": "El valle del Jordán y el mar Muerto",
+        "lede": "La falla que parte el país de norte a sur, muy por debajo del nivel del mar: Jericó, el río del bautismo y la orilla de enfrente, con el Nebo asomado a la tierra prometida."
+      },
+      "galilea": {
+        "name": "Galilea y el lago",
+        "lede": "Donde transcurre la mayor parte del Evangelio: Nazaret, los pueblos de la orilla norte del lago, el Tabor y la llanura de Jezrael."
+      },
+      "samaria": {
+        "name": "Samaría y la montaña central",
+        "lede": "El camino entre Jerusalén y Galilea, que muchos cruzan sin detenerse: Siquem al pie del Garizín, Silo, Betel y la Samaría de los reyes de Israel."
+      },
+      "costa": {
+        "name": "La costa, el Carmelo y la llanura",
+        "lede": "La franja llana por la que pasó todo el que venía de fuera: Cesarea marítima, Jope, el Carmelo de Elías y las ciudades filisteas del sur."
+      }
+    },
+    "holyLand": {
+      "title": "Lugares bíblicos de Tierra Santa que hoy se pueden visitar",
+      "metaTitle": "Qué ver en Tierra Santa: {count} lugares bíblicos",
+      "metaDescription": "Los {count} lugares que la Biblia nombra y todavía se pueden visitar en Tierra Santa: qué se conserva en cada uno, dónde está y qué pasaje leer estando allí.",
+      "lede": "De Jerusalén a Galilea, los lugares que la Biblia nombra y todavía se pueden ver: qué queda hoy en cada uno, dónde está y el pasaje para leer allí mismo.",
+      "criterion": "Aquí no hay horarios, ni precios, ni consejos de agencia: nada que caduque. Y sólo entran topónimos que la Biblia nombra — Masada, Qumrán o Ein Karem son visitas magníficas y no están en esta lista porque no son lugares bíblicos.",
+      "howOrganized": "Las zonas siguen la forma en que se viaja y no el orden del canon: un viaje a Tierra Santa se organiza en dos o tres bases —Jerusalén, Galilea, a veces Belén— y desde cada una se sale a lo que queda cerca. Dentro de cada zona va primero lo que nadie se salta.",
+      "mapLabel": "Mapa de los lugares de Tierra Santa que se pueden visitar",
+      "readingLink": "Leer allí: {reference}",
+      "nextHeading": "Seguir por Tabor",
+      "nextRoutes": "Rutas por el mapa, con lecturas en cada parada",
+      "nextPlaces": "Todos los lugares bíblicos del atlas"
+    },
+    "site": {
+      "heading": "¿Se puede visitar hoy?",
+      "whereLabel": "Dónde está",
+      "readingHeading": "Qué leer allí",
+      "readingLede": "El pasaje que da sentido a este sitio, para leerlo estando aquí.",
+      "readingCta": "Abrir en el lector",
+      "metaDescription": "Qué se conserva hoy en {name}: {snippet} Dónde está y qué pasaje leer allí."
+    },
+    "promo": {
+      "homeTitle": "Los lugares que se pueden visitar",
+      "homeBody": "Buena parte de los sitios que la Biblia nombra siguen ahí. Qué se conserva de cada uno, dónde está y el pasaje para leer estando allí.",
+      "homeCta": "Ver la guía de Tierra Santa",
+      "placesTitle": "¿Vas a Tierra Santa?",
+      "placesBody": "Varios de estos lugares se pueden visitar hoy. La guía cuenta qué se conserva en cada uno y qué leer allí.",
+      "placesCta": "Lugares de Tierra Santa que se pueden visitar",
+      "routesBody": "Algunas de estas rutas pasan por lugares que hoy se pueden visitar.",
+      "routesCta": "Ver la guía de Tierra Santa"
+    }
+  },
   "periods": {
     "bc": "a. C.",
     "ad": "d. C.",

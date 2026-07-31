@@ -1118,6 +1118,13 @@ function toPlaceSummary(r: PlaceRow): DbPlaceSummary {
  * El nombre localizado se resuelve con un LATERAL en vez de un LEFT JOIN
  * normal porque un lugar puede tener varios nombres alternativos en el mismo
  * idioma, y el join multiplicaría filas (y con ello el conteo).
+ *
+ * El conteo va por LEFT JOIN y no por JOIN: hay lugares con cero versículos
+ * enlazados en el atlas que aun así deben publicarse. Magdala es el caso —
+ * ninguna mención enlazada y parada obligada de cualquier peregrinación a
+ * Galilea. Con un JOIN interno desaparecían aquí, antes de que la capa de
+ * arriba pudiera decidir si merecen página, y quedaban fuera del índice y
+ * del sitemap sin que nada fallara: por eso `minMentions: 0` tiene sentido.
  */
 export async function listPlacesWithMentions(opts: {
   language?: string;
@@ -1128,17 +1135,17 @@ export async function listPlacesWithMentions(opts: {
   const rows = await db.execute<PlaceRow>(sql`
     SELECT p.slug, p.canonical_name, p.modern_name, p.modern_country, p.description,
            ST_X(p.geom::geometry) AS lng, ST_Y(p.geom::geometry) AS lat,
-           pan.name AS localized_name, m.cnt AS mention_count
+           pan.name AS localized_name, COALESCE(m.cnt, 0) AS mention_count
     FROM place p
-    JOIN (
+    LEFT JOIN (
       SELECT place_id, COUNT(*)::int AS cnt FROM verse_location GROUP BY place_id
     ) m ON m.place_id = p.id
     LEFT JOIN LATERAL (
       SELECT name FROM place_alternate_name
       WHERE place_id = p.id AND language = ${language} LIMIT 1
     ) pan ON TRUE
-    WHERE p.geom IS NOT NULL AND m.cnt >= ${min}
-    ORDER BY m.cnt DESC, p.slug ASC
+    WHERE p.geom IS NOT NULL AND COALESCE(m.cnt, 0) >= ${min}
+    ORDER BY COALESCE(m.cnt, 0) DESC, p.slug ASC
   `);
   return Array.from(rows).map(toPlaceSummary);
 }

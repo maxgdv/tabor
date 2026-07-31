@@ -13,6 +13,7 @@
 import type { DbPlaceMention } from '@tabor/db';
 import { REGION_PLACE_SLUGS } from '@/lib/data/place-regions';
 import { ROUTES, type BibleRoute } from '@/lib/routes';
+import { VISITABLE_SLUGS } from '@/lib/visitable';
 
 /**
  * Menciones mínimas para que un lugar entre en el índice y en el sitemap.
@@ -46,9 +47,17 @@ export function routesForPlace(slug: string): BibleRoute[] {
  * Testamento los nombra pocas veces. Los que además son parada de una ruta
  * entran igualmente: están curados editorialmente y son justo los que la
  * gente escribe en el buscador.
+ *
+ * Lo mismo con los sitios visitables: Magdala no tiene ni una mención
+ * enlazada en el atlas y es parada obligada de cualquier peregrinación a
+ * Galilea. Si se publica como visitable, tiene ficha.
  */
 export function isListedPlace(place: { slug: string; mentionCount: number }): boolean {
-  return place.mentionCount >= PLACE_MIN_MENTIONS || ROUTE_PLACE_SLUGS.has(place.slug);
+  return (
+    place.mentionCount >= PLACE_MIN_MENTIONS ||
+    ROUTE_PLACE_SLUGS.has(place.slug) ||
+    VISITABLE_SLUGS.has(place.slug)
+  );
 }
 
 // --- Presentación del nombre moderno ---------------------------------------

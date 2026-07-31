@@ -2,10 +2,11 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 
 export async function SiteFooter() {
-  const [t, tVerse, tPlaces] = await Promise.all([
+  const [t, tVerse, tPlaces, tVisit] = await Promise.all([
     getTranslations('footer'),
     getTranslations('verseOfDay'),
     getTranslations('places'),
+    getTranslations('visit'),
   ]);
   const year = new Date().getFullYear();
 
@@ -28,6 +29,17 @@ export async function SiteFooter() {
             className="underline-offset-2 hover:text-stone-700 hover:underline dark:hover:text-sand-200"
           >
             {tPlaces('title')}
+          </Link>
+          {/* El hub y no la guía de Tierra Santa: es el índice de la sección
+              —como /lugares lo es del atlas— y no habrá que tocar el pie
+              cuando lleguen los viajes de Pablo. La guía recibe desde la
+              portada, desde /lugares y desde cada ficha visitable, que es
+              donde el enlace además viene a cuento. */}
+          <Link
+            href="/visitar"
+            className="underline-offset-2 hover:text-stone-700 hover:underline dark:hover:text-sand-200"
+          >
+            {tVisit('title')}
           </Link>
           <a
             href="https://github.com/maxgdv/tabor"

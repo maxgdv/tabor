@@ -88,7 +88,7 @@ async function buildEntries(): Promise<Entry[]> {
   // Dos consultas en paralelo, muy por debajo del `max` del pool.
   const [books, places] = await Promise.all([
     listBooks({ versionCode: 'STRA' }),
-    listPlacesWithMentions({ minMentions: 1 }).then((all) => all.filter(isListedPlace)),
+    listPlacesWithMentions({ minMentions: 0 }).then((all) => all.filter(isListedPlace)),
   ]);
 
   const entries: Entry[] = [
@@ -100,6 +100,14 @@ async function buildEntries(): Promise<Entry[]> {
     ...PLANS.flatMap((plan) => perLocale(`planes/${plan.slug}`, 'monthly', 0.7)),
     ...perLocale('rutas', 'monthly', 0.8),
     ...ROUTES.flatMap((route) => perLocale(`rutas/${route.slug}`, 'monthly', 0.7)),
+    // Las guías de lugares visitables. La de Tierra Santa va a 0.9, al nivel
+    // del índice de lugares y por encima de cualquier ficha: es contenido
+    // escrito aquí, no lo tiene nadie más en esta forma —qué se conserva y qué
+    // leer estando allí— y es la página por la que este proyecto espera que lo
+    // enlacen parroquias y agencias, que es lo que le falta al dominio. El hub
+    // va un escalón por debajo: hoy es sólo un camino hacia ella.
+    ...perLocale('visitar', 'monthly', 0.8),
+    ...perLocale('visitar/tierra-santa', 'monthly', 0.9),
     // Los lugares son contenido propio (coordenadas, nombre curado y los
     // versículos exactos): por encima de los capítulos, cuyo texto está en
     // medio internet. El índice manda sobre las fichas, y 'monthly' es

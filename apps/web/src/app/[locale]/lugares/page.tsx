@@ -60,7 +60,7 @@ export default async function PlacesIndexPage({ params }: { params: Params }) {
   setRequestLocale(locale);
   const t = await getTranslations('places');
 
-  const places = await listedPlaces(locale);
+  const [tVisit, places] = await Promise.all([getTranslations('visit'), listedPlaces(locale)]);
   const featured = mostMentioned(places, FEATURED);
   const groups = groupPlacesByLetter(places, locale);
 
@@ -74,6 +74,25 @@ export default async function PlacesIndexPage({ params }: { params: Params }) {
           {t('lede', { count: places.length })}
         </p>
       </header>
+
+      {/* Arriba del todo y no al pie: quien abre un índice de trescientos
+          topónimos casi nunca busca uno concreto, y este es el único desvío
+          del atlas que resuelve una pregunta distinta —qué de esto se puede
+          ver— antes de que se ponga a hacer scroll. */}
+      <aside className="mb-10 rounded-lg border border-sand-300 bg-sand-100/70 p-5 dark:border-stone-600 dark:bg-stone-800/70">
+        <h2 className="font-serif text-xl text-stone-800 dark:text-sand-100">
+          {tVisit('promo.placesTitle')}
+        </h2>
+        <p className="mt-1.5 text-sm leading-relaxed text-stone-700 dark:text-sand-200">
+          {tVisit('promo.placesBody')}
+        </p>
+        <Link
+          href="/visitar/tierra-santa"
+          className="mt-2 inline-flex min-h-11 items-center font-sans text-sm font-medium text-lapis-600 underline-offset-2 hover:underline dark:text-lapis-300"
+        >
+          {tVisit('promo.placesCta')}
+        </Link>
+      </aside>
 
       <section aria-labelledby="lugares-destacados">
         <h2

@@ -10,13 +10,19 @@ import {
   routesForPlace,
 } from '@/lib/places';
 import { placeBySlug, placeMentions } from '@/lib/places-data';
+import { routeReadingHref, routeReadingLabel } from '@/lib/routes';
 import { SITE_URL, localeAlternates, openGraphFor, verseSnippet } from '@/lib/seo';
+import { visitableSite } from '@/lib/visitable';
 import { PlaceMapClient } from '@/components/places/PlaceMapClient';
+import { VisitableSiteBlock } from '@/components/visit/VisitableSiteBlock';
 
 type Params = Promise<{ locale: string; slug: string }>;
 
 /** Caracteres del versículo que caben en la meta description sin comerse el resto. */
 const SNIPPET_MAX = 58;
+
+/** Caracteres de «qué se conserva» que caben en la descripción sin que Google la corte. */
+const PRESERVED_MAX = 74;
 
 /**
  * Título y descripción con datos reales de este lugar y de ningún otro.
@@ -34,25 +40,43 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const place = await placeBySlug(slug, locale);
   if (!place) return {};
 
-  const [t, mentions] = await Promise.all([
+  const [t, tVisit, mentions] = await Promise.all([
     getTranslations({ locale, namespace: 'places' }),
+    getTranslations({ locale, namespace: 'visit' }),
     placeMentions(slug, versionForLocale(locale)),
   ]);
 
   const first = mentions[0];
   const title = t('placeTitle', { name: place.name });
-  const description = first
-    ? t('placeDescription', {
+
+  // En un sitio visitable la descripción no la manda el versículo sino lo que
+  // se conserva. Quien escribe «Cafarnaúm» en el buscador puede querer el
+  // pasaje o el yacimiento; quien llega a estas cincuenta fichas desde una
+  // búsqueda de viaje quiere saber qué va a ver, y eso —a diferencia del
+  // texto bíblico, que está en decenas de sitios— sólo lo dice Tabor. El
+  // título no cambia: «X en la Biblia: dónde está» ya responde a la otra
+  // mitad de las búsquedas y es el mismo en las 314 fichas del atlas.
+  const site = visitableSite(slug);
+  const description = site
+    ? tVisit('site.metaDescription', {
         name: place.name,
-        count: place.mentionCount,
-        reference: t('reference', {
-          book: first.bookName,
-          chapter: first.chapterNumber,
-          verse: first.verseNumber,
-        }),
-        snippet: verseSnippet([{ text: first.text }], SNIPPET_MAX),
+        snippet: verseSnippet(
+          [{ text: site.preserved[locale === 'en' ? 'en' : 'es'] }],
+          PRESERVED_MAX,
+        ),
       })
-    : t('placeDescriptionNoMentions', { name: place.name });
+    : first
+      ? t('placeDescription', {
+          name: place.name,
+          count: place.mentionCount,
+          reference: t('reference', {
+            book: first.bookName,
+            chapter: first.chapterNumber,
+            verse: first.verseNumber,
+          }),
+          snippet: verseSnippet([{ text: first.text }], SNIPPET_MAX),
+        })
+      : t('placeDescriptionNoMentions', { name: place.name });
 
   const path = `lugares/${place.slug}`;
   return {
@@ -87,16 +111,31 @@ export default async function PlacePage({ params }: { params: Params }) {
   const routes = routesForPlace(place.slug);
   const lang = locale === 'en' ? 'en' : 'es';
   const truncated = place.mentionCount > mentions.length;
+  // Módulo estático, resolución en O(1): ni una consulta más.
+  const site = visitableSite(place.slug);
 
   // Datos estructurados: el `Place` con sus coordenadas es exactamente lo que
   // Google necesita para entender que esto es un sitio geográfico y no una
   // página más de texto bíblico; el `BreadcrumbList` le da la ruta
   // «Lugares bíblicos › Cafarnaúm» en el resultado en vez de la URL cruda.
+  //
+  // Cuando el lugar es además un sitio visitable, el nodo dice tres cosas más,
+  // todas con vocabulario que schema.org define de verdad:
+  //   · los tipos `TouristAttraction` y `LandmarksOrHistoricalBuildings`, que
+  //     son subtipos de `Place` y describen justo esto (un sitio al que se va
+  //     a ver algo que sigue en pie);
+  //   · `publicAccess`, la propiedad booleana de `Place` para «abierto a
+  //     visitantes», que es la pregunta exacta que trae a esta página;
+  //   · `description` con lo que se conserva, y `subjectOf` apuntando al
+  //     pasaje en el lector — la obra que habla de este lugar.
+  // Lo que NO se emite, a propósito: `address` ni `containedInPlace`. Situar
+  // estos sitios en un país es tomar partido sobre soberanías, y Tabor no lo
+  // hace ni en el texto ni en los metadatos.
   const url = `${SITE_URL}/${locale}/lugares/${place.slug}`;
   const jsonLd = [
     {
       '@context': 'https://schema.org',
-      '@type': 'Place',
+      '@type': site ? ['Place', 'TouristAttraction', 'LandmarksOrHistoricalBuildings'] : 'Place',
       name: place.name,
       alternateName: place.canonicalName.replace(/\s+\d+$/, ''),
       url,
@@ -114,6 +153,17 @@ export default async function PlacePage({ params }: { params: Params }) {
               '@type': 'PropertyValue',
               name: t('modernLabel'),
               value: modern.name,
+            },
+          }
+        : {}),
+      ...(site
+        ? {
+            description: site.preserved[lang],
+            publicAccess: true,
+            subjectOf: {
+              '@type': 'CreativeWork',
+              name: routeReadingLabel(site.reading, lang),
+              url: `${SITE_URL}/${locale}${routeReadingHref(site.reading)}`,
             },
           }
         : {}),
@@ -209,6 +259,11 @@ export default async function PlacePage({ params }: { params: Params }) {
             {t('sourceNote')}
           </p>
         </section>
+
+        {/* Justo después del mapa y antes de los pasajes: quien llega
+            preguntándose si esto se puede ver no debería tener que bajar por
+            ciento veinte versículos para averiguarlo. */}
+        {site && <VisitableSiteBlock site={site} locale={locale} />}
 
         <section aria-labelledby="pasajes" className="mt-12">
           <h2 id="pasajes" className="font-serif text-2xl text-stone-800 dark:text-sand-100">

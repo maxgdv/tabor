@@ -24,7 +24,11 @@ export default async function HomePage({
 }) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
-  const [t, tPlaces] = await Promise.all([getTranslations('home'), getTranslations('places')]);
+  const [t, tPlaces, tVisit] = await Promise.all([
+    getTranslations('home'),
+    getTranslations('places'),
+    getTranslations('visit'),
+  ]);
 
   // Tiempo litúrgico actual; ?season= permite previsualizar cualquiera
   // fuera de fecha (útil para revisar el diseño en Tiempo Ordinario).
@@ -92,6 +96,28 @@ export default async function HomePage({
       {/* Antes del destacado de temporada: esto no se busca cuando toca el
           calendario, se busca el día que hace falta. */}
       <SituationPlansSection locale={locale} />
+
+      {/* Enlace directo a la guía, no al hub: es la página que el proyecto
+          quiere que se enlace desde fuera, y la portada es el sitio del que
+          más fuerza recibe. Va aquí, por encima del destacado de temporada,
+          porque no depende del calendario: quien planea un viaje lo planea en
+          cualquier mes. Un botón más en la fila de arriba no valía —seis
+          píldoras en un móvil no las lee nadie— y esto necesita dos líneas
+          para explicarse. */}
+      <section className="mt-16 rounded-lg border border-sand-300 bg-sand-100/70 p-8 dark:border-stone-600 dark:bg-stone-800/70">
+        <h2 className="font-serif text-2xl text-stone-800 dark:text-sand-100">
+          {tVisit('promo.homeTitle')}
+        </h2>
+        <p className="mt-3 max-w-2xl leading-relaxed text-stone-700 dark:text-sand-200">
+          {tVisit('promo.homeBody')}
+        </p>
+        <Link
+          href="/visitar/tierra-santa"
+          className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-md bg-lapis-500 px-5 py-3 font-sans text-sm font-medium text-white hover:bg-lapis-600"
+        >
+          {tVisit('promo.homeCta')}
+        </Link>
+      </section>
 
       {season && <SeasonHighlight season={season} locale={locale} />}
 

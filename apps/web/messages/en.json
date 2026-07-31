@@ -273,6 +273,86 @@
     "backToIndex": "See all biblical places",
     "sourceNote": "Coordinates and the modern identification come from the open atlas at OpenBible.info. For regions, peoples and large features there is no identification: the marked point only places the area on the map, and stands for neither a particular site nor its boundaries."
   },
+  "visit": {
+    "title": "Places you can visit",
+    "metaTitle": "Biblical places you can still visit",
+    "metaDescription": "Guides to the places the Bible names that can still be seen: what survives, where it is, and which passage to read there. The Holy Land first, Paul next.",
+    "lede": "Many of the places the Bible names are still there. These guides gather the ones you can see today: what survives at each, where it is, and the passage to read while standing there.",
+    "criterion": "These are not travel guides: no opening hours, no prices, no tour recommendations. Only what does not go out of date. And only places the Bible names, which is what this atlas can stand behind.",
+    "sites": "{count, plural, one {# site} other {# sites}}",
+    "soon": "Coming soon",
+    "breadcrumbLabel": "Back to the guides",
+    "sourceNote": "Coordinates come from the open atlas at OpenBible.info. What survives at each site, and the passage to read there, are an editorial proposal by Tabor, open to correction: if you find a mistake, please say so.",
+    "regions": {
+      "tierra-santa": {
+        "name": "The Holy Land",
+        "lede": "From Jerusalem to Galilee: the places of the Gospel and the Old Testament that are still standing, area by area.",
+        "guideLink": "See the Holy Land places you can visit"
+      },
+      "viajes-de-pablo": {
+        "name": "The journeys of Saint Paul",
+        "lede": "Greece, Turkey, Malta and Rome: the cities of Acts and of the letters. In preparation.",
+        "guideLink": "See the places of Paul's journeys you can visit"
+      }
+    },
+    "areas": {
+      "jerusalen": {
+        "name": "Jerusalem and around",
+        "lede": "The city and what you can walk from it in a morning: the Mount of Olives, the valleys that gird it, and the villages just over the ridge."
+      },
+      "judea": {
+        "name": "Bethlehem and the Judean hills",
+        "lede": "The south: Bethlehem eight kilometres from Jerusalem and, beyond it, Hebron and the hill country dropping away towards the desert."
+      },
+      "jordan": {
+        "name": "The Jordan Valley and the Dead Sea",
+        "lede": "The rift that splits the country from north to south, far below sea level: Jericho, the river of the baptism, and the far bank with Nebo looking out over the promised land."
+      },
+      "galilea": {
+        "name": "Galilee and the lake",
+        "lede": "Where most of the Gospel takes place: Nazareth, the villages along the northern shore of the lake, Mount Tabor and the plain of Jezreel."
+      },
+      "samaria": {
+        "name": "Samaria and the central highlands",
+        "lede": "The road between Jerusalem and Galilee that many cross without stopping: Shechem at the foot of Gerizim, Shiloh, Bethel and the Samaria of the kings of Israel."
+      },
+      "costa": {
+        "name": "The coast, Carmel and the plain",
+        "lede": "The flat strip everyone coming from abroad passed through: Caesarea Maritima, Joppa, the Carmel of Elijah and the Philistine cities to the south."
+      }
+    },
+    "holyLand": {
+      "title": "Biblical places in the Holy Land you can visit today",
+      "metaTitle": "What to see in the Holy Land: {count} biblical sites",
+      "metaDescription": "The {count} places the Bible names that you can still visit in the Holy Land: what survives at each one, where it is, and which passage to read there.",
+      "lede": "From Jerusalem to Galilee, the places the Bible names that can still be seen: what is left of each one today, where it is, and the passage to read on the spot.",
+      "criterion": "No opening hours here, no prices, no tour advice: nothing that goes out of date. And only place names the Bible uses — Masada, Qumran and Ein Karem are magnificent visits and are not on this list, because they are not biblical places.",
+      "howOrganized": "The areas follow the way people travel rather than the order of the canon: a trip to the Holy Land is built around two or three bases —Jerusalem, Galilee, sometimes Bethlehem— and from each you go out to whatever lies near. Within each area, what no one skips comes first.",
+      "mapLabel": "Map of the Holy Land places you can visit",
+      "readingLink": "Read there: {reference}",
+      "nextHeading": "Carry on through Tabor",
+      "nextRoutes": "Map routes, with readings at every stop",
+      "nextPlaces": "Every biblical place in the atlas"
+    },
+    "site": {
+      "heading": "Can you visit it today?",
+      "whereLabel": "Where it is",
+      "readingHeading": "What to read there",
+      "readingLede": "The passage that gives this site its meaning, to read while you are here.",
+      "readingCta": "Open in the reader",
+      "metaDescription": "What survives at {name} today: {snippet} Where it is and which passage to read there."
+    },
+    "promo": {
+      "homeTitle": "The places you can visit",
+      "homeBody": "Many of the sites the Bible names are still there. What survives at each one, where it is, and the passage to read while standing there.",
+      "homeCta": "See the Holy Land guide",
+      "placesTitle": "Going to the Holy Land?",
+      "placesBody": "Several of these places can be visited today. The guide tells what survives at each one and what to read there.",
+      "placesCta": "Holy Land places you can visit",
+      "routesBody": "Some of these routes pass through places you can visit today.",
+      "routesCta": "See the Holy Land guide"
+    }
+  },
   "periods": {
     "bc": "BC",
     "ad": "AD",
