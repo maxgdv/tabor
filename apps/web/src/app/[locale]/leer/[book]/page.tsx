@@ -10,6 +10,14 @@ const VERSION_BY_LOCALE: Record<string, string> = {
   en: 'CPDV',
 };
 
+// Vacío a propósito: habilita la generación estática bajo demanda (ISR) de
+// los 73 × 2 índices de libro sin exigir BD en el build.
+export function generateStaticParams() {
+  return [];
+}
+
+export const revalidate = 86400;
+
 type Params = Promise<{ locale: string; book: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {

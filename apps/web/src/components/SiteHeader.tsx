@@ -1,20 +1,18 @@
-import { headers } from 'next/headers';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link, routing } from '@/i18n/routing';
-import { auth } from '@/lib/auth';
 import { getBooks, versionForLocale } from '@/lib/bible';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { BookSidebar } from './BookSidebar';
 import { SearchBox } from './SearchBox';
-import { UserMenu } from './UserMenu';
+import { HeaderAuth } from './HeaderAuth';
 
+// Ojo: nada de `headers()`/sesión aquí. El header lo renderizan páginas
+// estáticas servidas desde la CDN; la sesión se resuelve en el cliente
+// (HeaderAuth) para no arrastrar toda la app a renderizado por petición.
 export async function SiteHeader() {
   const locale = await getLocale();
   const t = await getTranslations('header');
-  const [books, session] = await Promise.all([
-    getBooks(versionForLocale(locale)),
-    auth.api.getSession({ headers: await headers() }),
-  ]);
+  const books = await getBooks(versionForLocale(locale));
 
   return (
     <header className="border-b border-sand-200 bg-sand-50/80 backdrop-blur dark:border-stone-700 dark:bg-stone-900/80">
@@ -40,16 +38,7 @@ export async function SiteHeader() {
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:ml-0 sm:gap-3">
           <LocaleSwitcher locales={routing.locales} label={t('switchLanguage')} />
-          {session ? (
-            <UserMenu name={session.user.name ?? null} email={session.user.email} />
-          ) : (
-            <Link
-              href="/entrar"
-              className="inline-flex min-h-11 items-center rounded-md px-2 font-sans text-sm text-stone-700 transition-colors hover:bg-sand-200 dark:text-sand-100 dark:hover:bg-stone-700"
-            >
-              {t('signIn')}
-            </Link>
-          )}
+          <HeaderAuth />
         </div>
       </div>
     </header>

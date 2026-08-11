@@ -9,15 +9,18 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import '../globals.css';
 
+// Sin `force-dynamic`: las páginas de solo lectura (capítulos, lugares,
+// índices) se prerenderizan y se sirven desde la CDN — cada visita dejaba de
+// quemar "Fluid Active CPU" en Vercel. Lo que varía por usuario (sesión del
+// header, marcadores) se resuelve en el cliente; las páginas de cuenta y las
+// que leen `headers()`/`searchParams` siguen siendo dinámicas por sí solas.
 export function generateStaticParams() {
+  // En CI no hay BD y el prerender fallaría: sin params, el build no genera
+  // nada bajo [locale] y todo pasa a ISR bajo demanda. En Vercel (y en local
+  // con BD) sí se prerenderizan los índices de ambos idiomas.
+  if (!process.env.DATABASE_URL) return [];
   return routing.locales.map((locale) => ({ locale }));
 }
-
-// El SiteHeader hace `listBooks()` contra Postgres en cada render — para
-// alimentar el BookSidebar. Forzar dinámico evita que el build intente
-// prerender estático (que falla en CI donde no hay BD). Cuando convenga,
-// se puede optimizar envolviendo `listBooks` en `unstable_cache`.
-export const dynamic = 'force-dynamic';
 
 /**
  * Viewport y color de la barra del sistema.

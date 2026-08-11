@@ -119,6 +119,32 @@ export function ChapterReader({
     () => new Map((initialAnnotations?.notes ?? []).map((n) => [n.verseNumber, n.body])),
   );
 
+  // La página del lector es estática: se hidrata como invitado y lo personal
+  // llega después por /api/chapter-state (props null → datos). Ajuste de
+  // estado durante el render —el patrón documentado para "resetear estado
+  // cuando cambia una prop"— en vez de un efecto. No machaca cambios
+  // optimistas porque los props solo transitan una vez por montaje (el
+  // remontaje por key al cambiar de capítulo resetea todo).
+  const [adoptedBookmarks, setAdoptedBookmarks] = useState(initialBookmarks);
+  if (initialBookmarks !== adoptedBookmarks) {
+    setAdoptedBookmarks(initialBookmarks);
+    if (initialBookmarks) setBookmarks(new Set(initialBookmarks));
+  }
+  const [adoptedAnnotations, setAdoptedAnnotations] = useState(initialAnnotations);
+  if (initialAnnotations !== adoptedAnnotations) {
+    setAdoptedAnnotations(initialAnnotations);
+    if (initialAnnotations) {
+      setHighlights(
+        new Map(
+          initialAnnotations.highlights
+            .filter((h) => isHighlightColor(h.color))
+            .map((h) => [h.verseNumber, { color: h.color as HighlightColor, label: h.label }]),
+        ),
+      );
+      setNotes(new Map(initialAnnotations.notes.map((n) => [n.verseNumber, n.body])));
+    }
+  }
+
   const selectedNumbers = [...selected].sort((a, b) => a - b);
   const selectedHighlights = selectedNumbers.map((n) => highlights.get(n) ?? null);
   // Swatch activo solo si TODA la selección comparte color; ídem etiqueta.

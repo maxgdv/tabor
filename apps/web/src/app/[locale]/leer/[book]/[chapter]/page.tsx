@@ -1,23 +1,14 @@
 import type { Metadata } from 'next';
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { getAdjacentChapter, getBookmarkedVerseNumbers, getChapterAnnotations } from '@tabor/db';
-import { auth } from '@/lib/auth';
+import { getAdjacentChapter } from '@tabor/db';
 import { Link } from '@/i18n/routing';
-import {
-  getChapter,
-  getPlacesForChapter,
-  getSecondaryChapter,
-  resolveCompare,
-  versionForLocale,
-} from '@/lib/bible';
+import { getChapter, getPlacesForChapter, versionForLocale } from '@/lib/bible';
 import { SITE_URL, localeAlternates, openGraphFor, verseSnippet } from '@/lib/seo';
-import { ChapterReader } from '@/components/reader/ChapterReader';
+import { ReaderClient } from '@/components/reader/ReaderClient';
 import { ReaderShell } from '@/components/reader/ReaderShell';
-import { ActiveVerseMarker } from '@/components/reader/ActiveVerseMarker';
 import { ChapterArt } from '@/components/reader/ChapterArt';
-import { CompareSelector } from '@/components/reader/CompareSelector';
+import { ChapterNav } from '@/components/reader/ChapterNav';
 import { PeriodTimeline } from '@/components/reader/PeriodTimeline';
 import { BibleMapClient } from '@/components/map/BibleMapClient';
 import { getChapterArt } from '@/lib/chapter-art';
@@ -27,6 +18,25 @@ const VERSION_BY_LOCALE: Record<string, string> = {
   es: 'STRA',
   en: 'CPDV',
 };
+
+// Página estática servida desde la CDN: el texto bíblico es el mismo para
+// todos y no cambia. Nada de `headers()` ni `searchParams` aquí — la sesión
+// (marcadores, notas) y el modo comparado (?vs=) se resuelven en el cliente
+// dentro de ReaderClient. Cada visita —humana o de un bot rastreando las
+// 1.334 × 2 páginas— deja de invocar una función en Vercel.
+//
+// Sin generateStaticParams: los capítulos se generan bajo demanda en la
+// primera visita (ISR) y quedan cacheados; así el build no necesita BD.
+// Un día de revalidación deja propagar correcciones del texto sin redesplegar.
+export const revalidate = 86400;
+
+// Vacío a propósito: sin él Next trataría la ruta como dinámica pura (una
+// invocación por visita); con él, cada capítulo se genera en su primera
+// visita y queda en la caché ISR. Prerenderizar los 1.334 × 2 en el build
+// sería pagar ese coste en cada deploy.
+export function generateStaticParams() {
+  return [];
+}
 
 type Params = Promise<{ locale: string; book: string; chapter: string }>;
 
@@ -60,14 +70,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
-export default async function ReaderPage({
-  params,
-  searchParams,
-}: {
-  params: Params;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const [{ locale, book, chapter }, query] = await Promise.all([params, searchParams]);
+export default async function ReaderPage({ params }: { params: Params }) {
+  const { locale, book, chapter } = await params;
   setRequestLocale(locale);
 
   const chapterNumber = Number.parseInt(chapter, 10);
@@ -75,17 +79,11 @@ export default async function ReaderPage({
 
   const versionCode = VERSION_BY_LOCALE[locale] ?? 'STRA';
   const upperBook = book.toUpperCase();
+  const basePath = `/leer/${book.toLowerCase()}/${chapterNumber}`;
 
-  // Lectura comparada: ?vs=vul|stra|cpdv (saneado; nunca contra sí misma).
-  const vsParam = typeof query.vs === 'string' ? query.vs : undefined;
-  const compareOption = resolveCompare(vsParam, versionForLocale(locale));
-  // prev/next conservan el modo comparado.
-  const vsSuffix = compareOption ? `?vs=${compareOption.param}` : '';
-
-  // Capítulo, vecinos, texto comparado, sesión y traducciones — en paralelo.
-  const [chapterData, secondary, prev, next, session, tBooks, tReader] = await Promise.all([
+  // Capítulo, vecinos y traducciones — en paralelo.
+  const [chapterData, prev, next, tBooks] = await Promise.all([
     getChapter(book, chapterNumber, locale),
-    compareOption ? getSecondaryChapter(upperBook, chapterNumber, compareOption) : null,
     getAdjacentChapter({
       bookCanonicalId: upperBook,
       chapterNumber,
@@ -98,27 +96,9 @@ export default async function ReaderPage({
       direction: 'next',
       versionCode,
     }),
-    auth.api.getSession({ headers: await headers() }),
     getTranslations('books'),
-    getTranslations('reader'),
   ]);
   if (!chapterData) notFound();
-
-  // `null` = invitado (el lector no muestra ninguna UI personal).
-  const [initialBookmarks, initialAnnotations] = session
-    ? await Promise.all([
-        getBookmarkedVerseNumbers({
-          userId: session.user.id,
-          bookCanonicalId: upperBook,
-          chapterNumber,
-        }),
-        getChapterAnnotations({
-          userId: session.user.id,
-          bookCanonicalId: upperBook,
-          chapterNumber,
-        }),
-      ])
-    : [null, null];
 
   const places = getPlacesForChapter(chapterData);
   // Nombre del primer lugar de cada versículo: la barra inferior del móvil lo
@@ -136,6 +116,7 @@ export default async function ReaderPage({
   const art =
     places.length === 0 ? getChapterArt(chapterData.bookCanonicalId, chapterData.number) : null;
   const period = getPeriod(chapterData.bookCanonicalId, chapterData.number);
+  const tReader = await getTranslations('reader');
 
   // Datos estructurados schema.org: Google los usa para mostrar la ruta
   // "Biblia › Génesis › 12" en los resultados en vez de la URL cruda.
@@ -163,59 +144,6 @@ export default async function ReaderPage({
     ],
   };
 
-  // Prev/next de capítulo. Se renderiza dos veces con distinta presentación
-  // —arriba en escritorio, en la barra del pulgar en móvil— pero cada copia
-  // vive tras un `display:none` del breakpoint contrario, así que en el árbol
-  // de accesibilidad solo existe una: ni landmarks duplicados ni paradas de
-  // tabulación de más. El aria-label repite el texto visible (WCAG 2.5.3).
-  const navLinkClass =
-    'inline-flex min-h-11 items-center gap-1.5 rounded-md border border-sand-200 bg-white/60 px-3 font-sans text-sm text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-700 dark:bg-stone-800/60 dark:text-sand-100';
-  const navDisabledClass =
-    'inline-flex min-h-11 items-center gap-1.5 rounded-md border border-transparent px-3 font-sans text-sm text-stone-300 dark:text-stone-600';
-
-  const chapterNav = (variant: 'top' | 'thumb') => {
-    const compact = variant === 'thumb';
-    return (
-      <nav
-        aria-label={tReader('sectionNav')}
-        className={
-          compact
-            ? 'flex shrink-0 items-center gap-1.5 lg:hidden'
-            : 'hidden items-center gap-1.5 lg:flex'
-        }
-      >
-        {prev ? (
-          <Link
-            href={`/leer/${prev.bookUrlSegment}/${prev.chapterNumber}${vsSuffix}`}
-            aria-label={`${tReader('ariaPrev')}: ${prev.bookName} ${prev.chapterNumber}`}
-            className={navLinkClass}
-          >
-            <span aria-hidden="true">←</span>
-            <span>{compact ? prev.chapterNumber : `${prev.bookName} ${prev.chapterNumber}`}</span>
-          </Link>
-        ) : (
-          <span aria-hidden="true" className={navDisabledClass}>
-            ←
-          </span>
-        )}
-        {next ? (
-          <Link
-            href={`/leer/${next.bookUrlSegment}/${next.chapterNumber}${vsSuffix}`}
-            aria-label={`${tReader('ariaNext')}: ${next.bookName} ${next.chapterNumber}`}
-            className={navLinkClass}
-          >
-            <span>{compact ? next.chapterNumber : `${next.bookName} ${next.chapterNumber}`}</span>
-            <span aria-hidden="true">→</span>
-          </Link>
-        ) : (
-          <span aria-hidden="true" className={navDisabledClass}>
-            →
-          </span>
-        )}
-      </nav>
-    );
-  };
-
   return (
     <>
       <script
@@ -231,7 +159,11 @@ export default async function ReaderPage({
           toda la pantalla y el panel del mapa se convoca desde la barra
           inferior (hoja deslizante). Lo gestiona ReaderShell, que necesita
           estado de cliente; el contenido de los paneles y de las barras sigue
-          viniendo renderizado desde el servidor. */}
+          viniendo renderizado desde el servidor. Prev/next se renderiza dos
+          veces con distinta presentación —arriba en escritorio, en la barra
+          del pulgar en móvil— pero cada copia vive tras un `display:none` del
+          breakpoint contrario, así que en el árbol de accesibilidad solo
+          existe una. */}
       <ReaderShell
         topBar={
           <div className="border-b border-sand-200 bg-sand-50/60 px-4 py-2.5 backdrop-blur sm:px-6 dark:border-stone-700 dark:bg-stone-900/60">
@@ -260,7 +192,7 @@ export default async function ReaderPage({
                 </ol>
               </nav>
 
-              {chapterNav('top')}
+              <ChapterNav prev={prev} next={next} variant="top" />
             </div>
           </div>
         }
@@ -268,36 +200,17 @@ export default async function ReaderPage({
         panelLabel={art ? tReader('sectionArt') : tReader('sectionMap')}
         toggleLabel={art ? tReader('panelArt') : tReader('panelMap')}
         versePlaces={versePlaces}
-        chapterNav={chapterNav('thumb')}
+        chapterNav={<ChapterNav prev={prev} next={next} variant="thumb" />}
         text={
-          <>
-            {/* key: al navegar entre capítulos el componente se remonta y el
-                estado local de marcadores arranca limpio desde el server. */}
-            <ChapterReader
-              key={`${chapterData.bookCanonicalId}-${chapterData.number}-${secondary?.versionCode ?? ''}`}
-              chapter={chapterData}
-              initialBookmarks={initialBookmarks}
-              initialAnnotations={initialAnnotations}
-              secondary={
-                secondary
-                  ? {
-                      versionFullName: secondary.versionFullName,
-                      copyright: secondary.copyright,
-                      lang: secondary.lang,
-                      byVerse: secondary.byVerse,
-                    }
-                  : null
-              }
-              headerExtra={
-                <CompareSelector
-                  basePath={`/leer/${book.toLowerCase()}/${chapterNumber}`}
-                  primaryVersionCode={versionForLocale(locale)}
-                  activeCode={secondary?.versionCode ?? null}
-                />
-              }
-            />
-            <ActiveVerseMarker />
-          </>
+          // key: al navegar entre capítulos el cliente del lector se remonta
+          // entero y el estado (personal, comparado) arranca limpio.
+          <ReaderClient
+            key={`${locale}-${chapterData.bookCanonicalId}-${chapterData.number}`}
+            chapter={chapterData}
+            basePath={basePath}
+            primaryVersionCode={versionForLocale(locale)}
+            locale={locale}
+          />
         }
         panel={
           // Con lugares: mapa sincronizado. Sin lugares: arte sacro del

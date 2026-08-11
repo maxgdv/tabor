@@ -48,26 +48,11 @@ export function versionForLocale(locale: string): string {
 }
 
 // --- Lectura comparada ------------------------------------------------------
-// Versiones disponibles como segunda columna. `param` viaja en ?vs= y `lang`
-// alimenta el atributo lang del texto secundario (a11y: pronunciación).
+// El catálogo de versiones y el saneado de ?vs= viven en lib/compare.ts
+// (cliente-seguro); se re-exportan aquí para el código de servidor existente.
 
-export type CompareOption = { code: string; param: string; lang: string };
-
-export const COMPARE_VERSIONS: CompareOption[] = [
-  { code: 'STRA', param: 'stra', lang: 'es' },
-  { code: 'CPDV', param: 'cpdv', lang: 'en' },
-  { code: 'VUL', param: 'vul', lang: 'la' },
-];
-
-/** Opción de comparación válida para `?vs=`, o `null` (incluye "contra sí misma"). */
-export function resolveCompare(
-  param: string | undefined,
-  primaryVersionCode: string,
-): CompareOption | null {
-  if (!param) return null;
-  const option = COMPARE_VERSIONS.find((v) => v.param === param.toLowerCase());
-  return option && option.code !== primaryVersionCode ? option : null;
-}
+export { COMPARE_VERSIONS, resolveCompare, type CompareOption } from './compare';
+import type { CompareOption } from './compare';
 
 export type SecondaryChapter = {
   versionCode: string;

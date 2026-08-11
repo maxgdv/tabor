@@ -20,12 +20,16 @@ const isPooled = connectionString.includes(':6543');
 // que `max`, postgres-js encola la sobrante y el pool queda envenenado: la
 // primera ráfaga responde y TODA query posterior cuelga indefinidamente
 // (reproducido A/B: max=5 con 6 paralelas → colgado; max=10 → perfecto).
-// `max` debe superar siempre el máximo de queries simultáneas de una
-// petición (hoy ~8: capítulo×2 + comparada + prev + next + sesión +
-// marcadores/anotaciones + listBooks del header). Si añades queries
-// paralelas a una página, sube este número.
+// `max` debe superar siempre el máximo de queries simultáneas — y con las
+// páginas estáticas (ISR bajo demanda) la unidad ya no es una petición sino
+// los renders concurrentes del mismo proceso: cada generación de capítulo
+// lanza ~5 queries (texto+geo + prev + next + listBooks del header), y justo
+// tras un deploy pueden coincidir varias generaciones en la misma instancia
+// (reproducido en local: 3 renders × 5 queries con max=12 → 2 colgados).
+// max=24 tolera 4 generaciones simultáneas y sigue lejos del límite de 200
+// conexiones del pooler en el plan Free de Supabase.
 const client = postgres(connectionString, {
-  max: 12,
+  max: 24,
   idle_timeout: 10,
   connect_timeout: 10,
   keep_alive: 20,

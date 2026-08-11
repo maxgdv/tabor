@@ -10,9 +10,7 @@ type Params = Promise<{ locale: string }>;
 
 // El versículo es el mismo para todos durante todo el día, pero el día
 // cambia: una hora de caché sirve la página al instante sin que el pasaje se
-// quede congelado. (Hoy el layout declara `force-dynamic` por culpa del
-// SiteHeader, así que esto solo entra en juego cuando esa restricción caiga;
-// se deja declarado porque es lo que le corresponde a esta página.)
+// quede congelado.
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {

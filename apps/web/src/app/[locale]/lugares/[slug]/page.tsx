@@ -18,6 +18,14 @@ import { VisitableSiteBlock } from '@/components/visit/VisitableSiteBlock';
 
 type Params = Promise<{ locale: string; slug: string }>;
 
+// Vacío a propósito: habilita la generación estática bajo demanda (ISR) de
+// las páginas de lugar sin exigir BD en el build.
+export function generateStaticParams() {
+  return [];
+}
+
+export const revalidate = 86400;
+
 /** Caracteres del versículo que caben en la meta description sin comerse el resto. */
 const SNIPPET_MAX = 58;
 

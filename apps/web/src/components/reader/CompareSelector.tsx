@@ -1,21 +1,28 @@
+'use client';
+
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
-import { COMPARE_VERSIONS } from '@/lib/bible';
+import { COMPARE_VERSIONS, resolveCompare } from '@/lib/compare';
 
 type Props = {
   /** /leer/gen/12 — ruta del capítulo sin query. */
   basePath: string;
   primaryVersionCode: string;
-  /** Código de la versión comparada activa, o null. */
-  activeCode: string | null;
 };
 
 /**
- * Pastillas de lectura comparada: enlaces server-rendered (?vs=) — sin estado
- * de cliente, el modo viaja en la URL y sobrevive a prev/next. La versión
- * primaria no se ofrece contra sí misma.
+ * Pastillas de lectura comparada: enlaces ?vs= — el modo viaja en la URL y
+ * sobrevive a prev/next. Componente de cliente porque la página es estática
+ * y el estado activo sale de `useSearchParams` al hidratar; el HTML estático
+ * (fallback del Suspense) lleva las mismas pastillas con "solo texto" activo.
  */
-export function CompareSelector({ basePath, primaryVersionCode, activeCode }: Props) {
+function CompareSelectorPills({
+  basePath,
+  primaryVersionCode,
+  activeCode,
+}: Props & { activeCode: string | null }) {
   const t = useTranslations('reader.compare');
   const options = COMPARE_VERSIONS.filter((v) => v.code !== primaryVersionCode);
 
@@ -50,5 +57,19 @@ export function CompareSelector({ basePath, primaryVersionCode, activeCode }: Pr
         </Link>
       ))}
     </nav>
+  );
+}
+
+function CompareSelectorWithQuery(props: Props) {
+  const vs = useSearchParams().get('vs');
+  const activeCode = resolveCompare(vs ?? undefined, props.primaryVersionCode)?.code ?? null;
+  return <CompareSelectorPills {...props} activeCode={activeCode} />;
+}
+
+export function CompareSelector(props: Props) {
+  return (
+    <Suspense fallback={<CompareSelectorPills {...props} activeCode={null} />}>
+      <CompareSelectorWithQuery {...props} />
+    </Suspense>
   );
 }
