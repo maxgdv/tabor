@@ -142,6 +142,18 @@
     "spec": "Source code on GitHub",
     "navLabel": "Footer links"
   },
+  "feedback": {
+    "title": "Comments and questions",
+    "lede": "A question about a passage, an error on the map, an idea? Tell us. We read every message, even if we can't always reply.",
+    "bodyLabel": "Your message",
+    "bodyPlaceholder": "Write your comment or question here…",
+    "emailLabel": "Email (optional)",
+    "emailHint": "Only if you'd like a reply; we won't use it for anything else.",
+    "submit": "Send",
+    "submitting": "Sending…",
+    "sent": "Received, thank you. If you left your email or have an account, we'll get back to you when we can.",
+    "error": "The message could not be sent. Please try again in a moment."
+  },
   "reader": {
     "geoCredits": "Geographic data: <link>OpenBible.info Bible Geocoding Data</link> (CC-BY 4.0).",
     "prevChapter": "Previous chapter",

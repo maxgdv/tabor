@@ -2,11 +2,12 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 
 export async function SiteFooter() {
-  const [t, tVerse, tPlaces, tVisit] = await Promise.all([
+  const [t, tVerse, tPlaces, tVisit, tFeedback] = await Promise.all([
     getTranslations('footer'),
     getTranslations('verseOfDay'),
     getTranslations('places'),
     getTranslations('visit'),
+    getTranslations('feedback'),
   ]);
   const year = new Date().getFullYear();
 
@@ -40,6 +41,12 @@ export async function SiteFooter() {
             className="underline-offset-2 hover:text-stone-700 hover:underline dark:hover:text-sand-200"
           >
             {tVisit('title')}
+          </Link>
+          <Link
+            href="/comentarios"
+            className="underline-offset-2 hover:text-stone-700 hover:underline dark:hover:text-sand-200"
+          >
+            {tFeedback('title')}
           </Link>
           <a
             href="https://github.com/maxgdv/tabor"

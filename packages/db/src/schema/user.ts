@@ -172,6 +172,24 @@ export const note = pgTable(
   (t) => [uniqueIndex('note_user_start_verse_idx').on(t.userId, t.startVerseId)],
 );
 
+// Buzón de comentarios y preguntas (fase 1: sin nada público). Se lee desde
+// el panel de Supabase / drizzle studio; no hay UI de administración.
+export const feedback = pgTable(
+  'feedback',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    // Si el remitente tenía sesión; se conserva el mensaje aunque borre la cuenta.
+    userId: uuid('user_id').references(() => appUser.id, { onDelete: 'set null' }),
+    // Contacto opcional para remitentes anónimos que quieran respuesta.
+    email: citext('email'),
+    // Ruta desde la que llegó al formulario (referrer del mismo origen).
+    fromPath: text('from_path'),
+    body: text('body').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  // Deny-all para PostgREST, como el resto de tablas (ver 0005_enable_rls).
+).enableRLS();
+
 export const donation = pgTable('donation', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid('user_id').references(() => appUser.id, { onDelete: 'set null' }),

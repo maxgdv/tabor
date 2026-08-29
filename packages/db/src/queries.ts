@@ -7,7 +7,7 @@ import { alias } from 'drizzle-orm/pg-core';
 import { db } from './index';
 import { book, bookTranslation, chapter, verse, verseText, version } from './schema/bible';
 import { place, placeAlternateName, verseLocation } from './schema/geo';
-import { bookmark, highlight, note, planProgress } from './schema/user';
+import { bookmark, feedback, highlight, note, planProgress } from './schema/user';
 import { escapeLike, foldJs, foldSql } from './text';
 
 export type DbVerse = {
@@ -1227,4 +1227,23 @@ export async function listPlaceMentions(opts: {
     verseNumber: Number(r.verse_number),
     text: r.text,
   }));
+}
+
+/**
+ * Guarda un mensaje del buzón de comentarios y preguntas. `userId` si había
+ * sesión; `email` para anónimos que quieran respuesta; `fromPath` la ruta
+ * desde la que se llegó al formulario. La validación vive en la API route.
+ */
+export async function createFeedback(opts: {
+  userId: string | null;
+  email: string | null;
+  fromPath: string | null;
+  body: string;
+}): Promise<void> {
+  await db.insert(feedback).values({
+    userId: opts.userId,
+    email: opts.email,
+    fromPath: opts.fromPath,
+    body: opts.body,
+  });
 }

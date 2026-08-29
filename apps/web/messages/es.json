@@ -142,6 +142,18 @@
     "spec": "Código fuente en GitHub",
     "navLabel": "Enlaces del pie"
   },
+  "feedback": {
+    "title": "Comentarios y preguntas",
+    "lede": "¿Una duda sobre un pasaje, un error en el mapa, una idea? Cuéntanosla. Leemos todos los mensajes, aunque no siempre podamos responder.",
+    "bodyLabel": "Tu mensaje",
+    "bodyPlaceholder": "Escribe aquí tu comentario o pregunta…",
+    "emailLabel": "Email (opcional)",
+    "emailHint": "Solo si quieres que te respondamos; no lo usaremos para nada más.",
+    "submit": "Enviar",
+    "submitting": "Enviando…",
+    "sent": "Recibido, gracias. Si dejaste tu email o tienes cuenta, te responderemos cuando podamos.",
+    "error": "No se pudo enviar el mensaje. Inténtalo de nuevo en un momento."
+  },
   "reader": {
     "geoCredits": "Datos geográficos: <link>OpenBible.info Bible Geocoding Data</link> (CC-BY 4.0).",
     "prevChapter": "Capítulo anterior",
