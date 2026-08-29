@@ -18,6 +18,7 @@ type Props = {
 export function UserMenu({ name, email }: Props) {
   const t = useTranslations('auth');
   const tHeader = useTranslations('header');
+  const tFeedback = useTranslations('feedback');
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -90,6 +91,15 @@ export function UserMenu({ name, email }: Props) {
             className="block px-3 py-2 font-sans text-sm text-stone-700 hover:bg-sand-100 dark:text-sand-100 dark:hover:bg-stone-800"
           >
             {t('notesTitle')}
+          </Link>
+          {/* El buzón también vive en el pie, pero el pie queda al final de
+              cada capítulo: aquí está siempre a un click. */}
+          <Link
+            href="/comentarios"
+            onClick={() => setOpen(false)}
+            className="block border-t border-sand-200 px-3 py-2 font-sans text-sm text-stone-700 hover:bg-sand-100 dark:border-stone-700 dark:text-sand-100 dark:hover:bg-stone-800"
+          >
+            {tFeedback('title')}
           </Link>
           <button
             type="button"
