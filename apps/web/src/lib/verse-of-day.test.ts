@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CHAPTER_COUNTS } from '@tabor/db/chapter-counts';
 import { VERSE_POOL } from './data/verse-pool';
-import { dayIndex, formatReference, referenceDay, verseOfDay } from './verse-of-day';
+import { dayIndex, formatReference, referenceDay, stripUnpairedQuotes, verseOfDay } from './verse-of-day';
 import { getLiturgicalSeason } from './liturgical';
 import type { LiturgicalSeason } from './routes';
 
@@ -158,5 +158,41 @@ describe('formatReference', () => {
     expect(formatReference({ book: 'MAT', chapter: 5, verses: [3, 10] }, 'Mateo')).toBe(
       'Mateo 5, 3-10',
     );
+  });
+});
+
+describe('stripUnpairedQuotes', () => {
+  it('quita la comilla de apertura sin cierre (Jn 14, 1 en CPDV)', () => {
+    expect(
+      stripUnpairedQuotes(['“Do not let your heart be troubled. Believe in me also.']),
+    ).toEqual(['Do not let your heart be troubled. Believe in me also.']);
+  });
+
+  it('quita un cierre huérfano al final del extracto', () => {
+    expect(stripUnpairedQuotes(['and you shall find rest for your souls.”'])).toEqual([
+      'and you shall find rest for your souls.',
+    ]);
+  });
+
+  it('conserva los pares completos, incluso repartidos entre versículos', () => {
+    const texts = ['He said: “Come', 'and see.” And they went.'];
+    expect(stripUnpairedQuotes(texts)).toEqual(texts);
+  });
+
+  it('quita solo la huérfana cuando conviven con un par completo', () => {
+    expect(stripUnpairedQuotes(['“He said: “I am.”'])).toEqual(['He said: “I am.”']);
+  });
+
+  it('maneja también las angulares « »', () => {
+    expect(stripUnpairedQuotes(['«Venid a mí todos los que estáis cansados'])).toEqual([
+      'Venid a mí todos los que estáis cansados',
+    ]);
+  });
+
+  it('no toca textos sin comillas ni deja espacios dobles', () => {
+    expect(stripUnpairedQuotes(['No se turbe vuestro corazón.'])).toEqual([
+      'No se turbe vuestro corazón.',
+    ]);
+    expect(stripUnpairedQuotes(['dijo: “ y calló'])).toEqual(['dijo: y calló']);
   });
 });

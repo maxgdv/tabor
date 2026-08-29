@@ -14,7 +14,12 @@ import { cache } from 'react';
 import { getChapter, type Verse } from './bible';
 import { getLiturgicalSeason } from './liturgical';
 import type { LiturgicalSeason } from './routes';
-import { formatReference, verseOfDay, type VerseOfDayEntry } from './verse-of-day';
+import {
+  formatReference,
+  stripUnpairedQuotes,
+  verseOfDay,
+  type VerseOfDayEntry,
+} from './verse-of-day';
 
 export type VerseOfDayContent = {
   entry: VerseOfDayEntry;
@@ -47,8 +52,13 @@ export const getVerseOfDayContent = cache(
     if (!chapter) return null;
 
     const [from, to] = entry.verses;
-    const verses = chapter.verses.filter((v) => v.number >= from && v.number <= to);
-    if (verses.length === 0) return null;
+    const inRange = chapter.verses.filter((v) => v.number >= from && v.number <= to);
+    if (inRange.length === 0) return null;
+
+    // Fuera de su capítulo, un diálogo abierto en el extracto puede quedarse
+    // con comillas sin cerrar (Jn 14, 1 en CPDV): se retiran las huérfanas.
+    const texts = stripUnpairedQuotes(inRange.map((v) => v.text));
+    const verses = inRange.map((v, i) => ({ ...v, text: texts[i]! }));
 
     return {
       entry,

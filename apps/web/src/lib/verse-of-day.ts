@@ -77,6 +77,47 @@ export function verseOfDay(date: Date): VerseOfDayEntry {
   return pool[index]!;
 }
 
+// Pares tipográficos inequívocos. Las comillas rectas (") quedan fuera: el
+// mismo carácter abre y cierra y no se puede saber cuál sobra.
+const QUOTE_PAIRS: ReadonlyArray<readonly [string, string]> = [
+  ['“', '”'],
+  ['«', '»'],
+];
+
+/**
+ * Quita las comillas que quedan sin pareja al extraer un rango de versículos
+ * de su capítulo. Algunas traducciones (CPDV, p. ej.) abren un diálogo en un
+ * versículo y lo cierran varios más adelante — Jn 14, 1 empieza con “ y el
+ * cierre llega en el v. 4 —, así que el extracto suelto hereda comillas
+ * huérfanas. En el lector, con el capítulo entero, se ven bien; aquí se
+ * retiran las que no casan dentro del propio extracto.
+ */
+export function stripUnpairedQuotes(texts: string[]): string[] {
+  const drop = new Set<string>(); // claves "índiceVersículo:índiceCarácter"
+  for (const [open, close] of QUOTE_PAIRS) {
+    const unmatchedOpens: string[] = [];
+    texts.forEach((text, vi) => {
+      for (let ci = 0; ci < text.length; ci++) {
+        if (text[ci] === open) unmatchedOpens.push(`${vi}:${ci}`);
+        else if (text[ci] === close) {
+          if (unmatchedOpens.length > 0) unmatchedOpens.pop();
+          else drop.add(`${vi}:${ci}`); // cierre sin apertura previa
+        }
+      }
+    });
+    for (const pos of unmatchedOpens) drop.add(pos); // aperturas sin cierre
+  }
+  if (drop.size === 0) return texts;
+  return texts.map((text, vi) => {
+    let out = '';
+    for (let ci = 0; ci < text.length; ci++) {
+      if (!drop.has(`${vi}:${ci}`)) out += text[ci];
+    }
+    // Sin la comilla puede quedar un espacio doble en medio o colgando.
+    return out.replace(/ {2,}/g, ' ').trim();
+  });
+}
+
 /** Referencia legible «Juan 3, 16» / «Juan 3, 16-18». */
 export function formatReference(entry: VerseOfDayEntry, bookName: string): string {
   const [from, to] = entry.verses;
