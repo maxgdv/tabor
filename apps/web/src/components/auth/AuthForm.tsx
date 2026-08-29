@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
 import { authClient } from '@/lib/auth-client';
 import { authErrorKey } from '@/lib/auth-errors';
 
@@ -151,6 +151,15 @@ export function AuthForm() {
             ? t('submitting')
             : t(mode === 'signin' ? 'submitSignIn' : 'submitSignUp')}
         </button>
+
+        {mode === 'signin' && (
+          <Link
+            href="/recuperar"
+            className="block text-center font-sans text-xs text-stone-500 underline-offset-2 hover:text-stone-700 hover:underline dark:text-stone-400 dark:hover:text-sand-200"
+          >
+            {t('forgotPassword')}
+          </Link>
+        )}
       </form>
     </div>
   );
