@@ -12,6 +12,7 @@ import { HeaderAuth } from './HeaderAuth';
 export async function SiteHeader() {
   const locale = await getLocale();
   const t = await getTranslations('header');
+  const tFeedback = await getTranslations('feedback');
   const books = await getBooks(versionForLocale(locale));
 
   return (
@@ -37,6 +38,29 @@ export async function SiteHeader() {
           <SearchBox />
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:ml-0 sm:gap-3">
+          {/* Entrada visible del buzón: el enlace del pie no se descubre (queda
+              al final de cada capítulo). Icono solo en móvil, texto en ≥md. */}
+          <Link
+            href="/comentarios"
+            aria-label={tFeedback('title')}
+            title={tFeedback('title')}
+            className="flex h-11 shrink-0 items-center gap-1.5 rounded-md border border-stone-300 px-2.5 font-sans text-sm text-stone-600 hover:text-stone-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lapis-500 dark:border-stone-600 dark:text-sand-200 dark:hover:text-sand-100"
+          >
+            <svg
+              aria-hidden="true"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+            </svg>
+            <span className="hidden md:inline">{tFeedback('headerLabel')}</span>
+          </Link>
           <LocaleSwitcher locales={routing.locales} label={t('switchLanguage')} />
           <HeaderAuth />
         </div>

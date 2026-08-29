@@ -72,6 +72,8 @@
     "passwordLabel": "Contraseña",
     "passwordHint": "Mínimo 8 caracteres",
     "forgotPassword": "¿Has olvidado tu contraseña?",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
     "resetTitle": "Recuperar contraseña",
     "resetLede": "Dinos tu email y te enviaremos un enlace para elegir una contraseña nueva.",
     "resetSubmitRequest": "Enviarme el enlace",
@@ -154,6 +156,7 @@
   },
   "feedback": {
     "title": "Comentarios y preguntas",
+    "headerLabel": "Comentarios",
     "lede": "¿Una duda sobre un pasaje, un error en el mapa, una idea? Cuéntanosla. Leemos todos los mensajes, aunque no siempre podamos responder.",
     "bodyLabel": "Tu mensaje",
     "bodyPlaceholder": "Escribe aquí tu comentario o pregunta…",

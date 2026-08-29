@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import { authClient } from '@/lib/auth-client';
+import { PasswordInput } from './PasswordInput';
 
 /**
  * Recuperación de contraseña en dos tiempos sobre la misma página:
@@ -73,14 +74,12 @@ export function PasswordResetForm() {
           <span className="mb-1 block font-sans text-xs font-medium text-stone-600 dark:text-sand-200">
             {t('resetNewPasswordLabel')}
           </span>
-          <input
-            type="password"
+          <PasswordInput
             required
             minLength={8}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             autoComplete="new-password"
-            className={inputClass}
           />
           <span className="mt-1 block font-sans text-xs text-stone-500 dark:text-stone-400">
             {t('passwordHint')}

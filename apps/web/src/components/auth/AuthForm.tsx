@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
 import { authClient } from '@/lib/auth-client';
 import { authErrorKey } from '@/lib/auth-errors';
+import { PasswordInput } from './PasswordInput';
 
 type Mode = 'signin' | 'signup';
 
@@ -120,14 +121,12 @@ export function AuthForm() {
           <span className="mb-1 block font-sans text-xs font-medium text-stone-600 dark:text-sand-200">
             {t('passwordLabel')}
           </span>
-          <input
-            type="password"
+          <PasswordInput
             required
             minLength={8}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-            className={inputClass}
           />
           {mode === 'signup' && (
             <span className="mt-1 block font-sans text-xs text-stone-500 dark:text-stone-400">

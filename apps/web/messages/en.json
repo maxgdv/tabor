@@ -72,6 +72,8 @@
     "passwordLabel": "Password",
     "passwordHint": "At least 8 characters",
     "forgotPassword": "Forgot your password?",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "resetTitle": "Reset password",
     "resetLede": "Tell us your email and we'll send you a link to choose a new password.",
     "resetSubmitRequest": "Send me the link",
@@ -154,6 +156,7 @@
   },
   "feedback": {
     "title": "Comments and questions",
+    "headerLabel": "Feedback",
     "lede": "A question about a passage, an error on the map, an idea? Tell us. We read every message, even if we can't always reply.",
     "bodyLabel": "Your message",
     "bodyPlaceholder": "Write your comment or question here…",
