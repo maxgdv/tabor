@@ -24,7 +24,8 @@ export function generateStaticParams() {
   return [];
 }
 
-export const revalidate = 86400;
+// 30 días, como los capítulos (ver el porqué en leer/[book]/[chapter]/page.tsx).
+export const revalidate = 2592000;
 
 /** Caracteres del versículo que caben en la meta description sin comerse el resto. */
 const SNIPPET_MAX = 58;

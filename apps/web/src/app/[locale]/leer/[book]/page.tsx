@@ -16,7 +16,8 @@ export function generateStaticParams() {
   return [];
 }
 
-export const revalidate = 86400;
+// 30 días, como los capítulos (ver el porqué en [chapter]/page.tsx).
+export const revalidate = 2592000;
 
 type Params = Promise<{ locale: string; book: string }>;
 

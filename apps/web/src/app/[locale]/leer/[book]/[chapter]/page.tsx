@@ -27,8 +27,11 @@ const VERSION_BY_LOCALE: Record<string, string> = {
 //
 // Sin generateStaticParams: los capítulos se generan bajo demanda en la
 // primera visita (ISR) y quedan cacheados; así el build no necesita BD.
-// Un día de revalidación deja propagar correcciones del texto sin redesplegar.
-export const revalidate = 86400;
+// Revalidación a 30 días: con 24 h, los bots que recorren a diario casi todas
+// las páginas forzaban una regeneración por página y día y acercaban los ISR
+// Writes al tope del plan Hobby (171K/200K en oct-2026). Una corrección del
+// texto tarda hasta 30 días en verse, o aparece en el siguiente deploy.
+export const revalidate = 2592000;
 
 // Vacío a propósito: sin él Next trataría la ruta como dinámica pura (una
 // invocación por visita); con él, cada capítulo se genera en su primera
