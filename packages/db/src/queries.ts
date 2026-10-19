@@ -1247,3 +1247,12 @@ export async function createFeedback(opts: {
     body: opts.body,
   });
 }
+
+/** Mensajes del buzón recibidos desde `since` (para limitar los avisos por email). */
+export async function countFeedbackSince(since: Date): Promise<number> {
+  const [row] = await db
+    .select({ c: sql<number>`count(*)::int` })
+    .from(feedback)
+    .where(gte(feedback.createdAt, since));
+  return row?.c ?? 0;
+}

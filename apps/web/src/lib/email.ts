@@ -9,6 +9,8 @@ export async function sendEmail(opts: {
   to: string;
   subject: string;
   text: string;
+  /** Dirección a la que va la respuesta si el destinatario pulsa «Responder». */
+  replyTo?: string;
 }): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -22,7 +24,13 @@ export async function sendEmail(opts: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ from: FROM, to: opts.to, subject: opts.subject, text: opts.text }),
+    body: JSON.stringify({
+      from: FROM,
+      to: opts.to,
+      subject: opts.subject,
+      text: opts.text,
+      ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
+    }),
   });
   if (!res.ok) {
     // El cuerpo de error de Resend no lleva secretos; al log para diagnóstico.

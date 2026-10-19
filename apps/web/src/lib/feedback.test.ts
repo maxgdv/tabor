@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FEEDBACK_MAX_LENGTH, parseFeedbackBody } from './feedback';
+import { FEEDBACK_MAX_LENGTH, feedbackNotificationEmail, parseFeedbackBody } from './feedback';
 
 describe('parseFeedbackBody', () => {
   it('acepta un mensaje mínimo y recorta espacios', () => {
@@ -48,5 +48,48 @@ describe('parseFeedbackBody', () => {
         fromPath: null,
       });
     }
+  });
+});
+
+describe('feedbackNotificationEmail', () => {
+  const base = {
+    body: 'Hola',
+    contactEmail: null,
+    withAccount: false,
+    fromPath: null,
+    siteUrl: 'https://proyectotabor.org',
+  };
+
+  it('pone el mensaje en el asunto y en el cuerpo', () => {
+    const { subject, text } = feedbackNotificationEmail({
+      ...base,
+      body: '¿Dónde\nestaba Emaús?',
+      contactEmail: 'ana@example.com',
+      fromPath: '/es/leer/luc/24',
+    });
+    expect(subject).toBe('Buzón de Proyecto Tabor: «¿Dónde estaba Emaús?»');
+    expect(text).toContain('De: ana@example.com\n');
+    expect(text).toContain('Desde: https://proyectotabor.org/es/leer/luc/24');
+    expect(text).toContain('---\n¿Dónde\nestaba Emaús?\n---');
+    expect(text).toContain('Responde a este correo');
+  });
+
+  it('recorta el asunto de los mensajes largos', () => {
+    const { subject } = feedbackNotificationEmail({ ...base, body: 'palabra '.repeat(20) });
+    expect(subject).toBe(`Buzón de Proyecto Tabor: «${'palabra '.repeat(7).trimEnd()}…»`);
+  });
+
+  it('distingue cuenta, anónimo y página desconocida', () => {
+    const withAccount = feedbackNotificationEmail({
+      ...base,
+      contactEmail: 'ana@example.com',
+      withAccount: true,
+    });
+    expect(withAccount.text).toContain('De: ana@example.com (con cuenta)');
+
+    const anonymous = feedbackNotificationEmail(base);
+    expect(anonymous.text).toContain('De: anónimo, sin email de contacto');
+    expect(anonymous.text).toContain('Desde: desconocida');
+    expect(anonymous.text).toContain('No se puede responder');
   });
 });
