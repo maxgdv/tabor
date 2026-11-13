@@ -83,7 +83,6 @@ export default async function ReaderPage({ params }: { params: Params }) {
 
   const versionCode = VERSION_BY_LOCALE[locale] ?? 'STRA';
   const upperBook = book.toUpperCase();
-  const basePath = `/leer/${book.toLowerCase()}/${chapterNumber}`;
 
   // Capítulo, vecinos y traducciones — en paralelo.
   const [chapterData, prev, next, tBooks] = await Promise.all([
@@ -211,7 +210,6 @@ export default async function ReaderPage({ params }: { params: Params }) {
           <ReaderClient
             key={`${locale}-${chapterData.bookCanonicalId}-${chapterData.number}`}
             chapter={chapterData}
-            basePath={basePath}
             primaryVersionCode={versionForLocale(locale)}
             locale={locale}
             // Renderizado en servidor y pasado como prop: los enlaces a las

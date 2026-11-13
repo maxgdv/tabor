@@ -3,28 +3,43 @@
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
 import { COMPARE_VERSIONS, resolveCompare } from '@/lib/compare';
 
 type Props = {
-  /** /leer/gen/12 — ruta del capítulo sin query. */
-  basePath: string;
   primaryVersionCode: string;
 };
 
 /**
- * Pastillas de lectura comparada: enlaces ?vs= — el modo viaja en la URL y
- * sobrevive a prev/next. Componente de cliente porque la página es estática
- * y el estado activo sale de `useSearchParams` al hidratar; el HTML estático
- * (fallback del Suspense) lleva las mismas pastillas con "solo texto" activo.
+ * Pastillas de lectura comparada. El modo sigue viajando en la URL (?vs=) —
+ * se puede compartir y sobrevive a prev/next—, pero las pastillas son botones
+ * y no enlaces.
+ *
+ * Como enlaces, cada capítulo ofrecía a los rastreadores dos URLs más
+ * (`?vs=cpdv`, `?vs=vul`) con el mismo texto: Google llegó a mostrar esas
+ * variantes en resultados pese a su canónica, Next las precargaba en cada
+ * visita, y cada bot que las seguía disparaba /api/chapter-secondary (98
+ * invocaciones en 12 h, nov-2026). Un botón no se rastrea ni se precarga.
+ *
+ * `history.pushState` en vez del router: Next sincroniza `useSearchParams`
+ * con el historial nativo, así que el cambio de modo no pide nada al servidor
+ * (la página es la misma; solo cambia la segunda columna, que ReaderClient
+ * trae por su cuenta) y el botón Atrás deshace el cambio, como antes.
+ *
+ * Componente de cliente porque la página es estática y el estado activo sale
+ * de `useSearchParams` al hidratar; el HTML estático (fallback del Suspense)
+ * lleva las mismas pastillas con «solo lectura» activo.
  */
 function CompareSelectorPills({
-  basePath,
   primaryVersionCode,
   activeCode,
 }: Props & { activeCode: string | null }) {
   const t = useTranslations('reader.compare');
   const options = COMPARE_VERSIONS.filter((v) => v.code !== primaryVersionCode);
+
+  const select = (param: string | null) => {
+    const { pathname, hash } = window.location;
+    window.history.pushState(null, '', `${pathname}${param ? `?vs=${param}` : ''}${hash}`);
+  };
 
   const pill = (active: boolean) =>
     // py-1.5: en móvil la pastilla de 22 px era un objetivo táctil escaso.
@@ -35,28 +50,33 @@ function CompareSelectorPills({
     }`;
 
   return (
-    <nav aria-label={t('label')} className="flex flex-wrap items-center gap-1.5">
-      <span className="font-sans text-xs uppercase tracking-wide text-stone-500 dark:text-stone-400">
+    <div role="group" aria-label={t('label')} className="flex flex-wrap items-center gap-1.5">
+      <span
+        aria-hidden="true"
+        className="font-sans text-xs uppercase tracking-wide text-stone-500 dark:text-stone-400"
+      >
         {t('label')}
       </span>
-      <Link
-        href={basePath}
+      <button
+        type="button"
+        onClick={() => select(null)}
+        aria-pressed={activeCode === null}
         className={pill(activeCode === null)}
-        aria-current={activeCode === null ? 'true' : undefined}
       >
         {t('none')}
-      </Link>
+      </button>
       {options.map((option) => (
-        <Link
+        <button
           key={option.code}
-          href={`${basePath}?vs=${option.param}`}
+          type="button"
+          onClick={() => select(option.param)}
+          aria-pressed={activeCode === option.code}
           className={pill(activeCode === option.code)}
-          aria-current={activeCode === option.code ? 'true' : undefined}
         >
           {t(option.param)}
-        </Link>
+        </button>
       ))}
-    </nav>
+    </div>
   );
 }
 

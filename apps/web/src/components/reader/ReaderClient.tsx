@@ -42,13 +42,11 @@ function VsWatcher({ onChange }: { onChange: (vs: string | null) => void }) {
  */
 export function ReaderClient({
   chapter,
-  basePath,
   primaryVersionCode,
   locale,
   afterText,
 }: {
   chapter: Chapter;
-  basePath: string;
   primaryVersionCode: string;
   locale: string;
   /** Bloque renderizado en servidor que va tras el texto del capítulo. */
@@ -114,9 +112,7 @@ export function ReaderClient({
         initialBookmarks={personalState?.bookmarks ?? null}
         initialAnnotations={personalState?.annotations ?? null}
         secondary={secondaryText}
-        headerExtra={
-          <CompareSelector basePath={basePath} primaryVersionCode={primaryVersionCode} />
-        }
+        headerExtra={<CompareSelector primaryVersionCode={primaryVersionCode} />}
         afterText={afterText}
       />
       <ActiveVerseMarker />
