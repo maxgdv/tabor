@@ -4,7 +4,8 @@ import { useEffect, useRef, useSyncExternalStore } from 'react';
 // Se importa el dato en crudo, no los helpers de `lib/places`: aquéllos
 // arrastran el catálogo de rutas y esto es un componente de cliente.
 import { REGION_PLACE_SLUGS } from '@/lib/data/place-regions';
-import maplibregl, { Marker, Popup, type Map as MapLibreMap } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import { Marker, Popup, type Map as MapLibreMap } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useLocale, useTranslations } from 'next-intl';
 import { useReaderStore } from '@/lib/reader-store';
@@ -29,8 +30,31 @@ const OVERVIEW_ZOOM = 5;
 // A partir de cuántos lugares las etiquetas persistentes se solapan en una
 // sopa ilegible (Josué 15 tiene 163). En capítulos densos solo se muestran
 // desde este zoom; el hover y el versículo activo las fuerzan una a una.
+// (9.5 y no 7.5: el encuadre inicial llega ahora hasta INITIAL_MAX_ZOOM, y
+// con el umbral antiguo un capítulo denso abría ya con todas las etiquetas.)
 const DENSE_PLACE_THRESHOLD = 40;
-const LABEL_MIN_ZOOM = 7.5;
+const LABEL_MIN_ZOOM = 9.5;
+
+// Hasta dónde se acerca el mapa. Antes todo se quedaba en zoom 6 (unos
+// 1.400 km de lado a lado): en un capítulo como Juan 4, cuyos lugares caben
+// en 130 km, el mapa «volaba» al versículo activo sin moverse apenas, y la
+// sincronía pasaje↔mapa —lo que distingue a Tabor— no se percibía.
+//   · PLACE_ZOOM: un asentamiento o un accidente concreto (≈90 km de ancho:
+//     Cafarnaúm con el lago entero alrededor).
+//   · REGION_ZOOM: regiones y países, cuyo punto en el atlas es solo
+//     representativo (Egipto → un barrio de El Cairo); acercarse más ahí
+//     sería afirmar una precisión que el dato no tiene.
+//   · INITIAL_MAX_ZOOM: tope del encuadre inicial con todos los lugares del
+//     capítulo.
+const PLACE_ZOOM = 10;
+const REGION_ZOOM = 7.5;
+const INITIAL_MAX_ZOOM = 9;
+const zoomForPlace = (slug: string) => (REGION_PLACE_SLUGS.has(slug) ? REGION_ZOOM : PLACE_ZOOM);
+
+// Separación mínima, en píxeles de pantalla, entre dos marcadores visibles.
+// Por debajo, el segundo se recoge en el primero, que muestra «+n». Un pin
+// mide unos 27 px de ancho: con 30 dejan de pisarse.
+const MARKER_MIN_GAP_PX = 30;
 
 // --- Persistencia de la preferencia de estilo en localStorage ----------
 type MapStyleId = 'vector' | 'satellite';
@@ -65,6 +89,9 @@ export function BibleMap({ chapter, places, period }: Props) {
   // Recalcula qué etiquetas se ven; lo comparten el listener de zoom del
   // mapa y el efecto de versículo activo (que marca data-active).
   const labelVisibilityRef = useRef<() => void>(() => {});
+  // Reagrupa los marcadores que se pisan; lo llaman el mapa al terminar cada
+  // movimiento y el efecto de versículo activo (que decide cuáles no se ocultan).
+  const declutterRef = useRef<() => void>(() => {});
 
   const activeVerse = useReaderStore((s) => s.activeVerseNumber);
   const requestScrollTo = useReaderStore((s) => s.requestScrollTo);
@@ -183,7 +210,7 @@ export function BibleMap({ chapter, places, period }: Props) {
         bounds.extend([place.lng, place.lat]);
       }
       if (!bounds.isEmpty()) {
-        map.fitBounds(bounds, { padding: 80, duration: 0, maxZoom: 6 });
+        map.fitBounds(bounds, { padding: 80, duration: 0, maxZoom: INITIAL_MAX_ZOOM });
       }
 
       for (const place of places) {
@@ -213,6 +240,9 @@ export function BibleMap({ chapter, places, period }: Props) {
         markerEl.setAttribute('tabindex', '0');
         markerEl.setAttribute('role', 'button');
         markerEl.setAttribute('aria-label', place.name);
+        // El nombre a secas, para recomponer el aria-label cuando el marcador
+        // agrupa a otros («Hebrón (+4)») o deja de hacerlo.
+        markerEl.dataset.placeName = place.name;
         const goToVerse = () => {
           const firstVerse = chapter.verses.find((v) => v.placeSlugs.includes(place.slug));
           if (firstVerse) requestScrollTo(firstVerse.number);
@@ -238,9 +268,69 @@ export function BibleMap({ chapter, places, period }: Props) {
           label.style.display = showAll || el.dataset.active === 'true' ? '' : 'none';
         });
       };
+      // Marcadores amontonados: en Josué 15 hay 163 pines y a zoom lejano
+      // forman una mancha en la que no se distingue ni se puede pulsar
+      // ninguno. Tras cada movimiento se recorre la lista —los del versículo
+      // activo primero, luego en orden de aparición— y el que cae a menos de
+      // MARKER_MIN_GAP_PX de uno ya visible se recoge en él, que enseña
+      // cuántos agrupa. Al acercarse se separan solos. No se pierde acceso a
+      // ningún lugar: todos siguen en la lista «Lugares de este capítulo»
+      // bajo el texto, y el del versículo activo nunca se oculta.
+      const declutterMarkers = () => {
+        const entries = Array.from(markersRef.current.values()).map((marker, order) => {
+          const el = marker.getElement();
+          return {
+            el,
+            order,
+            active: el.dataset.active === 'true',
+            point: map.project(marker.getLngLat()),
+          };
+        });
+        entries.sort((a, b) => Number(b.active) - Number(a.active) || a.order - b.order);
+
+        const kept: { x: number; y: number; el: HTMLElement; hidden: number }[] = [];
+        for (const entry of entries) {
+          const host = entry.active
+            ? undefined
+            : kept.find(
+                (k) =>
+                  Math.hypot(k.x - entry.point.x, k.y - entry.point.y) < MARKER_MIN_GAP_PX,
+              );
+          if (host) {
+            entry.el.style.display = 'none';
+            host.hidden += 1;
+          } else {
+            entry.el.style.display = '';
+            kept.push({ x: entry.point.x, y: entry.point.y, el: entry.el, hidden: 0 });
+          }
+        }
+
+        for (const { el, hidden } of kept) {
+          let badge = el.querySelector<HTMLElement>('.tabor-marker-count');
+          if (hidden === 0) {
+            badge?.remove();
+            el.setAttribute('aria-label', el.dataset.placeName ?? '');
+            continue;
+          }
+          if (!badge) {
+            badge = document.createElement('span');
+            badge.className =
+              'tabor-marker-count pointer-events-none absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-white px-1 font-sans text-[10px] font-bold leading-none text-lapis-600 shadow ring-1 ring-lapis-500/40';
+            badge.setAttribute('aria-hidden', 'true');
+            el.appendChild(badge);
+          }
+          badge.textContent = `+${hidden}`;
+          el.setAttribute('aria-label', `${el.dataset.placeName ?? ''} (+${hidden})`);
+        }
+      };
+      declutterRef.current = declutterMarkers;
+
       labelVisibilityRef.current = updateLabelVisibility;
       updateLabelVisibility();
+      declutterMarkers();
       map.on('zoom', updateLabelVisibility);
+      // 'moveend' cubre también el final de cada zoom y de cada vuelo.
+      map.on('moveend', declutterMarkers);
     });
 
     const markers = markersRef.current;
@@ -314,13 +404,16 @@ export function BibleMap({ chapter, places, period }: Props) {
       // y salta sin animación para quien lo pide.
       map.flyTo({
         center: [targets[0].lng, targets[0].lat],
-        zoom: 6,
+        zoom: zoomForPlace(targets[0].slug),
         duration: 1200,
       });
     } else {
       const bounds = new maplibregl.LngLatBounds();
       for (const tgt of targets) bounds.extend([tgt.lng, tgt.lat]);
-      map.fitBounds(bounds, { padding: 80, duration: 1200, maxZoom: 6 });
+      // Con una región entre los lugares del versículo manda su tope: el
+      // encuadre no debe cerrarse sobre el punto representativo.
+      const maxZoom = Math.min(...targets.map((tgt) => zoomForPlace(tgt.slug)));
+      map.fitBounds(bounds, { padding: 80, duration: 1200, maxZoom });
     }
 
     markersRef.current.forEach((marker, slug) => {
@@ -333,8 +426,10 @@ export function BibleMap({ chapter, places, period }: Props) {
         : el.style.transform.replace(/scale\([^)]*\)/, '');
     });
     // Los lugares del versículo activo muestran su etiqueta aunque el
-    // capítulo sea denso y el zoom esté lejos.
+    // capítulo sea denso y el zoom esté lejos, y nunca quedan recogidos en
+    // otro marcador.
     labelVisibilityRef.current();
+    declutterRef.current();
   }, [activeVerse, chapter, places, isOverview]);
 
   return (
