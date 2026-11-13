@@ -29,6 +29,11 @@ export function HeaderAuth() {
   ) : (
     <Link
       href="/entrar"
+      // Sin precarga: /entrar se renderiza por petición (lee la sesión), y
+      // este enlace está en la cabecera de todas las páginas. Precargarlo era
+      // una invocación de función por cada página vista. Lo mismo vale para
+      // los enlaces a /planes y /rutas/[ruta] repartidos por el sitio.
+      prefetch={false}
       className="inline-flex min-h-11 items-center rounded-md px-2 font-sans text-sm text-stone-700 transition-colors hover:bg-sand-200 dark:text-sand-100 dark:hover:bg-stone-700"
     >
       {t('signIn')}

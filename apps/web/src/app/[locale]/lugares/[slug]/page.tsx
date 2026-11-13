@@ -343,6 +343,7 @@ export default async function PlacePage({ params }: { params: Params }) {
                 <li key={route.slug}>
                   <Link
                     href={`/rutas/${route.slug}`}
+                    prefetch={false}
                     className="block rounded-lg border border-sand-200 bg-white/60 px-4 py-3 transition-colors hover:border-lapis-500 dark:border-stone-700 dark:bg-stone-800/60"
                   >
                     <span className="font-serif text-lg text-stone-800 dark:text-sand-100">

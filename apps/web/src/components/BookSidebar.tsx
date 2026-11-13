@@ -160,6 +160,7 @@ export function BookSidebar({ books }: Props) {
         <nav className="flex-1 overflow-y-auto px-4 py-4">
           <Link
             href="/planes"
+            prefetch={false}
             onClick={() => setOpen(false)}
             className="mb-5 flex items-center gap-2 rounded-md border border-sand-200 px-3 py-2 font-serif text-sm text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-700 dark:text-sand-200 dark:hover:border-lapis-500"
           >
@@ -185,6 +186,7 @@ export function BookSidebar({ books }: Props) {
                           <li key={book.canonicalId}>
                             <Link
                               href={`/leer/${book.urlSegment}`}
+                              prefetch={false}
                               onClick={() => setOpen(false)}
                               aria-current={isActive ? 'page' : undefined}
                               className={`block rounded px-2 py-1.5 font-serif text-sm transition-colors ${

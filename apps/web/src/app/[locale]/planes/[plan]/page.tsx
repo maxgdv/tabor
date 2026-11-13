@@ -59,7 +59,7 @@ export default async function PlanPage({ params }: { params: Params }) {
     <div className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">
       <header className="mb-10">
         <nav aria-label={t('breadcrumb')} className="text-xs text-stone-500">
-          <Link href="/planes" className="underline-offset-2 hover:underline">
+          <Link href="/planes" prefetch={false} className="underline-offset-2 hover:underline">
             {t('title')}
           </Link>
         </nav>

@@ -37,6 +37,7 @@ export function SeasonHighlight({ season, locale }: Props) {
           <li key={plan.slug}>
             <Link
               href={`/planes/${plan.slug}`}
+              prefetch={false}
               className="inline-block rounded-md border border-sand-200 bg-white/70 px-3 py-1.5 font-sans text-sm text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100"
             >
               {plan.name[lang]}
@@ -47,6 +48,7 @@ export function SeasonHighlight({ season, locale }: Props) {
           <li key={route.slug}>
             <Link
               href={`/rutas/${route.slug}`}
+              prefetch={false}
               className="inline-block rounded-md border border-sand-200 bg-white/70 px-3 py-1.5 font-sans text-sm text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100"
             >
               {route.name[lang]} 🗺

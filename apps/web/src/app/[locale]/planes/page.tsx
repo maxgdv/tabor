@@ -49,6 +49,7 @@ function PlanList({
         <li key={plan.slug}>
           <Link
             href={`/planes/${plan.slug}`}
+            prefetch={false}
             className="group block rounded-lg border border-sand-200 bg-white/60 p-5 transition-colors hover:border-lapis-500 hover:bg-white dark:border-stone-700 dark:bg-stone-800/60 dark:hover:bg-stone-800"
           >
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">

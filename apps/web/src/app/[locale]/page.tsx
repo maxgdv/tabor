@@ -15,6 +15,14 @@ const SEASONS: readonly LiturgicalSeason[] = [
   'pascua',
 ];
 
+// La portada se sirve desde la CDN y se regenera cada hora, igual que
+// /versiculo-del-dia: lo único que cambia en ella es el versículo (a diario)
+// y el tiempo litúrgico (cada varias semanas). Antes se renderizaba en cada
+// visita solo porque leía `searchParams`, y era la ruta que más funciones
+// gastaba del sitio: todas las páginas la precargan desde el logo de la
+// cabecera (104 invocaciones en 12 h, nov-2026).
+export const revalidate = 3600;
+
 export default async function HomePage({
   params,
   searchParams,
@@ -22,7 +30,7 @@ export default async function HomePage({
   params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [{ locale }, query] = await Promise.all([params, searchParams]);
+  const { locale } = await params;
   setRequestLocale(locale);
   const [t, tPlaces, tVisit] = await Promise.all([
     getTranslations('home'),
@@ -30,8 +38,11 @@ export default async function HomePage({
     getTranslations('visit'),
   ]);
 
-  // Tiempo litúrgico actual; ?season= permite previsualizar cualquiera
-  // fuera de fecha (útil para revisar el diseño en Tiempo Ordinario).
+  // Tiempo litúrgico actual. En desarrollo, ?season= permite previsualizar
+  // cualquiera fuera de fecha (útil para revisar el diseño en Tiempo
+  // Ordinario). Solo en desarrollo: en producción `searchParams` no se toca,
+  // porque leerlo —aunque sea para ignorarlo— saca la página de la CDN.
+  const query = process.env.NODE_ENV === 'development' ? await searchParams : {};
   const preview = typeof query.season === 'string' ? query.season : undefined;
   const season = SEASONS.includes(preview as LiturgicalSeason)
     ? (preview as LiturgicalSeason)
@@ -69,6 +80,7 @@ export default async function HomePage({
           </Link>
           <Link
             href="/planes"
+            prefetch={false}
             className="inline-flex items-center gap-2 rounded-md border border-stone-300 px-5 py-3 font-sans text-sm font-medium text-stone-700 hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:text-sand-100 dark:hover:border-lapis-500"
           >
             {t('ctaPlans')}

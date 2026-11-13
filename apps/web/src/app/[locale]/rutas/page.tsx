@@ -38,6 +38,7 @@ export default async function RoutesIndexPage({ params }: { params: Params }) {
           <li key={route.slug}>
             <Link
               href={`/rutas/${route.slug}`}
+              prefetch={false}
               className="block rounded-lg border border-sand-200 bg-white/60 p-5 transition-colors hover:border-lapis-500 dark:border-stone-700 dark:bg-stone-800/60"
             >
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">

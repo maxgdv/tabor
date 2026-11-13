@@ -121,6 +121,7 @@ export default async function VerseOfDayPage({ params }: { params: Params }) {
           <li>
             <Link
               href="/planes"
+              prefetch={false}
               className="inline-block rounded-md border border-stone-300 px-4 py-2 font-sans text-sm text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:text-sand-100 dark:hover:border-lapis-500"
             >
               {t('continuePlans')}

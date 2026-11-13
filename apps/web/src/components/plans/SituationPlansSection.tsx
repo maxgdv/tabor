@@ -37,6 +37,7 @@ export function SituationPlansSection({ locale }: { locale: string }) {
           <li key={plan.slug}>
             <Link
               href={`/planes/${plan.slug}`}
+              prefetch={false}
               // min-h-11: objetivo táctil cómodo; son doce pastillas juntas
               // y en un teléfono se pulsan con el pulgar.
               className="border-sand-200 bg-sand-50/60 hover:border-lapis-500 hover:text-lapis-600 dark:text-sand-100 dark:hover:border-lapis-500 inline-flex min-h-11 items-center rounded-full border px-4 font-sans text-sm text-stone-700 transition-colors dark:border-stone-600 dark:bg-stone-800/60"
@@ -49,6 +50,7 @@ export function SituationPlansSection({ locale }: { locale: string }) {
       <p className="mt-5">
         <Link
           href="/planes"
+          prefetch={false}
           className="text-lapis-600 dark:text-lapis-300 inline-flex items-center gap-1.5 font-sans text-sm underline-offset-2 hover:underline"
         >
           {t('all')}
