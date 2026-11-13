@@ -193,6 +193,10 @@
     "mapLoading": "Loading map…",
     "artCredit": "Public domain · Wikimedia Commons",
     "regionsAttribution": "Historical layers: approximate boundaries and routes",
+    "placesHeading": "Places in this chapter",
+    "placesLede": "In the order they appear in the text. Linked places have their own page, with a map and every passage that names them.",
+    "placesVerses": "{count, plural, one {v. {refs}} other {vv. {refs}}}",
+    "placesAll": "See all Bible places",
     "compare": {
       "label": "Compare",
       "none": "Reading only",

@@ -193,6 +193,10 @@
     "mapLoading": "Cargando mapa…",
     "artCredit": "Dominio público · Wikimedia Commons",
     "regionsAttribution": "Capas históricas: límites y recorridos aproximados",
+    "placesHeading": "Lugares de este capítulo",
+    "placesLede": "En el orden en que aparecen en el texto. Los enlazados tienen ficha propia, con su mapa y todos los pasajes que los nombran.",
+    "placesVerses": "{count, plural, one {v. {refs}} other {vv. {refs}}}",
+    "placesAll": "Ver todos los lugares bíblicos",
     "compare": {
       "label": "Comparar",
       "none": "Solo lectura",

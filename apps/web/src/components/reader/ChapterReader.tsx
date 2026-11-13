@@ -74,6 +74,8 @@ type Props = {
   secondary?: SecondaryText | null;
   /** Selector de comparación (server component inyectado desde la página). */
   headerExtra?: React.ReactNode;
+  /** Contenido de servidor entre el texto y el pie (lugares del capítulo). */
+  afterText?: React.ReactNode;
 };
 
 export function ChapterReader({
@@ -82,6 +84,7 @@ export function ChapterReader({
   initialAnnotations,
   secondary = null,
   headerExtra,
+  afterText,
 }: Props) {
   const t = useTranslations('reader');
   const setActiveVerse = useReaderStore((s) => s.setActiveVerse);
@@ -453,6 +456,7 @@ export function ChapterReader({
               </span>
             ))}
           </VersesContainer>
+          {afterText}
           <footer className="mt-16 border-t border-sand-200 pt-6 text-xs text-stone-500 dark:border-stone-700 dark:text-stone-400">
             <p>{chapter.copyright}</p>
             {secondary && <p className="mt-1">{secondary.copyright}</p>}

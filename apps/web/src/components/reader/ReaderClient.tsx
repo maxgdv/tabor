@@ -45,11 +45,14 @@ export function ReaderClient({
   basePath,
   primaryVersionCode,
   locale,
+  afterText,
 }: {
   chapter: Chapter;
   basePath: string;
   primaryVersionCode: string;
   locale: string;
+  /** Bloque renderizado en servidor que va tras el texto del capítulo. */
+  afterText?: React.ReactNode;
 }) {
   const { data: session } = authClient.useSession();
   // El estado guarda de quién/de qué es cada dato y el valor efectivo se
@@ -114,6 +117,7 @@ export function ReaderClient({
         headerExtra={
           <CompareSelector basePath={basePath} primaryVersionCode={primaryVersionCode} />
         }
+        afterText={afterText}
       />
       <ActiveVerseMarker />
     </>

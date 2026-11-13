@@ -9,6 +9,7 @@ import { ReaderClient } from '@/components/reader/ReaderClient';
 import { ReaderShell } from '@/components/reader/ReaderShell';
 import { ChapterArt } from '@/components/reader/ChapterArt';
 import { ChapterNav } from '@/components/reader/ChapterNav';
+import { ChapterPlaces } from '@/components/reader/ChapterPlaces';
 import { PeriodTimeline } from '@/components/reader/PeriodTimeline';
 import { BibleMapClient } from '@/components/map/BibleMapClient';
 import { getChapterArt } from '@/lib/chapter-art';
@@ -213,6 +214,10 @@ export default async function ReaderPage({ params }: { params: Params }) {
             basePath={basePath}
             primaryVersionCode={versionForLocale(locale)}
             locale={locale}
+            // Renderizado en servidor y pasado como prop: los enlaces a las
+            // fichas de lugar van en el HTML estático, que es lo que lee un
+            // buscador, sin sumar JavaScript al cliente.
+            afterText={places.length > 0 ? <ChapterPlaces chapter={chapterData} /> : null}
           />
         }
         panel={

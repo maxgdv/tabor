@@ -11,6 +11,7 @@
 // `places-data.ts` para que este módulo se pueda probar sin levantar la BD.
 
 import type { DbPlaceMention } from '@tabor/db';
+import { contiguousRanges, formatRanges } from '@/lib/annotations';
 import { REGION_PLACE_SLUGS } from '@/lib/data/place-regions';
 import { ROUTES, type BibleRoute } from '@/lib/routes';
 import { VISITABLE_SLUGS } from '@/lib/visitable';
@@ -266,4 +267,58 @@ export function groupMentionsByBook(mentions: readonly DbPlaceMention[]): Mentio
     });
   }
   return groups;
+}
+
+// --- Lugares de un capítulo -------------------------------------------------
+
+export type ChapterPlaceEntry = {
+  slug: string;
+  name: string;
+  /** Versículos del capítulo que lo nombran, ya formateados: «4-5, 9». */
+  verseRefs: string;
+  /** Cuántos versículos del capítulo lo nombran (para el plural de «v.»/«vv.»). */
+  verseCount: number;
+  /** ¿Tiene ficha indexable a la que enlazar? */
+  hasPage: boolean;
+};
+
+/**
+ * La lista «Lugares de este capítulo» que el lector pinta bajo el texto.
+ *
+ * Hasta ahora un capítulo no enlazaba a ninguna ficha de lugar: los
+ * marcadores del mapa son JavaScript y el HTML que recibe un buscador no
+ * tenía ni un `<a>` hacia `/lugares`. Las fichas —lo único del sitio que no
+ * está en decenas de webs— solo recibían enlaces del índice y del sitemap.
+ *
+ * Solo se enlazan los lugares con ficha indexable (`isListedPlace`): el resto
+ * tiene página, pero con `noindex`, y mandar al rastreador hacia ~1.000
+ * páginas que no van a entrar en el índice es gastar su presupuesto y cuota
+ * de ISR. Esos se nombran igualmente, sin enlace, porque para el lector la
+ * lista vale completa.
+ *
+ * El orden es el de primera aparición en el capítulo, que es el que ya trae
+ * `chapter.places`.
+ */
+export function chapterPlaceEntries(chapter: {
+  verses: readonly { number: number; placeSlugs: readonly string[] }[];
+  places: readonly { slug: string; name: string; mentionCount: number }[];
+}): ChapterPlaceEntry[] {
+  const versesBySlug = new Map<string, number[]>();
+  for (const verse of chapter.verses) {
+    for (const slug of verse.placeSlugs) {
+      const list = versesBySlug.get(slug);
+      if (list) list.push(verse.number);
+      else versesBySlug.set(slug, [verse.number]);
+    }
+  }
+  return chapter.places.map((place) => {
+    const ranges = contiguousRanges(versesBySlug.get(place.slug) ?? []);
+    return {
+      slug: place.slug,
+      name: place.name,
+      verseRefs: formatRanges(ranges),
+      verseCount: ranges.reduce((sum, r) => sum + (r.end - r.start + 1), 0),
+      hasPage: isListedPlace(place),
+    };
+  });
 }

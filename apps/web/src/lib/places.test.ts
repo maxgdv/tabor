@@ -5,6 +5,7 @@ import { REGION_PLACE_SLUGS } from '@/lib/data/place-regions';
 import { ROUTES } from '@/lib/routes';
 import {
   PLACE_MIN_MENTIONS,
+  chapterPlaceEntries,
   distinctModernName,
   groupMentionsByBook,
   groupPlacesByLetter,
@@ -280,5 +281,62 @@ describe('groupMentionsByBook', () => {
 
   it('devuelve vacío sin menciones', () => {
     expect(groupMentionsByBook([])).toEqual([]);
+  });
+});
+
+describe('chapterPlaceEntries', () => {
+  const chapter = {
+    verses: [
+      { number: 3, placeSlugs: ['judea', 'galilee'] },
+      { number: 4, placeSlugs: ['samaria-1'] },
+      { number: 5, placeSlugs: ['samaria-1', 'aldea-sin-ficha'] },
+      { number: 6, placeSlugs: [] },
+      { number: 9, placeSlugs: ['samaria-1'] },
+    ],
+    places: [
+      { slug: 'judea', name: 'Judea', mentionCount: 40 },
+      { slug: 'galilee', name: 'Galilea', mentionCount: 60 },
+      { slug: 'samaria-1', name: 'Samaria', mentionCount: 100 },
+      { slug: 'aldea-sin-ficha', name: 'Aldea', mentionCount: PLACE_MIN_MENTIONS - 1 },
+    ],
+  };
+
+  it('conserva el orden de aparición y agrupa los versículos en rangos', () => {
+    const entries = chapterPlaceEntries(chapter);
+    expect(entries.map((e) => e.slug)).toEqual([
+      'judea',
+      'galilee',
+      'samaria-1',
+      'aldea-sin-ficha',
+    ]);
+    const samaria = entries[2]!;
+    expect(samaria.verseRefs).toBe('4-5, 9');
+    expect(samaria.verseCount).toBe(3);
+    expect(entries[0]!.verseRefs).toBe('3');
+    expect(entries[0]!.verseCount).toBe(1);
+  });
+
+  it('solo marca con ficha los lugares que se indexan', () => {
+    const entries = chapterPlaceEntries(chapter);
+    expect(entries.filter((e) => e.hasPage).map((e) => e.slug)).toEqual([
+      'judea',
+      'galilee',
+      'samaria-1',
+    ]);
+  });
+
+  it('enlaza un lugar poco nombrado si es parada de una ruta', () => {
+    const stop = ROUTES[0]!.stops[0]!.placeSlug;
+    const [entry] = chapterPlaceEntries({
+      verses: [{ number: 1, placeSlugs: [stop] }],
+      places: [{ slug: stop, name: 'Parada', mentionCount: 1 }],
+    });
+    expect(entry!.hasPage).toBe(true);
+  });
+
+  it('devuelve lista vacía en un capítulo sin geografía', () => {
+    expect(chapterPlaceEntries({ verses: [{ number: 1, placeSlugs: [] }], places: [] })).toEqual(
+      [],
+    );
   });
 });

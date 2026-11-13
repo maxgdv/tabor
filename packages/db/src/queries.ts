@@ -85,6 +85,9 @@ export type DbPlace = {
   description: string | null;
   lng: number;
   lat: number;
+  /** Versículos de toda la Biblia que lo mencionan (no solo de este capítulo):
+   *  decide si el lugar tiene ficha propia a la que enlazar. */
+  mentionCount: number;
 };
 
 /** "Bethel 1" → "Bethel". El sufijo numérico desambigua homónimos en el
@@ -134,6 +137,13 @@ export async function getChapterGeo(opts: {
       description: place.description,
       lng: sql<number>`ST_X(${place.geom}::geometry)`,
       lat: sql<number>`ST_Y(${place.geom}::geometry)`,
+      // Subconsulta correlacionada y no una query aparte: el conteo viaja en
+      // el mismo round-trip, así que el número de consultas en paralelo de la
+      // página no cambia (ver la invariante del pool en index.ts). Tira del
+      // índice verse_location_place_idx.
+      mentionCount: sql<number>`(
+        SELECT COUNT(*)::int FROM verse_location vl WHERE vl.place_id = ${place.id}
+      )`,
     })
     .from(verse)
     .innerJoin(verseLocation, eq(verseLocation.verseId, verse.id))
@@ -160,6 +170,7 @@ export async function getChapterGeo(opts: {
         description: r.description,
         lng: Number(r.lng),
         lat: Number(r.lat),
+        mentionCount: Number(r.mentionCount),
       });
     }
     const slugsOfVerse = (placeSlugsByVerse[r.verseNumber] ??= []);
