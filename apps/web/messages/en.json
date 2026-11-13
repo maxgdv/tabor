@@ -300,6 +300,24 @@
     "routesHeading": "Routes that pass through here",
     "routesLede": "Tabor itineraries with a stop at this place.",
     "backToIndex": "See all biblical places",
+    "summaryHeading": "{name} in the Bible",
+    "keyReadings": "Where to read it:",
+    "distanceLabel": "From Jerusalem",
+    "distanceAway": "{km, number} km to the {direction}, as the crow flies",
+    "distanceWithin": "in the city or at its gates",
+    "direction": {
+      "n": "north",
+      "ne": "north-east",
+      "e": "east",
+      "se": "south-east",
+      "s": "south",
+      "sw": "south-west",
+      "w": "west",
+      "nw": "north-west"
+    },
+    "nearbyHeading": "Nearby biblical places",
+    "nearbyLede": "The closest to {name} among those with a page of their own, with straight-line distances.",
+    "nearbyKm": "{km, plural, =0 {less than 1 km away} other {# km away}}",
     "sourceNote": "Coordinates and the modern identification come from the open atlas at OpenBible.info. For regions, peoples and large features there is no identification: the marked point only places the area on the map, and stands for neither a particular site nor its boundaries."
   },
   "visit": {

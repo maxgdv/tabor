@@ -13,6 +13,7 @@
 import type { DbPlaceMention } from '@tabor/db';
 import { contiguousRanges, formatRanges } from '@/lib/annotations';
 import { REGION_PLACE_SLUGS } from '@/lib/data/place-regions';
+import { PLACE_SUMMARIES, type PlaceSummary } from '@/lib/data/place-summaries';
 import { ROUTES, type BibleRoute } from '@/lib/routes';
 import { VISITABLE_SLUGS } from '@/lib/visitable';
 
@@ -321,4 +322,120 @@ export function chapterPlaceEntries(chapter: {
       hasPage: isListedPlace(place),
     };
   });
+}
+
+// --- Dónde queda: distancia a Jerusalén y lugares cercanos -------------------
+
+/** Resumen curado de un lugar («qué ocurre aquí»), o `null` si no lo tiene. */
+export function placeSummary(slug: string): PlaceSummary | null {
+  return PLACE_SUMMARIES[slug] ?? null;
+}
+
+type LatLng = { lat: number; lng: number };
+
+/** Jerusalén según el atlas: el punto desde el que se mide todo lo demás. */
+export const JERUSALEM: LatLng = { lat: 31.7767, lng: 35.2342 };
+
+const EARTH_RADIUS_KM = 6371;
+const toRad = (deg: number) => (deg * Math.PI) / 180;
+
+/** Distancia en línea recta entre dos puntos, en kilómetros (haversine). */
+export function distanceKm(a: LatLng, b: LatLng): number {
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(h));
+}
+
+export type Compass = 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'nw';
+const COMPASS: readonly Compass[] = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'];
+
+/** Rumbo inicial de `from` a `to`, reducido a ocho direcciones. */
+export function compassDirection(from: LatLng, to: LatLng): Compass {
+  const dLng = toRad(to.lng - from.lng);
+  const y = Math.sin(dLng) * Math.cos(toRad(to.lat));
+  const x =
+    Math.cos(toRad(from.lat)) * Math.sin(toRad(to.lat)) -
+    Math.sin(toRad(from.lat)) * Math.cos(toRad(to.lat)) * Math.cos(dLng);
+  const bearing = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+  return COMPASS[Math.round(bearing / 45) % 8]!;
+}
+
+/**
+ * Por debajo de esta distancia un lugar está, a efectos de quien pregunta
+ * «dónde queda», en Jerusalén: el Gólgota, Getsemaní, Siloé, el monte de los
+ * Olivos. Decir «a 1 km al este» de un punto que representa una ciudad entera
+ * sería una precisión falsa.
+ */
+export const IN_JERUSALEM_KM = 3;
+
+/** Por debajo de esto dos entradas del atlas son el mismo punto, no vecinas. */
+const SAME_POINT_KM = 0.2;
+
+export type FromJerusalem =
+  | { kind: 'within' }
+  | { kind: 'away'; km: number; direction: Compass };
+
+/**
+ * Dónde queda un lugar respecto a Jerusalén, que es la referencia que
+ * cualquier lector de la Biblia tiene en la cabeza.
+ *
+ * Devuelve `null` en dos casos, y en ninguno es un olvido:
+ *  · la propia Jerusalén (y Sión, que comparte su punto en el atlas);
+ *  · las regiones, países y accidentes extensos: su punto es solo
+ *    representativo (Egipto → un barrio de El Cairo) y medir desde él sería
+ *    afirmar una posición que el dato no tiene. Mismo criterio que
+ *    `isRegionPlace` aplica al nombre moderno.
+ */
+export function fromJerusalem(place: { slug: string } & LatLng): FromJerusalem | null {
+  if (isRegionPlace(place.slug)) return null;
+  const km = distanceKm(JERUSALEM, place);
+  if (km < SAME_POINT_KM) return null;
+  if (km < IN_JERUSALEM_KM) return { kind: 'within' };
+  return { kind: 'away', km: Math.round(km), direction: compassDirection(JERUSALEM, place) };
+}
+
+/** Lugares cercanos que se enseñan en una ficha, como máximo. */
+export const NEARBY_LIMIT = 6;
+/** Radio de búsqueda: más allá ya no es «cerca» ni en la escala de Galilea. */
+export const NEARBY_MAX_KM = 40;
+
+export type NearbyPlace<T> = { place: T; km: number };
+
+/**
+ * Los lugares con ficha más próximos a uno dado, de más cerca a más lejos.
+ *
+ * Es el enlazado entre fichas que faltaba: hasta ahora una ficha solo
+ * llevaba a sus capítulos y de vuelta al índice. Se excluyen:
+ *  · el propio lugar y todo lo que el atlas pone en su mismo punto: no son
+ *    vecinos sino el mismo sitio con otro nombre (Jerusalén y Sión, Samaria
+ *    ciudad y Samaria región, o la «Babilonia» del Apocalipsis, que el atlas
+ *    identifica con Roma y que en la ficha de Roma aparecería a 0 km);
+ *  · las regiones, como origen y como destino, por lo mismo que en
+ *    `fromJerusalem`: su punto es representativo y «Judea, a 0 km de
+ *    Jerusalén» o «Heliópolis, junto a Egipto» no informan de nada;
+ *  · los homónimos desdoblados en un mismo punto (dos «Ramá» a 5 km): se
+ *    queda el primero de la lista, que llega ordenada por menciones.
+ */
+export function nearbyPlaces<T extends { slug: string; name: string } & LatLng>(
+  origin: { slug: string; name: string } & LatLng,
+  candidates: readonly T[],
+  { limit = NEARBY_LIMIT, maxKm = NEARBY_MAX_KM }: { limit?: number; maxKm?: number } = {},
+): NearbyPlace<T>[] {
+  if (isRegionPlace(origin.slug)) return [];
+  const seen = new Set<string>();
+  return candidates
+    .filter((c) => c.slug !== origin.slug && !isRegionPlace(c.slug))
+    .filter((c) => {
+      const key = `${c.name}|${c.lat.toFixed(3)}|${c.lng.toFixed(3)}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((place) => ({ place, km: distanceKm(origin, place) }))
+    .filter(({ km }) => km >= SAME_POINT_KM && km <= maxKm)
+    .sort((a, b) => a.km - b.km || a.place.slug.localeCompare(b.place.slug))
+    .slice(0, limit);
 }

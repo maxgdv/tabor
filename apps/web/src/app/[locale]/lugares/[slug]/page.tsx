@@ -3,13 +3,17 @@ import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { versionForLocale } from '@/lib/bible';
+import { BOOK_META } from '@tabor/db/book-meta';
 import {
+  fromJerusalem,
   groupMentionsByBook,
   isListedPlace,
   modernNameDisplay,
+  nearbyPlaces,
+  placeSummary,
   routesForPlace,
 } from '@/lib/places';
-import { placeBySlug, placeMentions } from '@/lib/places-data';
+import { listedPlaces, placeBySlug, placeMentions } from '@/lib/places-data';
 import { routeReadingHref, routeReadingLabel } from '@/lib/routes';
 import { SITE_URL, localeAlternates, openGraphFor, verseSnippet } from '@/lib/seo';
 import { visitableSite } from '@/lib/visitable';
@@ -107,12 +111,16 @@ export default async function PlacePage({ params }: { params: Params }) {
   const place = await placeBySlug(slug, locale);
   if (!place) notFound();
 
-  // Dos consultas (ficha y versículos), memoizadas y compartidas con
-  // generateMetadata. Nada de queries dentro de bucles: el resto —libros,
-  // rutas— sale de datos ya cargados o de módulos estáticos.
-  const [t, mentions] = await Promise.all([
+  // Tres consultas: la ficha (arriba), y en paralelo los versículos y el
+  // índice de lugares con ficha, del que salen los «lugares cercanos». Las dos
+  // primeras están memoizadas y compartidas con generateMetadata. Nada de
+  // queries dentro de bucles: el resto —libros, rutas, distancias— sale de
+  // datos ya cargados o de módulos estáticos. Dos en paralelo quedan muy por
+  // debajo del `max` del pool (ver la invariante en packages/db/src/index.ts).
+  const [t, mentions, listed] = await Promise.all([
     getTranslations('places'),
     placeMentions(slug, versionForLocale(locale)),
+    listedPlaces(locale),
   ]);
 
   const modern = modernNameDisplay(place);
@@ -122,6 +130,13 @@ export default async function PlacePage({ params }: { params: Params }) {
   const truncated = place.mentionCount > mentions.length;
   // Módulo estático, resolución en O(1): ni una consulta más.
   const site = visitableSite(place.slug);
+  // Lo que responde a «¿dónde queda?» y «¿qué pasó aquí?»: resumen curado (si
+  // lo hay), posición respecto a Jerusalén y fichas vecinas.
+  const summary = placeSummary(place.slug);
+  const where = fromJerusalem(place);
+  const nearby = nearbyPlaces(place, listed);
+  const bookName = (canonicalId: string) =>
+    BOOK_META.find((b) => b.canonicalId === canonicalId)?.[lang].name ?? canonicalId;
 
   // Datos estructurados: el `Place` con sus coordenadas es exactamente lo que
   // Google necesita para entender que esto es un sitio geográfico y no una
@@ -165,6 +180,9 @@ export default async function PlacePage({ params }: { params: Params }) {
             },
           }
         : {}),
+      // El resumen es la descripción del lugar bíblico; en un sitio
+      // visitable manda, más abajo, lo que se conserva hoy.
+      ...(summary ? { description: summary[lang] } : {}),
       ...(site
         ? {
             description: site.preserved[lang],
@@ -223,6 +241,35 @@ export default async function PlacePage({ params }: { params: Params }) {
           </p>
         </header>
 
+        {/* Antes del mapa: quien llega preguntando qué es este lugar tiene
+            la respuesta en dos frases y los capítulos donde leerla. */}
+        {summary && (
+          <section
+            aria-labelledby="resumen"
+            className="mt-6 rounded-lg border border-sand-200 bg-white/60 p-5 dark:border-stone-700 dark:bg-stone-800/60"
+          >
+            <h2 id="resumen" className="font-serif text-xl text-stone-800 dark:text-sand-100">
+              {t('summaryHeading', { name: place.name })}
+            </h2>
+            <p className="mt-2 leading-relaxed text-stone-700 dark:text-sand-200">
+              {summary[lang]}
+            </p>
+            <p className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 font-sans text-sm">
+              <span className="text-stone-600 dark:text-stone-300">{t('keyReadings')}</span>
+              {summary.readings.map((reading) => (
+                <Link
+                  key={`${reading.book}-${reading.chapter}`}
+                  href={`/leer/${reading.book.toLowerCase()}/${reading.chapter}`}
+                  prefetch={false}
+                  className="font-medium text-lapis-600 underline underline-offset-4 hover:decoration-lapis-500 dark:text-lapis-300"
+                >
+                  {bookName(reading.book)} {reading.chapter}
+                </Link>
+              ))}
+            </p>
+          </section>
+        )}
+
         <section aria-label={t('mapSection', { name: place.name })} className="mt-6">
           {/* Alto fijo y no aspect-ratio: en móvil apaisado un 4:3 dejaría el
               mapa más alto que la pantalla. */}
@@ -249,6 +296,21 @@ export default async function PlacePage({ params }: { params: Params }) {
                 <dd className="text-stone-800 dark:text-sand-100">{modern.name}</dd>
               </div>
             )}
+            {where && (
+              <div className="flex flex-wrap gap-x-2">
+                <dt className="font-sans text-stone-600 dark:text-stone-300">
+                  {t('distanceLabel')}
+                </dt>
+                <dd className="text-stone-800 dark:text-sand-100">
+                  {where.kind === 'within'
+                    ? t('distanceWithin')
+                    : t('distanceAway', {
+                        km: where.km,
+                        direction: t(`direction.${where.direction}`),
+                      })}
+                </dd>
+              </div>
+            )}
             <div className="flex flex-wrap gap-x-2">
               <dt className="font-sans text-stone-600 dark:text-stone-300">
                 {t('coordinatesLabel')}
@@ -273,6 +335,38 @@ export default async function PlacePage({ params }: { params: Params }) {
             preguntándose si esto se puede ver no debería tener que bajar por
             ciento veinte versículos para averiguarlo. */}
         {site && <VisitableSiteBlock site={site} locale={locale} />}
+
+        {/* Enlazado entre fichas: las más próximas, que son también las que
+            aparecen en los mismos relatos. */}
+        {nearby.length > 0 && (
+          <section aria-labelledby="cercanos" className="mt-12">
+            <h2 id="cercanos" className="font-serif text-2xl text-stone-800 dark:text-sand-100">
+              {t('nearbyHeading')}
+            </h2>
+            <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">
+              {t('nearbyLede', { name: place.name })}
+            </p>
+            <ul className="mt-4 grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+              {nearby.map(({ place: near, km }) => (
+                <li
+                  key={near.slug}
+                  className="flex items-baseline justify-between gap-3 border-b border-sand-200/70 py-2 dark:border-stone-700/70"
+                >
+                  <Link
+                    href={`/lugares/${near.slug}`}
+                    prefetch={false}
+                    className="font-serif text-base text-lapis-600 underline decoration-lapis-500/40 underline-offset-4 hover:decoration-lapis-500 dark:text-lapis-300"
+                  >
+                    {near.name}
+                  </Link>
+                  <span className="shrink-0 font-sans text-xs text-stone-500 dark:text-stone-400">
+                    {t('nearbyKm', { km: Math.round(km) })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <section aria-labelledby="pasajes" className="mt-12">
           <h2 id="pasajes" className="font-serif text-2xl text-stone-800 dark:text-sand-100">
