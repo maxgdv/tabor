@@ -1,4 +1,10 @@
 import createNextIntlPlugin from 'next-intl/plugin';
+import { copyMaplibreWorker } from './scripts/copy-maplibre-worker.mjs';
+
+// El worker de MapLibre GL tiene que estar en public/ antes de que Next
+// recoja los estáticos. Se hace aquí, y no en un script de npm, para que
+// ocurra igual en `next dev`, en `next build` y en Vercel.
+copyMaplibreWorker();
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 

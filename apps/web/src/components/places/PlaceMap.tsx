@@ -4,7 +4,13 @@ import { useEffect, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import { Marker, type Map as MapLibreMap } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { SATELLITE_STYLE } from '../map/styles';
+import '../map/worker';
+import {
+  MapStyleToggle,
+  mapStyleFor,
+  useMapStyle,
+  type MapStyleId,
+} from '../map/style-preference';
 
 type Props = {
   /** Nombre localizado; se pinta como etiqueta bajo el marcador. */
@@ -22,8 +28,9 @@ type Props = {
 const ZOOM = 8;
 
 /**
- * Mapa de la ficha de un lugar: un único marcador, satélite fijo (el relieve
- * es la mitad del interés: por qué ahí y no dos valles más allá).
+ * Mapa de la ficha de un lugar: un único marcador. Satélite por defecto (el
+ * relieve es la mitad del interés: por qué ahí y no dos valles más allá), con
+ * el mapa actual a un toque para quien quiere ver cómo se llega hoy.
  *
  * El marcador no es interactivo —no hay a dónde ir desde él— así que se
  * queda fuera del árbol de accesibilidad: su nombre ya está en el h1, en la
@@ -35,19 +42,23 @@ const ZOOM = 8;
 export function PlaceMap({ name, lng, lat, label }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  const mapStyle = useMapStyle();
+  // Último estilo aplicado: evita el setStyle redundante del montaje.
+  const appliedStyleRef = useRef<MapStyleId | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: SATELLITE_STYLE,
+      style: mapStyleFor(mapStyle),
       center: [lng, lat],
       zoom: ZOOM,
       attributionControl: { compact: true },
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     mapRef.current = map;
+    appliedStyleRef.current = mapStyle;
 
     const marker = new Marker({ color: '#3a5a85' }).setLngLat([lng, lat]).addTo(map);
     const element = marker.getElement();
@@ -69,7 +80,25 @@ export function PlaceMap({ name, lng, lat, label }: Props) {
       map.remove();
       mapRef.current = null;
     };
+    // El cambio de estilo lo gestiona el efecto de abajo sin recrear el mapa.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lng, lat, name]);
 
-  return <div ref={containerRef} className="h-full w-full" role="application" aria-label={label} />;
+  // Cambio de estilo en caliente. El marcador es DOM y sobrevive al cambio.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || appliedStyleRef.current === mapStyle) return;
+    appliedStyleRef.current = mapStyle;
+    // diff: false → recarga completa. Con el diff por defecto, al pasar del
+    // estilo remoto al satélite MapLibre parchea el estilo en sitio, borra las
+    // capas propias y no emite 'style.load': nadie volvía a pintarlas.
+    map.setStyle(mapStyleFor(mapStyle), { diff: false });
+  }, [mapStyle]);
+
+  return (
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="h-full w-full" role="application" aria-label={label} />
+      <MapStyleToggle current={mapStyle} />
+    </div>
+  );
 }

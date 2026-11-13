@@ -5,6 +5,8 @@ node_modules/
 
 # Build outputs
 .next/
+# Worker de MapLibre GL: lo copia apps/web/scripts/copy-maplibre-worker.mjs
+apps/web/public/vendor/
 out/
 dist/
 build/

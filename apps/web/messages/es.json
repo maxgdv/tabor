@@ -176,7 +176,7 @@
     "noPlacesTitle": "Sin referencias geográficas",
     "noPlacesBody": "Este capítulo no menciona lugares específicos en el texto.",
     "overviewBadge": "Mapa general — este capítulo no menciona lugares específicos",
-    "mapStyleVector": "Mapa",
+    "mapStyleVector": "Mapa actual",
     "mapStyleSatellite": "Satélite",
     "mapStyleAria": "Cambiar estilo de mapa",
     "bookmarkAdd": "Marcar el versículo {n}",

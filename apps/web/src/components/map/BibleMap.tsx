@@ -1,18 +1,20 @@
 'use client';
 
-import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useRef } from 'react';
 // Se importa el dato en crudo, no los helpers de `lib/places`: aquéllos
 // arrastran el catálogo de rutas y esto es un componente de cliente.
 import { REGION_PLACE_SLUGS } from '@/lib/data/place-regions';
 import * as maplibregl from 'maplibre-gl';
 import { Marker, Popup, type Map as MapLibreMap } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import './worker';
 import { useLocale, useTranslations } from 'next-intl';
 import { useReaderStore } from '@/lib/reader-store';
 import type { Chapter, Place } from '@/lib/bible';
 import { HISTORICAL_OVERLAYS } from '@/lib/historical-overlays';
 import type { PeriodId } from '@/lib/periods';
-import { SATELLITE_STYLE, VECTOR_STYLE } from './styles';
+import { MAP_LABEL_FONT } from './styles';
+import { MapStyleToggle, mapStyleFor, useMapStyle, type MapStyleId } from './style-preference';
 import { MAP_PANEL_EVENT } from './panel-events';
 
 type Props = {
@@ -55,31 +57,6 @@ const zoomForPlace = (slug: string) => (REGION_PLACE_SLUGS.has(slug) ? REGION_ZO
 // Por debajo, el segundo se recoge en el primero, que muestra «+n». Un pin
 // mide unos 27 px de ancho: con 30 dejan de pisarse.
 const MARKER_MIN_GAP_PX = 30;
-
-// --- Persistencia de la preferencia de estilo en localStorage ----------
-type MapStyleId = 'vector' | 'satellite';
-const STYLE_KEY = 'tabor-map-style';
-const STYLE_CHANGE_EVENT = 'tabor-map-style-change';
-
-function subscribeStyle(cb: () => void): () => void {
-  window.addEventListener('storage', cb);
-  window.addEventListener(STYLE_CHANGE_EVENT, cb);
-  return () => {
-    window.removeEventListener('storage', cb);
-    window.removeEventListener(STYLE_CHANGE_EVENT, cb);
-  };
-}
-function getStoredStyle(): MapStyleId {
-  if (typeof localStorage === 'undefined') return 'satellite';
-  // Por defecto satélite; solo se usa vector si el usuario lo eligió explícitamente.
-  return localStorage.getItem(STYLE_KEY) === 'vector' ? 'vector' : 'satellite';
-}
-function setStoredStyle(s: MapStyleId): void {
-  localStorage.setItem(STYLE_KEY, s);
-  // 'storage' event no se dispara en la misma pestaña — usamos custom event
-  // para que el resto de componentes (si los hubiera) también reaccionen.
-  window.dispatchEvent(new Event(STYLE_CHANGE_EVENT));
-}
 
 // --- Componente --------------------------------------------------------
 export function BibleMap({ chapter, places, period }: Props) {
@@ -148,9 +125,9 @@ export function BibleMap({ chapter, places, period }: Props) {
         source: 'tabor-regions',
         layout: {
           'text-field': ['get', locale === 'en' ? 'nameEn' : 'nameEs'],
-          // Única fuente disponible en el servidor de glyphs de demotiles;
-          // sin fijarla, MapLibre pide su default y el texto sale corrupto.
-          'text-font': ['Open Sans Semibold'],
+          // Una fuente que el servidor de glyphs sí sirve (ver styles.ts);
+          // sin fijarla, MapLibre pide su default y el texto no se pinta.
+          'text-font': MAP_LABEL_FONT,
           'text-size': 12,
           'text-letter-spacing': 0.08,
           'text-transform': 'uppercase',
@@ -173,13 +150,8 @@ export function BibleMap({ chapter, places, period }: Props) {
   // él los marcadores) — carrera real observada con red lenta.
   const appliedStyleRef = useRef<MapStyleId | null>(null);
 
-  // Estilo persistente vía localStorage, leído con useSyncExternalStore
-  // para evitar mismatch de hidratación (SSR siempre devuelve 'satellite').
-  const mapStyle = useSyncExternalStore(
-    subscribeStyle,
-    getStoredStyle,
-    () => 'satellite' as MapStyleId,
-  );
+  // Estilo elegido por el usuario, compartido con los demás mapas del sitio.
+  const mapStyle = useMapStyle();
 
   const isOverview = places.length === 0;
 
@@ -190,7 +162,7 @@ export function BibleMap({ chapter, places, period }: Props) {
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: mapStyle === 'satellite' ? SATELLITE_STYLE : VECTOR_STYLE,
+      style: mapStyleFor(mapStyle),
       center: isOverview ? OVERVIEW_CENTER : [35.5, 32.5],
       zoom: isOverview ? OVERVIEW_ZOOM : 4.5,
       attributionControl: { compact: true },
@@ -381,7 +353,10 @@ export function BibleMap({ chapter, places, period }: Props) {
     const map = mapRef.current;
     if (!map || appliedStyleRef.current === mapStyle) return;
     appliedStyleRef.current = mapStyle;
-    map.setStyle(mapStyle === 'satellite' ? SATELLITE_STYLE : VECTOR_STYLE);
+    // diff: false → recarga completa. Con el diff por defecto, al pasar del
+    // estilo remoto al satélite MapLibre parchea el estilo en sitio, borra las
+    // capas propias y no emite 'style.load': nadie volvía a pintarlas.
+    map.setStyle(mapStyleFor(mapStyle), { diff: false });
     map.once('style.load', () => addRegionLayers(map));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapStyle]);
@@ -441,38 +416,7 @@ export function BibleMap({ chapter, places, period }: Props) {
         role="application"
       />
 
-      {/* Selector Vector / Satélite — arriba-izquierda (top-right ya tiene
-          NavigationControl de MapLibre). */}
-      <div
-        role="group"
-        aria-label={t('mapStyleAria')}
-        className="absolute left-2 top-2 z-10 flex overflow-hidden rounded-md bg-white shadow-md ring-1 ring-stone-200 dark:bg-stone-800 dark:ring-stone-700"
-      >
-        <button
-          type="button"
-          onClick={() => setStoredStyle('vector')}
-          aria-pressed={mapStyle === 'vector'}
-          className={`inline-flex min-h-11 items-center px-3 font-sans text-xs font-medium transition-colors ${
-            mapStyle === 'vector'
-              ? 'bg-lapis-500 text-white'
-              : 'text-stone-700 hover:bg-sand-100 dark:text-sand-100 dark:hover:bg-stone-700'
-          }`}
-        >
-          {t('mapStyleVector')}
-        </button>
-        <button
-          type="button"
-          onClick={() => setStoredStyle('satellite')}
-          aria-pressed={mapStyle === 'satellite'}
-          className={`inline-flex min-h-11 items-center px-3 font-sans text-xs font-medium transition-colors ${
-            mapStyle === 'satellite'
-              ? 'bg-lapis-500 text-white'
-              : 'text-stone-700 hover:bg-sand-100 dark:text-sand-100 dark:hover:bg-stone-700'
-          }`}
-        >
-          {t('mapStyleSatellite')}
-        </button>
-      </div>
+      <MapStyleToggle current={mapStyle} />
 
       {/* Badge informativo cuando el capítulo no tiene lugares específicos. */}
       {isOverview && (

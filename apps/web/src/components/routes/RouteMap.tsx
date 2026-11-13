@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import { Marker, type Map as MapLibreMap } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import '../map/worker';
 import { SATELLITE_STYLE } from '../map/styles';
 
 export type RouteMapStop = {

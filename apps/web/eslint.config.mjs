@@ -8,7 +8,9 @@ const config = [
   ...nextCoreWebVitals,
   ...nextTs,
   {
-    ignores: ['.next/**', 'node_modules/**', 'out/**'],
+    // public/vendor: el worker de MapLibre que copia el build (código de
+    // terceros minificado, no nuestro).
+    ignores: ['.next/**', 'node_modules/**', 'out/**', 'public/vendor/**'],
   },
   {
     rules: {

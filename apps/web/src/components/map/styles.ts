@@ -1,18 +1,34 @@
-// Estilos de mapa compartidos por BibleMap (lector) y RouteMap (rutas).
+// Estilos de mapa compartidos por BibleMap (lector), RouteMap (rutas),
+// PlaceMap (fichas) y VisitMap (guía de visita).
 
 import type { StyleSpecification } from 'maplibre-gl';
 
-// Estilo vectorial gratuito y open-source. Para el MVP basta y no requiere
-// API key. En el futuro podemos servir nuestro propio tile server.
-export const VECTOR_STYLE = 'https://demotiles.maplibre.org/style.json';
+// Mapa actual: OpenFreeMap (datos de OpenStreetMap), gratuito, sin API key y
+// sin límite de uso. Es el mapa de HOY —carreteras, pueblos, fronteras
+// vigentes—, y por eso el botón dice «Mapa actual»: a quien quiere visitar
+// estos lugares le sirve para orientarse, y a nadie le hace pensar que eso
+// era la geografía del pasaje.
+//
+// Sustituye a las teselas de demostración de MapLibre (demotiles), que solo
+// pintaban países en colores planos, sin una carretera ni un pueblo: no
+// servían ni para leer ni para viajar. Estilo «liberty»: el más completo de
+// los tres que ofrece el servicio.
+export const VECTOR_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
+
+// Fuente de los rótulos propios (regiones históricas, zonas de la guía).
+// MapLibre pide los glyphs al servidor del estilo activo, así que tiene que
+// existir en el de OpenFreeMap, que es el que usan los dos estilos: sirve
+// Noto Sans Regular, Bold e Italic. Con un nombre que el servidor no tenga,
+// el texto no se pinta.
+export const MAP_LABEL_FONT = ['Noto Sans Bold'];
 
 // Estilo satélite con teselas raster de Esri World Imagery — gratis para
 // uso no comercial, atribución obligatoria visible.
 export const SATELLITE_STYLE: StyleSpecification = {
   version: 8,
-  // Glyphs para capas de texto propias (rótulos de regiones y rutas);
-  // el estilo vectorial de demotiles ya trae los suyos.
-  glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+  // Glyphs para las capas de texto propias: el mismo servidor que usa el
+  // estilo vectorial, para que MAP_LABEL_FONT valga en ambos.
+  glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
   sources: {
     esri: {
       type: 'raster',
