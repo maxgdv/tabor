@@ -270,6 +270,15 @@ export function ChapterReader({
   };
 
   // Observa qué versículo está más cerca de la línea de lectura y lo marca activo.
+  //
+  // Depende de `compareMode` porque al entrar o salir de la lectura comparada
+  // el contenedor de versículos cambia de <p> a <div> y React desmonta y
+  // vuelve a montar cada <span>: el observador se quedaba vigilando nodos que
+  // ya no estaban en el documento y el mapa dejaba de seguir al texto en
+  // cuanto se activaba «Comparar» (fallo presente en producción hasta
+  // nov-2026). Al re-ejecutarse tras el commit, `verseRefs` ya tiene los
+  // nodos nuevos.
+  const compareMode = secondary != null;
   useEffect(() => {
     if (typeof IntersectionObserver === 'undefined') return;
 
@@ -298,7 +307,7 @@ export function ChapterReader({
 
     verseRefs.current.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [setActiveVerse]);
+  }, [setActiveVerse, compareMode]);
 
   // Deep-link a un versículo: /leer/mat/5#v3 (desde la búsqueda o un enlace
   // compartido). El contenedor de scroll es interno, así que hacemos el
