@@ -12,6 +12,10 @@ import {
 type Props = {
   /** «Versículo 3» o «Versículos 3-5, 8» — ya formateado por el lector. */
   refLabel: string;
+  /** Con sesión: colores, etiqueta y nota. Sin ella, solo compartir y copiar. */
+  canAnnotate: boolean;
+  /** Cita, referencia y enlace de la selección, listos para enviar. */
+  shareText: string | null;
   /** Color común de toda la selección, o `null` si difieren o no hay. */
   currentColor: HighlightColor | null;
   /** Etiqueta común de la selección (solo significativa con currentColor). */
@@ -25,14 +29,20 @@ type Props = {
   onClose: () => void;
 };
 
+type CopyStatus = 'idle' | 'copied' | 'failed';
+
 /**
  * Barra de acciones de la selección de versículos, fija al borde inferior del
  * panel del lector (sin anclaje al texto: robusta en móvil y con el scroll
- * interno). Tocar el color activo lo quita. El botón de etiqueta cambia la
- * barra a un input en línea (una sola fila también en móvil). Escape cierra.
+ * interno). Compartir y copiar están para todos; resaltar, etiquetar y anotar
+ * piden sesión. Tocar el color activo lo quita. El botón de etiqueta cambia
+ * la barra a un input en línea (una sola fila también en móvil). Escape
+ * cierra.
  */
 export function VerseActionsBar({
   refLabel,
+  canAnnotate,
+  shareText,
   currentColor,
   currentLabel,
   canNote,
@@ -46,6 +56,52 @@ export function VerseActionsBar({
   const [labelMode, setLabelMode] = useState(false);
   const [labelDraft, setLabelDraft] = useState('');
   const labelInputRef = useRef<HTMLInputElement>(null);
+  const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle');
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    },
+    [],
+  );
+
+  // La hoja de compartir del sistema existe sobre todo en móvil; donde no la
+  // hay, «Copiar» cubre el caso. La barra solo se monta tras una interacción,
+  // ya en el navegador, así que consultar `navigator` aquí no desajusta la
+  // hidratación.
+  const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+  const share = () => {
+    if (!shareText) return;
+    // Rechaza con AbortError cuando el usuario cierra la hoja sin elegir
+    // destino: no es un fallo y no hay nada que avisar.
+    navigator.share({ text: shareText }).catch(() => {});
+  };
+
+  const copy = async () => {
+    if (!shareText) return;
+    let status: CopyStatus = 'copied';
+    try {
+      await navigator.clipboard.writeText(shareText);
+    } catch {
+      status = 'failed';
+    }
+    setCopyStatus(status);
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    copyTimerRef.current = setTimeout(() => setCopyStatus('idle'), 2500);
+  };
+
+  const actionButtonClass =
+    'inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-md border border-sand-200 px-3 font-sans text-xs text-stone-700 transition-colors hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:text-sand-100';
+  const copyLabel = t(
+    copyStatus === 'copied' ? 'copied' : copyStatus === 'failed' ? 'copyFailed' : 'copy',
+  );
+  // Con sesión la barra ya lleva colores, etiqueta y nota: compartir y copiar
+  // se quedan en icono para no añadir otra fila (el panel de texto es media
+  // pantalla también en escritorio; el rótulo vuelve en pantallas muy
+  // anchas). Sin sesión son lo único que hay y caben con su texto.
+  const actionTextClass = canAnnotate ? 'hidden 2xl:inline' : '';
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -121,35 +177,37 @@ export function VerseActionsBar({
             {refLabel}
           </span>
 
-          <div className="flex items-center" role="group" aria-label={t('highlightGroup')}>
-            {HIGHLIGHT_COLORS.map((color) => {
-              const isActive = currentColor === color;
-              return (
-                // El botón mide 44×44 (área táctil); la muestra de color
-                // sigue siendo el círculo de 24 px de dentro.
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => onSelectColor(isActive ? null : color)}
-                  aria-pressed={isActive}
-                  aria-label={t(isActive ? 'highlightRemove' : `color.${color}`)}
-                  title={t(isActive ? 'highlightRemove' : `color.${color}`)}
-                  className="group inline-flex h-11 w-11 items-center justify-center rounded-md"
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`reader-motion h-6 w-6 rounded-full ${SWATCH_CLASSES[color]} transition-transform group-hover:scale-110 ${
-                      isActive
-                        ? 'ring-2 ring-stone-700 ring-offset-1 ring-offset-sand-50 dark:ring-sand-100 dark:ring-offset-stone-900'
-                        : 'opacity-80 group-hover:opacity-100'
-                    }`}
-                  />
-                </button>
-              );
-            })}
-          </div>
+          {canAnnotate && (
+            <div className="flex items-center" role="group" aria-label={t('highlightGroup')}>
+              {HIGHLIGHT_COLORS.map((color) => {
+                const isActive = currentColor === color;
+                return (
+                  // El botón mide 44×44 (área táctil); la muestra de color
+                  // sigue siendo el círculo de 24 px de dentro.
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => onSelectColor(isActive ? null : color)}
+                    aria-pressed={isActive}
+                    aria-label={t(isActive ? 'highlightRemove' : `color.${color}`)}
+                    title={t(isActive ? 'highlightRemove' : `color.${color}`)}
+                    className="group inline-flex h-11 w-11 items-center justify-center rounded-md"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`reader-motion h-6 w-6 rounded-full ${SWATCH_CLASSES[color]} transition-transform group-hover:scale-110 ${
+                        isActive
+                          ? 'ring-2 ring-stone-700 ring-offset-1 ring-offset-sand-50 dark:ring-sand-100 dark:ring-offset-stone-900'
+                          : 'opacity-80 group-hover:opacity-100'
+                      }`}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
-          {currentColor !== null && (
+          {canAnnotate && currentColor !== null && (
             <button
               type="button"
               onClick={openLabelMode}
@@ -160,7 +218,7 @@ export function VerseActionsBar({
             </button>
           )}
 
-          {canNote && (
+          {canAnnotate && canNote && (
             <button
               type="button"
               onClick={onOpenNote}
@@ -169,6 +227,72 @@ export function VerseActionsBar({
               {t(hasNote ? 'noteEdit' : 'noteAdd')}
             </button>
           )}
+
+          {shareText && canShare && (
+            <button
+              type="button"
+              onClick={share}
+              aria-label={t('share')}
+              title={t('share')}
+              className={actionButtonClass}
+            >
+              <svg
+                className="h-4 w-4 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 15V3m0 0L8 7m4-4l4 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
+                />
+              </svg>
+              <span className={actionTextClass}>{t('share')}</span>
+            </button>
+          )}
+          {shareText && (
+            <button
+              type="button"
+              onClick={copy}
+              aria-label={t('copy')}
+              title={t('copy')}
+              className={actionButtonClass}
+            >
+              {copyStatus === 'copied' ? (
+                <svg
+                  className="h-4 w-4 shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg
+                  className="h-4 w-4 shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                >
+                  <rect x="9" y="9" width="11" height="11" rx="2" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 15V6a2 2 0 012-2h9" />
+                </svg>
+              )}
+              <span className={actionTextClass}>{copyLabel}</span>
+            </button>
+          )}
+          {/* El cambio de icono y de texto no lo anuncia un lector de
+              pantalla por sí solo (WCAG 4.1.3). */}
+          <span role="status" className="sr-only">
+            {copyStatus === 'idle' ? '' : copyLabel}
+          </span>
 
           <button
             type="button"

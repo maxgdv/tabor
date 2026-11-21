@@ -3,6 +3,7 @@ import { Link } from '@/i18n/routing';
 import { getLiturgicalSeason } from '@/lib/liturgical';
 import type { LiturgicalSeason } from '@/lib/routes';
 import { getVerseOfDayContent } from '@/lib/verse-of-day-content';
+import { ReadCta } from '@/components/ReadCta';
 import { SeasonHighlight } from '@/components/SeasonHighlight';
 import { SituationPlansSection } from '@/components/plans/SituationPlansSection';
 import { VerseOfDayCard } from '@/components/VerseOfDayCard';
@@ -65,12 +66,9 @@ export default async function HomePage({
           {t('lede')}
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/leer"
-            className="inline-flex items-center gap-2 rounded-md bg-lapis-500 px-5 py-3 font-sans text-sm font-medium text-white hover:bg-lapis-600"
-          >
-            {t('ctaRead')}
-          </Link>
+          {/* «Comenzar a leer», o «Seguir leyendo · Mateo 4» para quien ya
+              leyó algo en este dispositivo (se resuelve en el navegador). */}
+          <ReadCta />
           <Link
             href="/leer/gen/12"
             className="inline-flex items-center gap-2 rounded-md border border-stone-300 px-5 py-3 font-sans text-sm font-medium text-stone-700 hover:border-lapis-500 hover:text-lapis-600 dark:border-stone-600 dark:text-sand-100 dark:hover:border-lapis-500"

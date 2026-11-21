@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { Analytics } from '@vercel/analytics/next';
 import { routing } from '@/i18n/routing';
 import { SITE_URL, localeAlternates, openGraphFor } from '@/lib/seo';
+import { TEXT_SIZE_BOOT_SCRIPT } from '@/lib/text-size';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import '../globals.css';
@@ -98,8 +99,16 @@ export default async function LocaleLayout({
   const tHeader = await getTranslations('header');
 
   return (
-    <html lang={locale}>
+    // suppressHydrationWarning: el script de abajo puede haber puesto
+    // `--reader-scale` en este elemento antes de que React hidrate, y React
+    // avisaría de un atributo `style` que él no renderizó. Solo silencia los
+    // atributos de <html>, no los de sus hijos.
+    <html lang={locale} suppressHydrationWarning>
       <body className="min-h-dvh flex flex-col font-serif">
+        {/* Tamaño de letra elegido por el lector, aplicado antes del primer
+            pintado (ver lib/text-size.ts). Es una constante de este código,
+            sin datos del usuario ni de la petición. */}
+        <script dangerouslySetInnerHTML={{ __html: TEXT_SIZE_BOOT_SCRIPT }} />
         <NextIntlClientProvider messages={messages}>
           <a
             href="#main"

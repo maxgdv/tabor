@@ -45,6 +45,11 @@ con ajustes según el aprendizaje real.
   (Web Speech API): versículo a versículo desde el versículo actual,
   con el texto y el mapa siguiendo la lectura, y voz y velocidad
   configurables. Sin licencias ni backend; también para invitados.
+- **Comodidades de lectura** que viven en el dispositivo, sin cuenta:
+  **tamaño de letra** ajustable, **compartir o copiar** un versículo
+  (o un rango) con su referencia y el enlace al versículo exacto, y
+  **«Seguir leyendo»** en la portada, que retoma el último capítulo en
+  el versículo donde se dejó.
 - **Arte sacro** de dominio público en 18 capítulos sin geografía
   (Rembrandt, Caravaggio, Durero, Van Eyck…), con atribución y
   enlace a Wikimedia Commons.
@@ -196,7 +201,9 @@ Si quieres empezar y no sabes por dónde:
 - **Mejoras de rendimiento** en el render del mapa (clustering de
   marcadores en chapters densos como Josué 15).
 - **Traducción de la UI** a otro idioma.
-- **Tests** (hay esqueleto de Vitest, falta cobertura real).
+- **Tests**: la lógica pura está cubierta con Vitest y el lector y el
+  mapa con pruebas de navegador (Playwright, `apps/web/e2e`); faltan
+  las zonas con sesión (marcadores, resaltados, notas, planes).
 - **Documentación** del código en zonas poco comentadas.
 
 Abre un *issue* describiendo qué quieres hacer **antes** de mandar

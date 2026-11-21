@@ -12,8 +12,13 @@ type ReaderState = {
   // Cuando el usuario hace click en un marcador del mapa, queremos
   // hacer scroll suave al primer versículo asociado a ese lugar.
   // El lector escucha esta señal con un efecto.
+  //
+  // `scrollInstant` pide el salto sin animación: es para devolver la lectura
+  // a su sitio al recargar la página, donde un desplazamiento animado desde
+  // el principio del capítulo solo estorbaría.
   scrollTarget: number | null;
-  requestScrollTo: (verse: number) => void;
+  scrollInstant: boolean;
+  requestScrollTo: (verse: number, options?: { instant?: boolean }) => void;
   clearScrollTarget: () => void;
 };
 
@@ -22,6 +27,8 @@ export const useReaderStore = create<ReaderState>((set) => ({
   setActiveVerse: (verse) => set({ activeVerseNumber: verse }),
 
   scrollTarget: null,
-  requestScrollTo: (verse) => set({ scrollTarget: verse }),
-  clearScrollTarget: () => set({ scrollTarget: null }),
+  scrollInstant: false,
+  requestScrollTo: (verse, options) =>
+    set({ scrollTarget: verse, scrollInstant: options?.instant ?? false }),
+  clearScrollTarget: () => set({ scrollTarget: null, scrollInstant: false }),
 }));

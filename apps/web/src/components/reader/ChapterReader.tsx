@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useReaderStore } from '@/lib/reader-store';
+import { SITE_URL } from '@/lib/seo';
+import { buildShareText } from '@/lib/share';
 import type { Chapter } from '@/lib/bible';
 import {
   HIGHLIGHT_CLASSES,
@@ -27,8 +29,10 @@ function VersesContainer({ compare, children }: { compare: boolean; children: Re
   // Interlineado 1.75 en móvil (leading-loose = 2 dejaba las líneas sueltas
   // en una columna de ~35 caracteres y obligaba a desplazar de más); en
   // pantallas anchas, donde la línea es larga, se mantiene el aire de antes.
+  // `reader-text` (globals.css) es el tamaño de letra: 18 px por el factor
+  // que el usuario haya elegido en los ajustes de lectura.
   const className =
-    'font-serif text-lg leading-[1.75] text-stone-800 sm:leading-loose dark:text-sand-100';
+    'reader-text font-serif leading-[1.75] text-stone-800 sm:leading-loose dark:text-sand-100';
   return compare ? (
     <div className={`${className} space-y-4`}>{children}</div>
   ) : (
@@ -87,8 +91,10 @@ export function ChapterReader({
   afterText,
 }: Props) {
   const t = useTranslations('reader');
+  const locale = useLocale();
   const setActiveVerse = useReaderStore((s) => s.setActiveVerse);
   const scrollTarget = useReaderStore((s) => s.scrollTarget);
+  const scrollInstant = useReaderStore((s) => s.scrollInstant);
   const clearScrollTarget = useReaderStore((s) => s.clearScrollTarget);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -101,10 +107,11 @@ export function ChapterReader({
     () => new Set(initialBookmarks ?? []),
   );
 
-  // Resaltados y notas (solo con sesión). Nacen del server y el remontaje
-  // por key al cambiar de capítulo los refresca — sin setState en effects.
-  // La selección es un conjunto: cada tap añade/quita un versículo, y el
-  // color se aplica por rangos contiguos (un tap solo = comportamiento v1).
+  // La selección de versículos es para todos: con ella se comparte o se
+  // copia el pasaje. Resaltados y notas, además, piden sesión; nacen del
+  // server y el remontaje por key al cambiar de capítulo los refresca — sin
+  // setState en effects. La selección es un conjunto: cada tap añade/quita un
+  // versículo, y el color se aplica por rangos contiguos.
   const [selected, setSelected] = useState<ReadonlySet<number>>(() => new Set());
   const [noteEditorVerse, setNoteEditorVerse] = useState<number | null>(null);
   // Anuncio sr-only cuando un guardado optimista revierte por fallo de red:
@@ -235,8 +242,11 @@ export function ChapterReader({
 
   // Tap en el texto del versículo = añadirlo/quitarlo de la selección. Los
   // clicks nacidos en botones interiores (marcador, icono de nota) no cuentan.
+  // Tampoco cuenta el final de un arrastre: quien selecciona texto con el
+  // ratón para copiarlo a su manera no quiere además marcar el versículo.
   const onVerseClick = (verseNumber: number) => (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return;
+    if (window.getSelection()?.isCollapsed === false) return;
     toggleVerseSelection(verseNumber);
   };
 
@@ -309,15 +319,22 @@ export function ChapterReader({
     return () => observer.disconnect();
   }, [setActiveVerse, compareMode]);
 
-  // Deep-link a un versículo: /leer/mat/5#v3 (desde la búsqueda o un enlace
-  // compartido). El contenedor de scroll es interno, así que hacemos el
-  // scroll nosotros en vez de confiar en el anchor nativo del navegador.
+  // Deep-link a un versículo: /leer/mat/5#v3 (desde la búsqueda, un enlace
+  // compartido o «Seguir leyendo»). El contenedor de scroll es interno, así
+  // que hacemos el scroll nosotros en vez de confiar en el anchor nativo del
+  // navegador.
+  //
+  // El anchor nativo actúa de todos modos antes que este efecto (al cargar el
+  // HTML, o Next al navegar) y, además de mover el panel, desplaza la página
+  // entera lo poco que da de sí: la cabecera quedaba cortada y en móvil
+  // asomaba el pie bajo la barra del pulgar. Se devuelve la página arriba.
   useEffect(() => {
     const match = window.location.hash.match(/^#v(\d+)$/);
     if (!match) return;
     const number = Number(match[1]);
     const el = verseRefs.current.get(number);
     if (el && containerRef.current) {
+      window.scrollTo(0, 0);
       scrollVerseIntoView(containerRef.current, el, 'auto');
       setActiveVerse(number);
     }
@@ -330,10 +347,20 @@ export function ChapterReader({
     const el = verseRefs.current.get(scrollTarget);
     if (el && containerRef.current) {
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      scrollVerseIntoView(containerRef.current, el, reduced ? 'auto' : 'smooth');
+      scrollVerseIntoView(containerRef.current, el, reduced || scrollInstant ? 'auto' : 'smooth');
     }
     clearScrollTarget();
-  }, [scrollTarget, clearScrollTarget]);
+  }, [scrollTarget, scrollInstant, clearScrollTarget]);
+
+  const shareText = buildShareText({
+    verses: chapter.verses.filter((v) => selected.has(v.number)),
+    bookName: chapter.bookName,
+    chapter: chapter.number,
+    versionName: chapter.versionFullName,
+    locale,
+    bookSegment: chapter.bookCanonicalId.toLowerCase(),
+    siteUrl: SITE_URL,
+  });
 
   // La nota sigue siendo de un solo versículo: el botón solo aparece con
   // exactamente un versículo seleccionado.
@@ -352,13 +379,16 @@ export function ChapterReader({
       </div>
       <div
         ref={containerRef}
+        // Marca el panel que desplaza el texto: los ajustes de tamaño de
+        // letra lo buscan para conservar la posición de lectura.
+        data-reader-scroll=""
         // El pb extra con selección activa evita que la barra de acciones
         // fija al fondo tape el versículo enfocado (WCAG 2.4.11).
         // overscroll-contain: al llegar al final del capítulo, el gesto no
         // arrastra la página entera (en móvil se llevaría por delante la barra
         // inferior del pulgar).
         className={`h-full overflow-y-auto overscroll-contain px-5 py-8 sm:px-10 sm:py-14 ${
-          isAuthed && selected.size > 0 ? 'pb-28 sm:pb-28' : ''
+          selected.size > 0 ? 'pb-28 sm:pb-28' : ''
         }`}
       >
         <article className="mx-auto max-w-reader">
@@ -390,9 +420,9 @@ export function ChapterReader({
                 data-bookmarked={isAuthed && bookmarks.has(verse.number) ? 'true' : undefined}
                 data-selected={selected.has(verse.number) ? 'true' : undefined}
                 // Seleccionar por puntero es el tap en el texto; por teclado,
-                // Mayús+Intro sobre el número del versículo (hacer focusables
-                // ~170 spans degradaría la navegación por teclado del lector).
-                onClick={isAuthed ? onVerseClick(verse.number) : undefined}
+                // el número del versículo, que es un botón (hacer focusables
+                // además ~170 spans degradaría la navegación por teclado).
+                onClick={onVerseClick(verse.number)}
                 className={`group ${secondary ? 'block' : 'inline'} transition-colors ${
                   isAuthed && highlights.has(verse.number)
                     ? `${HIGHLIGHT_CLASSES[highlights.get(verse.number)!.color]} box-decoration-clone rounded-sm`
@@ -422,9 +452,17 @@ export function ChapterReader({
                     {verse.number}
                   </button>
                 ) : (
-                  <sup className="mr-1 select-none font-sans text-xs text-stone-500 group-data-[active=true]:text-lapis-500 dark:text-stone-400">
+                  // Sin sesión no hay marcadores: el número selecciona el
+                  // versículo, que es la vía de teclado para compartirlo.
+                  <button
+                    type="button"
+                    onClick={() => toggleVerseSelection(verse.number)}
+                    aria-pressed={selected.has(verse.number)}
+                    aria-label={t('selectVerse', { n: verse.number })}
+                    className="mr-1 inline-block select-none align-super font-sans text-xs leading-none text-stone-500 transition-colors hover:text-lapis-500 group-data-[active=true]:text-lapis-500 dark:text-stone-400"
+                  >
                     {verse.number}
-                  </sup>
+                  </button>
                 )}
                 {isAuthed && notes.has(verse.number) && (
                   <button
@@ -457,7 +495,7 @@ export function ChapterReader({
                 {secondary && (
                   <span
                     lang={secondary.lang}
-                    className="mt-1 block border-l-2 border-sand-200 pl-3 font-serif text-[1.05rem] italic leading-relaxed text-stone-600 dark:border-stone-700 dark:text-stone-400"
+                    className="reader-text-secondary mt-1 block border-l-2 border-sand-200 pl-3 font-serif italic leading-relaxed text-stone-600 dark:border-stone-700 dark:text-stone-400"
                   >
                     {secondary.byVerse[verse.number] ?? '—'}
                   </span>
@@ -487,9 +525,11 @@ export function ChapterReader({
         </article>
       </div>
 
-      {isAuthed && selected.size > 0 && noteEditorVerse == null && (
+      {selected.size > 0 && noteEditorVerse == null && (
         <VerseActionsBar
           refLabel={selectionRef}
+          canAnnotate={isAuthed}
+          shareText={shareText}
           currentColor={selectionColor}
           currentLabel={selectionLabel}
           canNote={singleSelected != null}

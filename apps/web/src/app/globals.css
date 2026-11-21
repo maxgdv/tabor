@@ -84,6 +84,17 @@
   }
 }
 
+/* Tamaño de letra del texto bíblico. `--reader-scale` lo fija el usuario en
+   los ajustes de lectura (lib/text-size.ts); sin preferencia vale 1 y el
+   texto queda en los 18 px de siempre. El interlineado es relativo, así que
+   crece con la letra. La versión comparada mantiene su proporción. */
+.reader-text {
+  font-size: calc(1.125rem * var(--reader-scale, 1));
+}
+.reader-text-secondary {
+  font-size: calc(1.05rem * var(--reader-scale, 1));
+}
+
 /* Controles nativos de MapLibre (zoom): 29 px de fábrica se quedan cortos
    para el dedo cuando el mapa ocupa la pantalla del móvil. El doble selector
    gana en especificidad a `.maplibregl-ctrl button` de maplibre-gl.css, que

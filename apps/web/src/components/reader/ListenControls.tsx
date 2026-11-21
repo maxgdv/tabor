@@ -15,6 +15,7 @@ import {
   voicesForLocale,
 } from '@/lib/speech';
 import { keepScreenAwake } from '@/lib/wake-lock';
+import { TextSizeSetting } from './TextSizeSetting';
 
 type Props = {
   /** Versículos del capítulo, en orden. */
@@ -47,7 +48,12 @@ function subscribeVoices(onChange: () => void): () => void {
  * mapa lo sigue) y se lleva a la vista. Un enunciado por versículo: evita el
  * límite de ~15 s de Chrome y da la granularidad de la sincronización.
  * Ajustes de voz y velocidad persistentes; los cambios aplican en el
- * siguiente versículo. Si no hay speechSynthesis, no se renderiza nada.
+ * siguiente versículo.
+ *
+ * El engranaje abre los ajustes de lectura, que empiezan por el tamaño de
+ * letra: ese no depende de la síntesis de voz, así que el engranaje se
+ * muestra siempre, también en un navegador sin speechSynthesis (donde los
+ * botones de escucha y los ajustes de voz simplemente no aparecen).
  */
 export function ListenControls({ verses }: Props) {
   const t = useTranslations('reader');
@@ -219,7 +225,7 @@ export function ListenControls({ verses }: Props) {
     setStoredRate(value);
   };
 
-  if (!supported || verses.length === 0) return null;
+  if (verses.length === 0) return null;
 
   const localeVoices = voicesForLocale(voices, locale);
   const defaultVoice = pickVoice(voices, locale, voiceName);
@@ -236,112 +242,130 @@ export function ListenControls({ verses }: Props) {
 
   return (
     <div className="relative">
-      <div
-        className="flex shrink-0 items-center gap-1.5"
-        role="group"
-        aria-label={t('listenGroup')}
-      >
+      <div className="flex shrink-0 items-center gap-1.5">
+        {supported && (
+          <div className="flex items-center gap-1.5" role="group" aria-label={t('listenGroup')}>
+            <button
+              type="button"
+              onClick={status === 'playing' ? pause : play}
+              aria-label={mainLabel}
+              title={mainLabel}
+              className={buttonClass}
+            >
+              {status === 'playing' ? (
+                <svg
+                  className="h-3.5 w-3.5"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
+                </svg>
+              ) : (
+                <svg
+                  className="h-3.5 w-3.5"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M7 4.5v15l13-7.5z" />
+                </svg>
+              )}
+              <span className="hidden sm:inline">
+                {t(
+                  status === 'playing'
+                    ? 'listenPauseShort'
+                    : status === 'paused'
+                      ? 'listenResumeShort'
+                      : 'listenShort',
+                )}
+              </span>
+            </button>
+            {status !== 'idle' && (
+              <button
+                type="button"
+                onClick={stop}
+                aria-label={t('listenStop')}
+                title={t('listenStop')}
+                className={iconButtonClass}
+              >
+                <svg
+                  className="h-3.5 w-3.5"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6h12v12H6z" />
+                </svg>
+              </button>
+            )}
+          </div>
+        )}
         <button
           type="button"
-          onClick={status === 'playing' ? pause : play}
-          aria-label={mainLabel}
-          title={mainLabel}
-          className={buttonClass}
+          onClick={() => setSettingsOpen((v) => !v)}
+          aria-expanded={settingsOpen}
+          aria-label={t('readerSettings')}
+          title={t('readerSettings')}
+          className={iconButtonClass}
         >
-          {status === 'playing' ? (
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
-            </svg>
-          ) : (
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M7 4.5v15l13-7.5z" />
-            </svg>
-          )}
-          <span className="hidden sm:inline">
-            {t(
-              status === 'playing'
-                ? 'listenPauseShort'
-                : status === 'paused'
-                  ? 'listenResumeShort'
-                  : 'listenShort',
-            )}
-          </span>
+          <svg
+            className="h-3.5 w-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10.34 4.06a1.72 1.72 0 013.32 0l.18.72a1.72 1.72 0 002.57 1.06l.64-.38a1.72 1.72 0 012.35 2.35l-.38.64a1.72 1.72 0 001.06 2.57l.72.18a1.72 1.72 0 010 3.32l-.72.18a1.72 1.72 0 00-1.06 2.57l.38.64a1.72 1.72 0 01-2.35 2.35l-.64-.38a1.72 1.72 0 00-2.57 1.06l-.18.72a1.72 1.72 0 01-3.32 0l-.18-.72a1.72 1.72 0 00-2.57-1.06l-.64.38a1.72 1.72 0 01-2.35-2.35l.38-.64a1.72 1.72 0 00-1.06-2.57l-.72-.18a1.72 1.72 0 010-3.32l.72-.18a1.72 1.72 0 001.06-2.57l-.38-.64a1.72 1.72 0 012.35-2.35l.64.38a1.72 1.72 0 002.57-1.06l.18-.72z"
+            />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
         </button>
-        {status !== 'idle' && (
-          <button
-            type="button"
-            onClick={stop}
-            aria-label={t('listenStop')}
-            title={t('listenStop')}
-            className={iconButtonClass}
-          >
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M6 6h12v12H6z" />
-            </svg>
-          </button>
-        )}
-        {localeVoices.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setSettingsOpen((v) => !v)}
-            aria-expanded={settingsOpen}
-            aria-label={t('listenSettings')}
-            title={t('listenSettings')}
-            className={iconButtonClass}
-          >
-            <svg
-              className="h-3.5 w-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M10.34 4.06a1.72 1.72 0 013.32 0l.18.72a1.72 1.72 0 002.57 1.06l.64-.38a1.72 1.72 0 012.35 2.35l-.38.64a1.72 1.72 0 001.06 2.57l.72.18a1.72 1.72 0 010 3.32l-.72.18a1.72 1.72 0 00-1.06 2.57l.38.64a1.72 1.72 0 01-2.35 2.35l-.64-.38a1.72 1.72 0 00-2.57 1.06l-.18.72a1.72 1.72 0 01-3.32 0l-.18-.72a1.72 1.72 0 00-2.57-1.06l-.64.38a1.72 1.72 0 01-2.35-2.35l.38-.64a1.72 1.72 0 00-1.06-2.57l-.72-.18a1.72 1.72 0 010-3.32l.72-.18a1.72 1.72 0 001.06-2.57l-.38-.64a1.72 1.72 0 012.35-2.35l.64.38a1.72 1.72 0 002.57-1.06l.18-.72z"
-              />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </button>
-        )}
       </div>
 
       {settingsOpen && (
         <div className="absolute right-0 top-full z-20 mt-1.5 w-64 space-y-3 rounded-lg border border-sand-200 bg-sand-50 p-3 shadow-xl dark:border-stone-700 dark:bg-stone-900">
-          <label className="block">
-            <span className="mb-1 block font-sans text-xs font-medium text-stone-600 dark:text-sand-200">
-              {t('listenVoice')}
-            </span>
-            <select
-              value={defaultVoice?.name ?? ''}
-              onChange={(e) => chooseVoice(e.target.value)}
-              className="w-full min-h-11 rounded-md border border-sand-200 bg-white/70 px-2 font-sans text-xs text-stone-800 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100"
-            >
-              {localeVoices.map((v) => (
-                <option key={v.name} value={v.name}>
-                  {v.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className="mb-1 block font-sans text-xs font-medium text-stone-600 dark:text-sand-200">
-              {t('listenRate')}
-            </span>
-            <select
-              value={rate}
-              onChange={(e) => chooseRate(Number(e.target.value))}
-              className="w-full min-h-11 rounded-md border border-sand-200 bg-white/70 px-2 font-sans text-xs text-stone-800 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100"
-            >
-              {TTS_RATES.map((r) => (
-                <option key={r} value={r}>
-                  {t(`rate.${String(r).replace('.', '_')}`)}
-                </option>
-              ))}
-            </select>
-          </label>
+          <TextSizeSetting />
+          {localeVoices.length > 0 && (
+            <>
+              <label className="block">
+                <span className="mb-1 block font-sans text-xs font-medium text-stone-600 dark:text-sand-200">
+                  {t('listenVoice')}
+                </span>
+                <select
+                  value={defaultVoice?.name ?? ''}
+                  onChange={(e) => chooseVoice(e.target.value)}
+                  className="w-full min-h-11 rounded-md border border-sand-200 bg-white/70 px-2 font-sans text-xs text-stone-800 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100"
+                >
+                  {localeVoices.map((v) => (
+                    <option key={v.name} value={v.name}>
+                      {v.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block">
+                <span className="mb-1 block font-sans text-xs font-medium text-stone-600 dark:text-sand-200">
+                  {t('listenRate')}
+                </span>
+                <select
+                  value={rate}
+                  onChange={(e) => chooseRate(Number(e.target.value))}
+                  className="w-full min-h-11 rounded-md border border-sand-200 bg-white/70 px-2 font-sans text-xs text-stone-800 focus:border-lapis-500 focus:outline-none focus:ring-1 focus:ring-lapis-500 dark:border-stone-600 dark:bg-stone-800/70 dark:text-sand-100"
+                >
+                  {TTS_RATES.map((r) => (
+                    <option key={r} value={r}>
+                      {t(`rate.${String(r).replace('.', '_')}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          )}
         </div>
       )}
     </div>

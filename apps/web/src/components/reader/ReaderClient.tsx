@@ -8,6 +8,7 @@ import type { Chapter } from '@/lib/bible';
 import { ChapterReader, type ChapterAnnotations, type SecondaryText } from './ChapterReader';
 import { ActiveVerseMarker } from './ActiveVerseMarker';
 import { CompareSelector } from './CompareSelector';
+import { LastReadTracker } from './LastReadTracker';
 
 type PersonalState = {
   bookmarks: number[];
@@ -99,14 +100,15 @@ export function ReaderClient({
       cancelled = true;
     };
   }, [compareParam, book, chapter.number, locale]);
-  const secondaryText =
-    compareParam && secondary?.param === compareParam ? secondary.data : null;
+  const secondaryText = compareParam && secondary?.param === compareParam ? secondary.data : null;
 
   return (
     <>
       <Suspense fallback={null}>
         <VsWatcher onChange={setVs} />
       </Suspense>
+      {/* Antes que ChapterReader a propósito: ver LastReadTracker. */}
+      <LastReadTracker book={chapter.bookCanonicalId} chapter={chapter.number} />
       <ChapterReader
         chapter={chapter}
         initialBookmarks={personalState?.bookmarks ?? null}
