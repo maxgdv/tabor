@@ -1,8 +1,11 @@
 name: CI
 
+# En cada push a cualquier rama, no solo a main: el trabajo se hace en ramas
+# que Vercel despliega como vista previa y que solo llegan a main —que es
+# producción— con el visto bueno del promotor. Si la CI corriera solo en main,
+# los tests pasarían por primera vez después de desplegar.
 on:
   push:
-    branches: [main]
   pull_request:
     branches: [main]
 
