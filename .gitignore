@@ -31,6 +31,10 @@ Thumbs.db
 !.vscode/extensions.json
 !.vscode/settings.json
 
+# Playwright (informes y trazas de las pruebas de navegador)
+test-results/
+playwright-report/
+
 # Coverage
 coverage/
 .nyc_output/

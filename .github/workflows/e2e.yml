@@ -1,0 +1,69 @@
+name: Pruebas de navegador
+
+# Abre el sitio publicado en un navegador de verdad y comprueba lo que los
+# tests unitarios no pueden ver: que el mapa sigue al texto, que sus capas se
+# cargan, que cada tipo de página responde (apps/web/e2e).
+#
+# Van contra producción y no contra un build de la CI porque la CI no tiene
+# base de datos: no puede levantar la app. Las pruebas son de solo lectura y
+# sin sesión, así que no dejan rastro; son una veintena de páginas al día.
+#
+# Cuándo corren:
+#   · Cada mañana: si algo se cae solo (la base de datos, un proveedor de
+#     teselas, un despliegue a medias), GitHub avisa por correo al dueño del
+#     repositorio en vez de esperar a que lo cuente un lector.
+#   · A mano, desde la pestaña Actions («Run workflow»): tras fusionar una
+#     ronda en main y terminar el despliegue de Vercel. Admite otra URL.
+
+on:
+  schedule:
+    # 06:17 UTC: fuera de las horas en punto, que es cuando GitHub va saturado.
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'URL del sitio a probar'
+        default: 'https://proyectotabor.org'
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: Playwright contra el sitio publicado
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/web
+
+      - name: Run browser tests
+        run: npm run e2e
+        working-directory: apps/web
+        env:
+          E2E_BASE_URL: ${{ inputs.base_url || 'https://proyectotabor.org' }}
+
+      - name: Upload traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: apps/web/test-results/
+          retention-days: 7

@@ -64,12 +64,37 @@ Si algo falla, abre un *issue* describiendo paso a paso lo que viste.
 4. **Antes de abrir la PR**, asegúrate de que:
    - `npm run lint` pasa sin errores.
    - `npm run typecheck` pasa sin errores.
+   - `npm run test` pasa sin errores.
    - `npm run build` compila correctamente.
+   - Si tocas el lector o el mapa, pasan también las pruebas de navegador
+     (ver más abajo).
 5. **Abre la PR** describiendo qué resuelve, por qué y cómo verificarlo.
    Si toca UI, adjunta capturas (antes/después).
 6. **Revisión** por @maxgdv. Puede haber iteración; sé paciente y
    responde con buena fe.
 7. **Merge** lo hace el maintainer, no el contribuidor.
+
+## Pruebas de navegador
+
+Los tests de Vitest cubren la lógica pura. Lo que solo se ve con la página
+abierta —que el mapa siga al texto, que sus capas se carguen, el tamaño de
+letra, compartir un versículo, «Seguir leyendo»— lo cubre Playwright, en
+`apps/web/e2e`. Necesitan la app compilada contra una base de datos con
+contenido:
+
+```bash
+npm run db:up                             # Postgres local con la Biblia importada
+export DATABASE_URL=postgres://…          # la de tu .env, antes de compilar
+npm run build
+cd apps/web
+npx playwright install chromium           # solo la primera vez
+npm run e2e
+```
+
+Para probar un sitio ya desplegado: `E2E_BASE_URL=https://… npm run e2e`.
+Son de solo lectura y sin sesión. La CI no tiene base de datos, así que no
+las ejecuta en cada push: un workflow aparte (`.github/workflows/e2e.yml`)
+las pasa cada día contra producción.
 
 ## Estilo de código
 
@@ -84,8 +109,8 @@ Si algo falla, abre un *issue* describiendo paso a paso lo que viste.
 
 - **Maintainer único:** @maxgdv (Manuel G., promotor del proyecto).
 - **Branch principal:** `main`, protegida — solo se mergea vía PR.
-- **CI:** GitHub Actions corre lint + typecheck + build en cada PR.
-  Una PR no se mergea si CI está en rojo.
+- **CI:** GitHub Actions corre lint + typecheck + tests + build en cada
+  push y en cada PR. Una PR no se mergea si CI está en rojo.
 - **Decisiones doctrinales o editoriales:** responsabilidad exclusiva
   del maintainer.
 
