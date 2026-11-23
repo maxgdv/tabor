@@ -29,20 +29,51 @@ export async function openChapter(page: Page, path: string = CHAPTER): Promise<v
  * Empieza con un toque de rueda de verdad sobre el texto: la app distingue
  * el movimiento del usuario del que hace ella sola (ver LastReadTracker), y
  * un `scrollBy` desde script no cuenta como gesto.
+ *
+ * La alineación se repite hasta que aguanta quieta. El navegador aplica la
+ * rueda con retraso (y a veces animada), y una tipografía que termina de
+ * cargar recoloca los renglones: medir una sola vez dejaba el texto unos
+ * píxeles pasado cuando la máquina iba lenta, y el versículo activo era el
+ * siguiente. Pasó en la primera ejecución contra producción desde GitHub.
  */
 export async function scrollVerseToReadingLine(page: Page, verse: number): Promise<void> {
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.locator('[data-reader-scroll]').hover();
+  const wheelSeen = page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        window.addEventListener('wheel', () => resolve(), { once: true, capture: true });
+      }),
+  );
   await page.mouse.wheel(0, 40);
-  await page.evaluate((verse) => {
+  await wheelSeen;
+  await page.evaluate(async (verse) => {
     const el = document.querySelector<HTMLElement>(`[data-verse="${verse}"]`);
     const scroller = el?.closest<HTMLElement>('[data-reader-scroll]');
     if (!el || !scroller) throw new Error(`No se encuentra el versículo ${verse}`);
-    const bandTop = window.innerHeight * 0.25;
     const previous = document.querySelector<HTMLElement>(`[data-verse="${verse - 1}"]`);
-    const delta = previous
-      ? previous.getBoundingClientRect().bottom - (bandTop - 4)
-      : el.getBoundingClientRect().top - (bandTop + 8);
-    scroller.scrollBy({ top: delta });
+    const misalignment = () => {
+      const bandTop = window.innerHeight * 0.25;
+      return previous
+        ? previous.getBoundingClientRect().bottom - (bandTop - 4)
+        : el.getBoundingClientRect().top - (bandTop + 8);
+    };
+    const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const deadline = performance.now() + 5000;
+    // Tres medidas seguidas en su sitio, a 100 ms: ya no se mueve nada.
+    let calm = 0;
+    while (calm < 3) {
+      if (performance.now() > deadline) {
+        throw new Error(`El versículo ${verse} no se queda quieto en la línea de lectura`);
+      }
+      const delta = misalignment();
+      const before = scroller.scrollTop;
+      if (Math.abs(delta) >= 1) scroller.scrollBy({ top: delta, behavior: 'instant' });
+      // Sin recorrido (final del capítulo) el panel no se mueve: más cerca
+      // no se puede dejar, así que también cuenta como quieto.
+      calm = scroller.scrollTop === before ? calm + 1 : 0;
+      await pause(100);
+    }
   }, verse);
 }
 
